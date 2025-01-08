@@ -1,0 +1,882 @@
+﻿Task ID,Created At,Completed At,Last Modified,Name,Section/Column,Assignee,Assignee Email,Start Date,Due Date,Tags,Notes,Projects,Parent task,Blocked By (Dependencies),Blocking (Dependencies),NEW,Difficulty,TICKET STATUS
+1207434593973754,2024-05-29,,2024-05-29,Account onboarding *template*,ACCOUNT ONBOARDING,,,,,,,TRAINING,,,,,,
+1205394984255625,2023-08-31,,2024-03-15,Blender Fast Track Part 1: Minecraft,BLENDER,,,,,,"https://app.asana.com/app/asana/-/get_asset?asset_id=1205395078316468
+
+
+https://www.cgfasttrack.com/tutorials/blender-fast-track-vol-1-minecraft-4
+
+Username: corin@theonline.studio
+Pass: charlotte
+
+Blender Fast Track Vol 1: Minecraft (Remastered)
+
+Start here with this easy-to-follow introduction, where you’ll build a small Minecraft-style scene. Take a broad look at the user interface as you begin to learn the fundamentals of 3D animation and end with a fun destruction simulation!",TRAINING,,,,,,
+1205834110277978,2023-10-30,,2023-10-30,Completed by,,,,,,,,,Blender Fast Track Part 1: Minecraft,,,,,
+1205834110277979,2023-10-30,,2024-03-13,Corin,,Corin Fogarty,corin@theonline.studio,,,,,,Blender Fast Track Part 1: Minecraft,,,,,
+1206350524095990,2024-01-15,,2024-10-18,Dan,,,,,,,,,Blender Fast Track Part 1: Minecraft,,,,,
+1203796995528594,2023-01-24,,2024-10-18,3D Work,BLENDER,,,,,,,TRAINING,,,,,,READY FOR DESIGN
+1203821414241099,2023-01-24,,2023-06-09,INITIAL FEEDBACK (INTERNAL),,,,,,,,,3D Work,,,,,
+1203821414402928,2023-01-24,,2023-01-24,GENERAL ,,,,,,,,,INITIAL FEEDBACK (INTERNAL),,,,,
+1203903057348562,2023-02-07,,2023-02-07,Looking great!,,,,,,,,,INITIAL FEEDBACK (INTERNAL),,,,,
+1203903057348563,2023-02-07,,2023-02-07,Lets do a Babybel test,,,,,,,,,INITIAL FEEDBACK (INTERNAL),,,,,
+1203903057348595,2023-02-07,,2023-02-07,Create a short video clip of the red set up with the camera pan and zoom,,,,,,,,,INITIAL FEEDBACK (INTERNAL),,,,,
+1203903057348564,2023-02-07,,2023-02-07,Anything that could work for current L'Oreal project,,,,,,,,,INITIAL FEEDBACK (INTERNAL),,,,,
+1203821496136258,2023-01-24,,2023-01-24,R1 EDITS,,,,,,,,,3D Work,,,,,
+1203821496540526,2023-01-24,,2023-01-24,General ,,,,,,,,,R1 EDITS,,,,,
+1203821496540532,2023-01-24,,2023-01-24,P1,,,,,,,,,R1 EDITS,,,,,
+1203821496540538,2023-01-24,,2023-01-24,P2,,,,,,,,,R1 EDITS,,,,,
+1203821489338095,2023-01-24,,2023-01-24,P3,,,,,,,,,R1 EDITS,,,,,
+1203821489338101,2023-01-24,,2023-01-24,P4,,,,,,,,,R1 EDITS,,,,,
+1203821496728193,2023-01-24,,2023-01-24,P5,,,,,,,,,R1 EDITS,,,,,
+1203821496728199,2023-01-24,,2023-01-24,P6,,,,,,,,,R1 EDITS,,,,,
+1203821496728205,2023-01-24,,2023-01-24,P7,,,,,,,,,R1 EDITS,,,,,
+1203821496728211,2023-01-24,,2023-01-24,P8,,,,,,,,,R1 EDITS,,,,,
+1203821411702176,2023-01-24,,2023-01-24,R2 EDITS ,,,,,,,,,3D Work,,,,,
+1203821415201959,2023-01-24,,2023-01-24,GENERAL,,,,,,,,,R2 EDITS ,,,,,
+1203821415201965,2023-01-24,,2023-01-24,P1,,,,,,,,,R2 EDITS ,,,,,
+1203821415201971,2023-01-24,,2023-01-24,P2,,,,,,,,,R2 EDITS ,,,,,
+1203821415201977,2023-01-24,,2023-01-24,P3,,,,,,,,,R2 EDITS ,,,,,
+1203821412942512,2023-01-24,,2023-01-24,P4,,,,,,,,,R2 EDITS ,,,,,
+1203821412942518,2023-01-24,,2023-01-24,P5,,,,,,,,,R2 EDITS ,,,,,
+1203821412942524,2023-01-24,,2023-01-24,P6,,,,,,,,,R2 EDITS ,,,,,
+1203821412942530,2023-01-24,,2023-01-24,P7,,,,,,,,,R2 EDITS ,,,,,
+1203821415508750,2023-01-24,,2023-01-24,P8,,,,,,,,,R2 EDITS ,,,,,
+1205059300915896,2023-07-14,,2024-03-15,Blender Fast Track Part 2: Sword in the Stone,BLENDER,,,,,,"https://app.asana.com/app/asana/-/get_asset?asset_id=1205059302498271
+
+
+https://www.cgfasttrack.com/tutorials/sword-in-the-stone-4
+
+Username: corin@theonline.studio
+Pass: charlotte
+
+Blender Fast Track Vol 2: Sword in the Stone (Remastered)
+
+Dive deeper into Blender as you build out this epic Sword in the Stone scene. Go through the essentials of polygon modeling, shader nodes, building out an environment, and geometry nodes. Learn the basics while sidestepping the pitfalls of standard tutorials as you build a thrilling fantasy world.",TRAINING,,,,NEW,Beginner,
+1205059300915902,2023-07-14,,2024-03-15,Blender Fast Track Part 3: Modeling Fundamentals,BLENDER,,,,,,"https://app.asana.com/app/asana/-/get_asset?asset_id=1205059302498273
+
+
+https://www.cgfasttrack.com/tutorials/fund4-modeling
+
+Username: corin@theonline.studio
+Pass: charlotte
+
+Modeling Fundamentals in Blender (Remastered)
+
+Dive deep into the building blocks of 3D. In this series you’ll explore Blender’s modeling tools and learn essential modeling workflows while you construct a magical environment.",TRAINING,,,,NEW,Beginner,
+1205059302498243,2023-07-14,,2024-03-15,Blender Fast Track Part 4: UV and Image Projections,BLENDER,,,,,,"https://app.asana.com/app/asana/-/get_asset?asset_id=1205059302498275
+
+
+https://www.cgfasttrack.com/tutorials/uv-and-image-projections-in-blender-4-0
+
+Username: corin@theonline.studio
+Pass: charlotte
+
+UV and Image Projections in Blender (Remastered)
+
+Learn a quick way to apply 2D image textures to your 3D models using flat and box image projection techniques. Gain more control over your image textures by learning the fundamentals of UV unwrapping workflows.",TRAINING,,,,NEW,Beginner,
+1205059302498247,2023-07-14,,2024-03-15,Blender Fast Track Part 5: Texturing and Shading Fundamentals,BLENDER,,,,,,"https://app.asana.com/app/asana/-/get_asset?asset_id=1205059302498277
+
+
+https://www.cgfasttrack.com/tutorials/texturing-and-shading-fundamentals-in-blender-4-0
+
+Username: corin@theonline.studio
+Pass: charlotte
+
+Texturing and Shading Fundamentals in Blender (Remastered)
+
+Learn to transform your models to a fully textured and shaded scene by utilizing the shader editor. You'll learn how to create consistent, believable worlds with these production techniques.",TRAINING,,,,NEW,Beginner,
+1205059302498251,2023-07-14,,2023-08-09,Blender Fast Track Part 6: Animation Fundamentals in Blender,BLENDER,,,,,,"https://app.asana.com/app/asana/-/get_asset?asset_id=1205059302498279
+
+
+https://www.cgfasttrack.com/tutorials/blender-animation-fundamentals
+
+Username: corin@theonline.studio
+Pass: charlotte
+
+Animation Fundamentals in Blender
+
+Get ready to animate! In this tutorial for animation beginners, you'll learn the basics of keyframing tools. Bring your scenes to life by learning to create believable, dynamic sequences using the principles of animation. Jet kit included!",TRAINING,,,,NEW,Beginner,
+1205059302498255,2023-07-14,,2023-08-09,Blender Fast Track Part 7: The Art of Lighting,BLENDER,,,,,,"https://app.asana.com/app/asana/-/get_asset?asset_id=1205059302498281
+
+
+https://www.cgfasttrack.com/tutorials/the-art-of-lighting-in-blender
+
+Username: corin@theonline.studio
+Pass: charlotte
+
+The Art of Lighting in Blender
+
+Discover the art of lighting beautiful digital worlds in this introductory series. Learn these powerful artistic techniques and apply them while you create eye-catching renders in this easy-to-follow series.",TRAINING,,,,NEW,Beginner,
+1205067175200171,2023-07-14,,2023-08-09,First Steps with Blender 2.80,BLENDER,,,,,,"https://www.youtube.com/watch?v=MF1qEhBSfq4&list=PLa1F2ddGya_-UvuAqHAksYnB0qL9yWDO6&index=1
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205067175200175
+
+
+",TRAINING,,,,NEW,Beginner,
+1206810171822005,2024-03-14,,2024-03-14,Misc Blender Tutorials,BLENDER,,,,,,,TRAINING,,,,,,
+1204494583182393,2023-04-28,,2023-11-23,Create a Basic Asset ,FIGMA,,,,,,"Follow Felipes First session to create a basic OLS social asset. 
+
+You can watch the video https://drive.google.com/drive/folders/1u-C0zOJYEb7oQvwKlYKHQsJ3a-JqILn-
+
+You can look at the workbook https://docs.google.com/presentation/d/1hmx0TaaD4uxJp-nj_vxBW1eUC6ZEMZxXiRGcdiYCH5U/edit?usp=sharing
+
+You can find the assets to duplicate https://www.figma.com/file/h2NcHyaFQGOZKmI59g3ShG/Session-One%3A-Create-a-Basic-Asset?type=design&node-id=0%3A1&t=IFHay2mSytRu9BV3-1
+
+
+Please go to https://docs.google.com/presentation/d/1hmx0TaaD4uxJp-nj_vxBW1eUC6ZEMZxXiRGcdiYCH5U/edit#slide=id.g2403a29dede_0_275 of the workbook and follow the instructions on how this board works and how to get your own basic Figma template to practice with.
+
+",TRAINING,,,,NEW,Beginner,
+1205059514947232,2023-07-14,,2024-01-26,ADAM,,,,,,,,,Create a Basic Asset ,,,,,
+1205804473874585,2023-10-25,,2023-11-30,Figma: Beginner to Pro Class | Unit 1: Getting Started,FIGMA,,,,,,"Class: https://www.skillshare.com/en/classes/NEW-Figma-2023-Beginner-to-Pro-Class-in-under-4h/1399003407/lessons
+This lesson starts at 1. Intro
+
+https://www.skillshare.com/en/classes/NEW-Figma-2023-Beginner-to-Pro-Class-in-under-4h/1399003407/lessons
+
+username: studio@theonlinestudio.co.uk
+pass: ch4rl0tt3
+
+
+About This Class
+
+
+A beginner's course in UX/UI design with Figma
+This course is a comprehensive introduction to Figma from absolute Figma beginner to advanced features. Short and focused, providing you with all you need to know to tackle any design.
+
+We'll start from scratch by setting up your Figma account and familiarising ourselves with its file structure. Then, we'll dive into the fundamentals of Figma, such as setting up frames and nesting them, adding shapes, text, colours, and grids, and creating solid UI designs. Once you're comfortable with the basics, we dive into more advanced subjects like creating solid UI designs and working with components for reusable elements.
+
+You'll learn how to establish styles and variables for consistency, create responsive designs with auto layout, and add basic prototyping to bring your designs to life—always keeping collaboration with development in mind.
+
+With step-by-step exercises and valuable tips and tricks, you'll become proficient in Figma in under 4 hours. It's perfect for beginners or those switching from other design software like Sketch or Adobe XD to Figma.
+
+Getting Started
+
+1. Getting Figma - Registration Process
+2. Figma in the Browser vs. Figma App
+3. The Figma file browser – Figma's home
+4. Creating design files in Figma
+
+
+",TRAINING,,,,NEW,Beginner,
+1205807109866029,2023-10-25,,2024-01-26,ADAM,,,,,,,,,Figma: Beginner to Pro Class | Unit 1: Getting Started,,,,,
+1205804473874590,2023-10-25,,2024-01-04,Beginner to Pro Class | Unit 2: Figma Basics,FIGMA,,,,,,"Class: https://www.skillshare.com/en/classes/NEW-Figma-2023-Beginner-to-Pro-Class-in-under-4h/1399003407/lessons
+This lesson starts at 7. BASICS - 01 Adding frames to our file
+
+username: studio@theonlinestudio.co.uk
+pass: ch4rl0tt3
+
+
+About This Class
+
+
+A beginner's course in UX/UI design with Figma
+This course is a comprehensive introduction to Figma from absolute Figma beginner to advanced features. Short and focused, providing you with all you need to know to tackle any design.
+
+We'll start from scratch by setting up your Figma account and familiarising ourselves with its file structure. Then, we'll dive into the fundamentals of Figma, such as setting up frames and nesting them, adding shapes, text, colours, and grids, and creating solid UI designs. Once you're comfortable with the basics, we dive into more advanced subjects like creating solid UI designs and working with components for reusable elements.
+
+You'll learn how to establish styles and variables for consistency, create responsive designs with auto layout, and add basic prototyping to bring your designs to life—always keeping collaboration with development in mind.
+
+With step-by-step exercises and valuable tips and tricks, you'll become proficient in Figma in under 4 hours. It's perfect for beginners or those switching from other design software like Sketch or Adobe XD to Figma.
+
+Figma Basics
+
+    Adding frames to our file
+    A few handy shortcuts
+    Design file overview
+    Adding shapes and colour
+    Size menu – manipulating shapes and frames
+    Align, tidy up, and measure
+    Adding and working with text
+    Nesting frames – The Figma superpower
+    Frames vs Groups
+    Designing with nested frames
+    Re-usable grids with styles
+    Figma Community and Plugins
+    Adding images
+    Drawing in Figma
+    Scaling in Figma
+
+",TRAINING,,,,NEW,Beginner,
+1205807203030773,2023-10-25,,2023-10-25,ADAM,,,,,,,,,Beginner to Pro Class | Unit 2: Figma Basics,,,,,
+1205804473874594,2023-10-25,,2024-01-04,Beginner to Pro Class | Unit 3: Introducing Components,FIGMA,,,,,,"Class: https://www.skillshare.com/en/classes/NEW-Figma-2023-Beginner-to-Pro-Class-in-under-4h/1399003407/lessons
+This lesson starts at 23. COMPONENTS - 01 Re-use elements with components and instances
+
+username: studio@theonlinestudio.co.uk
+pass: ch4rl0tt3
+
+
+About This Class
+
+
+A beginner's course in UX/UI design with Figma
+This course is a comprehensive introduction to Figma from absolute Figma beginner to advanced features. Short and focused, providing you with all you need to know to tackle any design.
+
+We'll start from scratch by setting up your Figma account and familiarising ourselves with its file structure. Then, we'll dive into the fundamentals of Figma, such as setting up frames and nesting them, adding shapes, text, colours, and grids, and creating solid UI designs. Once you're comfortable with the basics, we dive into more advanced subjects like creating solid UI designs and working with components for reusable elements.
+
+You'll learn how to establish styles and variables for consistency, create responsive designs with auto layout, and add basic prototyping to bring your designs to life—always keeping collaboration with development in mind.
+
+With step-by-step exercises and valuable tips and tricks, you'll become proficient in Figma in under 4 hours. It's perfect for beginners or those switching from other design software like Sketch or Adobe XD to Figma.
+
+Introducing Components
+
+    Re-use elements with components and instances
+    Overriding instances
+    What to override and what not to
+    Reverting components and overrides
+    Nest components
+    Component sets with variants
+    Move components to their own page
+    Keeping components organised
+    Advanced component features introduction
+",TRAINING,,,,NEW,Intermediate,
+1205807210676080,2023-10-25,,2023-10-25,ADAM,,,,,,,,,Beginner to Pro Class | Unit 3: Introducing Components,,,,,
+1205804473874592,2023-10-25,,2024-01-04,Beginner to Pro Class | Unit 4: Variables and Styles,FIGMA,,,,,,"Class: https://www.skillshare.com/en/classes/NEW-Figma-2023-Beginner-to-Pro-Class-in-under-4h/1399003407/lessons
+This lesson starts at 32. VARIABLES - 01 Introduction to variables
+
+username: studio@theonlinestudio.co.uk
+pass: ch4rl0tt3
+
+
+About This Class
+
+
+A beginner's course in UX/UI design with Figma
+This course is a comprehensive introduction to Figma from absolute Figma beginner to advanced features. Short and focused, providing you with all you need to know to tackle any design.
+
+We'll start from scratch by setting up your Figma account and familiarising ourselves with its file structure. Then, we'll dive into the fundamentals of Figma, such as setting up frames and nesting them, adding shapes, text, colours, and grids, and creating solid UI designs. Once you're comfortable with the basics, we dive into more advanced subjects like creating solid UI designs and working with components for reusable elements.
+
+You'll learn how to establish styles and variables for consistency, create responsive designs with auto layout, and add basic prototyping to bring your designs to life—always keeping collaboration with development in mind.
+
+With step-by-step exercises and valuable tips and tricks, you'll become proficient in Figma in under 4 hours. It's perfect for beginners or those switching from other design software like Sketch or Adobe XD to Figma.
+
+Variables and Styles
+
+    Introduction to variables
+    Working with colour variables
+    Organising with variable collections and groups
+    Size and spacing variables
+    And what about styles?
+    Typography and styles
+    Documenting variables and styles
+",TRAINING,,,,NEW,Intermediate,
+1205806808107412,2023-10-25,,2023-10-25,ADAM,,,,,,,,,Beginner to Pro Class | Unit 4: Variables and Styles,,,,,
+1205804473874596,2023-10-25,,2024-01-04,Beginner to Pro Class | Unit 5: Responsive Design,FIGMA,,,,,,"Class: https://www.skillshare.com/en/classes/NEW-Figma-2023-Beginner-to-Pro-Class-in-under-4h/1399003407/lessons
+This lesson starts at 39. RESPONSIVE - 01 What is auto layout?
+
+username: studio@theonlinestudio.co.uk
+pass: ch4rl0tt3
+
+
+About This Class
+
+
+A beginner's course in UX/UI design with Figma
+This course is a comprehensive introduction to Figma from absolute Figma beginner to advanced features. Short and focused, providing you with all you need to know to tackle any design.
+
+We'll start from scratch by setting up your Figma account and familiarising ourselves with its file structure. Then, we'll dive into the fundamentals of Figma, such as setting up frames and nesting them, adding shapes, text, colours, and grids, and creating solid UI designs. Once you're comfortable with the basics, we dive into more advanced subjects like creating solid UI designs and working with components for reusable elements.
+
+You'll learn how to establish styles and variables for consistency, create responsive designs with auto layout, and add basic prototyping to bring your designs to life—always keeping collaboration with development in mind.
+
+With step-by-step exercises and valuable tips and tricks, you'll become proficient in Figma in under 4 hours. It's perfect for beginners or those switching from other design software like Sketch or Adobe XD to Figma.
+
+Responsive Design
+
+    What is auto layout?
+    Adding auto layout
+    Auto layout components and variables
+    Resize settings
+    Auto or space between
+    Nesting auto layout with system
+    Absolute positioning
+    Auto layout pages
+    Constraints in Figma
+    Constraints and grids
+    Which frame size should I use?
+",TRAINING,,,,NEW,Advanced,
+1205807034936057,2023-10-25,,2023-10-25,ADAM,,,,,,,,,Beginner to Pro Class | Unit 5: Responsive Design,,,,,
+1205804473874598,2023-10-25,,2024-01-04,Beginner to Pro Class | Unit 6: Basic Prototyping,FIGMA,,,,,,"Class: https://www.skillshare.com/en/classes/NEW-Figma-2023-Beginner-to-Pro-Class-in-under-4h/1399003407/lessons
+This lesson starts at 50. PROTOTYPING - 01 The Figma prototype workspace
+username: studio@theonlinestudio.co.uk
+pass: ch4rl0tt3
+
+
+About This Class
+
+
+A beginner's course in UX/UI design with Figma
+This course is a comprehensive introduction to Figma from absolute Figma beginner to advanced features. Short and focused, providing you with all you need to know to tackle any design.
+
+We'll start from scratch by setting up your Figma account and familiarising ourselves with its file structure. Then, we'll dive into the fundamentals of Figma, such as setting up frames and nesting them, adding shapes, text, colours, and grids, and creating solid UI designs. Once you're comfortable with the basics, we dive into more advanced subjects like creating solid UI designs and working with components for reusable elements.
+
+You'll learn how to establish styles and variables for consistency, create responsive designs with auto layout, and add basic prototyping to bring your designs to life—always keeping collaboration with development in mind.
+
+With step-by-step exercises and valuable tips and tricks, you'll become proficient in Figma in under 4 hours. It's perfect for beginners or those switching from other design software like Sketch or Adobe XD to Figma.
+
+Basic Prototyping
+
+    Prototyping in Figma
+    Setting scroll behaviour
+    Connecting screens
+    Dropdown menu with overlays
+    Animation types
+    Interactive components
+    Figma Mirror – Preview on your device
+",TRAINING,,,,NEW,Advanced,
+1205807315494071,2023-10-25,,2023-10-25,ADAM,,,,,,,,,Beginner to Pro Class | Unit 6: Basic Prototyping,,,,,
+1205042356860776,2023-07-14,,2023-11-23,Components 0 to 1 Practice & Cheat Sheet,FIGMA,,,,,,"Become a master at creating and using Figma Components, Instances and Variants with these simple exercises.
+
+https://www.figma.com/file/VTXwD8IniSXgBEjYuFjrvi/Component-Practice-%26-Cheat-Sheet-(Community)?type=design&node-id=1-2&mode=design&t=y00RG2GPpYfas7sO-0
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205101408176181
+
+
+",TRAINING,,,,NEW,Intermediate,
+1205394980192816,2023-08-31,,2024-01-04,Learn After Effects in 2 h,AFTER EFFECTS ,,,,,,"https://www.skillshare.com/en/classes/Learn-After-Effects-In-Only-Two-Hours/1982651597/projects?via=user-profile
+
+
+----------------------------------------
+
+
+username: studio@theonlinestudio.co.uk
+pass: ch4rl0tt3
+
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205395179975861
+
+
+About This Class
+
+Learn Adobe After Effects In only TWO Hours!
+Have you ever thought of becoming a Motion Graphics Designer or Visual Effects Artist?
+Ever wanted to create your own Animations or Cartoons or wanted to know how to create your own amazing Visual Effects / Special Effects (VFX)? Well now you can! - In just 2 Hours!
+Adobe After Effects is seen as the industry standard when it comes to Motion Graphics, Visual Effects (VFX) and Animation. During the following two hours you will learn all the basics and even some advanced techniques using this amazing application! Learn these 22 lessons and you will be able to create anything that you can imagine!
+
+
+What will you learn?
+    The Interface
+    FX Console
+    Keeping Things Neat And Tidy
+    Importing Assets In To After Effects
+    Creating Your First Composition
+    Working With 2D Layers
+    Working With 3D Layers
+    Adding Effects To Layers
+    Creating Text In After Effects
+    Animation Basics And Keyframes
+    The Pivot Point
+    Layer Parenting
+    Working With Solids
+    Null Objects
+    Pre Composing Layers
+    Rotoscoping And Masks
+    Adjustment Layers
+    Green Screen and Chroma Keying
+    2D Motion Tracking
+    3D Camera Tracking
+    Adding Motion Blur
+    Rendering From After Effects
+
+All this is just 2 HOURS!
+Good luck and have lots of fun!
+Please upload your class project deliverable as mp4 to the Skillshare project gallery for review! You can find the details regarding the project under Class Project.
+
+",TRAINING,,,,NEW,Beginner,
+1205395179975873,2023-08-31,,2023-08-31,Add your name here when complete,,,,,,,,,Learn After Effects in 2 h,,,,,
+1205833326431756,2023-10-31,,2023-10-31,Liam,,,,,2023-10-31,,,,Learn After Effects in 2 h,,,,,
+1205159579381480,2023-07-28,,2024-01-04,Text Animators: Custom Text Animation in Adobe After Effects,AFTER EFFECTS ,,,,,,"https://www.skillshare.com/en/classes/Text-Animators-Custom-Text-Animation-in-Adobe-After-Effects/1739980266?via=search-layout-grid
+
+
+----------------------------------------
+
+
+username: studio@theonlinestudio.co.uk
+pass: ch4rl0tt3
+
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205159579381482
+
+
+About This Class
+Learn how to create custom text animations with text animators: After Effects’ built-in system specifically designed to animate text.
+
+If you create motion graphics or videos of any kind, being able to animate text is a necessity.
+Using text animators, you have numerous options for animating each letter, word, or line of text. It’s quick to set up and easy to edit what the text says even after you’ve created the animation. Plus, you can save the animation as a preset so you can easily reuse it on any text layer, in any After Effects project; no need to recreate or even import anything. You can even share text animation presets with others.
+
+What you’ll learn:
+    How text animators work
+    What different text animator options and controllers do
+    What Selector Shapes do and how to animate with the Range Selector
+    What properties can be animated
+    How to adjust easing on text animators
+    How to use multiple text animators for more complex animations
+    When to use the Wiggly Selector
+    How to make text 3D (using After Effects)
+    How to save your custom text animators as a preset
+Plus, I’ll show you 8 different examples that demonstrate a wide range of possibilities. Using what you learn, you’ll be able to create your own unique text animations.
+
+Included with this class:
+    An After Effects project file with guides to help you visualize what different text animator options and controllers do
+    6 text animator presets
+    
+Who this class is for:
+Text animators work a little differently than other types of animation in After Effects. This means that if you already have experience with After Effects animation, but haven’t touched text animators, you’ll get a lot out of this class. It also means that you don’t need to know a ton about After Effects to be successful. Before taking this class you should know some After Effects basics like how to create a composition and set keyframes.
+
+
+
+",TRAINING,,,,NEW,Beginner,
+1205159922877259,2023-07-28,,2023-07-28,Add your name here when complete,,,,,,,,,Text Animators: Custom Text Animation in Adobe After Effects,,,,,
+1205833681726848,2023-10-30,2023-10-30,2023-10-30,Liam,,,,,2023-10-30,,,,Text Animators: Custom Text Animation in Adobe After Effects,,,,,
+1206025423891341,2023-11-24,,2024-03-18,Mocha for Beginners: Screen Replacements | 27 min,AFTER EFFECTS ,,,,,,"
+
+https://www.skillshare.com/en/classes/After-Effects-Mocha-for-Beginners-Screen-Replacements/751144017/lessons
+
+----------------------------------------
+
+
+username: studio@theonlinestudio.co.uk
+pass: ch4rl0tt3
+
+
+
+
+About This Class
+
+
+As a motion graphics artist, there’s one request that you will always get: screen replacements! Whether it’s a laptop, cellphone, or TV, you need to know how to quickly and accurately track and matte your screen. This short course will help you learn the basics so that you can approach your next screen replacement with confidence!
+
+This class is for anyone, with at least a little experience in After Effects, who wants to get started using Mocha. This tracking technique has countless applications, and I hope it helps with your compositing workflow!",TRAINING,,,,NEW,Beginner,
+1206025810815421,2023-11-24,,2023-11-24,Add your name here when complete,,,,,,,,,Mocha for Beginners: Screen Replacements | 27 min,,,,,
+1206025424420091,2023-11-24,,2023-11-24,Twinkling Stars  | 2 min,AFTER EFFECTS ,,,,,,"
+
+https://www.youtube.com/watch?v=S_kx93-ucWE&t=45s
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1206025424420095
+
+----------------------------------------
+
+
+
+
+About This Class
+
+
+You will learn how to use CC Particle World to create a Twinkling Stars sky",TRAINING,,,,NEW,Beginner,
+1206025928543716,2023-11-24,,2023-11-24,Add your name here when complete,,,,,,,,,Twinkling Stars  | 2 min,,,,,
+1206025424420099,2023-11-24,,2023-11-24,Water surface animation for a still image | 5 min,AFTER EFFECTS ,,,,,,"
+
+https://www.youtube.com/watch?v=_J-sOi1iacg
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1206025424420103
+
+----------------------------------------
+
+
+
+
+About This Class
+
+
+You will learn how to make the water in still photos or paintings move like real water.",TRAINING,,,,NEW,Beginner,
+1206025861516803,2023-11-24,,2023-11-24,Add your name here when complete,,,,,,,,,Water surface animation for a still image | 5 min,,,,,
+1206025423891345,2023-11-24,,2024-01-04,11 Expressions for Animation Efficiency in Adobe After Effects | 1:10 h,AFTER EFFECTS ,,,,,,"
+
+https://www.skillshare.com/en/classes/11-Expressions-for-Animation-Efficiency-in-Adobe-After-Effects/451087798?via=search-layout-grid
+
+----------------------------------------
+
+
+username: studio@theonlinestudio.co.uk
+pass: ch4rl0tt3
+
+
+
+
+About This Class
+
+
+Unlock a powerful side of Adobe After Effects where code controls animation. Learn 11 different expressions to automate animations, eliminate excessive keyframes, achieve complex effects, and work more efficiently; no programming experience needed!
+
+An expression is a short block of code, written in JavaScript that modifies an animatable property. Expressions can be useful in many different cases in motion design:
+    Create continuous, repetitive, or reactive motion
+    Automate animations
+    Avoid excessive keyframes
+    Set up rigs
+
+This class covers 11 different expressions so you can understand what they do and how to use them, without actually needing to learn how to write JavaScript. Plus, I’ll provide examples of how I use expressions in real projects. You’ll be able to start using these expressions in your animations to work more efficiently and achieve effects that would have been extremely tedious or impossible before.
+
+In future classes, once you’ve gotten comfortable using these expressions in your work, you can move on to learning how to write your own expressions. This class is a perfect intro into the advanced topic of expressions which can open up a whole new, customisable side of Adobe After Effects.
+
+Who this class is for:
+
+This class is for motion designers who are comfortable with the basics of Adobe After Effects and want to take their workflow to the next level. No programming experience is needed!
+
+What you should know before taking this class:
+
+    Adobe After Effects basics like creating compositions, setting keyframes, rendering, etc.
+    How to connect (parent) layers and properties
+    How to apply an effect to a layer
+    How to animate the path of a shape
+    How to add easing to keyframes and use the graph editor to adjust the spacing of an animation
+",TRAINING,,,,NEW,Intermediate,
+1206025832959153,2023-11-24,,2023-11-24,Add your name here when complete,,,,,,,,,11 Expressions for Animation Efficiency in Adobe After Effects | 1:10 h,,,,,
+1205256688444680,2023-08-11,,2023-08-11,Motion Beast,AFTER EFFECTS ,,,,,,"
+
+https://motiondesign.school/lessons/introduction-20/
+
+----------------------------------------
+
+
+username: studio@theonlinestudio.co.uk
+pass: Ch4rl0tt3
+
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205256688444682
+
+
+Congratulations and welcome to the Motion Beast course. You’ve made the right choice and there is a wonderful adventure in motion design waiting for you ahead. Let’s see what you need to take with you on that journey, so that you can reach the final destination and become a real Motion Beast.
+
+So, if you’ve opened this page hoping to discover an easy and quick way to achieve your goal — you’re in the right place. This is so obvious that everyone around you already knows about it. If you want to achieve success in animation, 3D modeling, video production or anything else, the main thing you need to do is to practice as much as possible.",TRAINING,,,,NEW,Intermediate,
+1205256372902882,2023-08-11,,2023-08-11,Add your name here when complete,,,,,,,,,Motion Beast,,,,,
+1205256688444686,2023-08-11,,2023-08-11,Fundamentals on UI Animation in After Effects,AFTER EFFECTS ,,,,,,"
+
+https://motiondesign.school/courses/fundamentals-on-ui-animation-in-after-effects/
+
+----------------------------------------
+
+
+username: studio@theonlinestudio.co.uk
+pass: Ch4rl0tt3
+
+
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205256688444688
+
+
+Welcome!
+Hello and welcome to the course on interface animation in After Effects. Five fascinating lessons are waiting for you. Whatever skill level you have, you’ll find something new and useful for yourself. Let’s check it out 😉
+For each lesson we’ve prepared a set of tools and techniques. So, read every document attentively before you start working.",TRAINING,,,,NEW,Intermediate,
+1205257059893139,2023-08-11,,2023-08-11,Add your name here when complete,,,,,,,,,Fundamentals on UI Animation in After Effects,,,,,
+1205160429626970,2023-07-28,,2024-01-04,Fundamentals for Beginners | 1:20 h,ILLUSTRATOR,,,,,,"https://www.skillshare.com/en/classes/Learn-Adobe-Illustrator-Fundamentals-for-Beginners/808971532?via=search-layout-grid
+
+
+----------------------------------------
+
+
+username: studio@theonlinestudio.co.uk
+pass: ch4rl0tt3
+
+
+
+About This Class
+
+
+Want to create clean and professional graphics? Learn how with designer Anne Bracker in this beginner’s guide to Adobe Illustrator!
+
+In this concise and comprehensive introduction, Anne walks you through everything you need to know in order to get started with Adobe Illustrator. You’ll learn how to customize your workspace and speed up your workflow with keyboard shortcuts, then you'll dive straight into the three core elements of Illustrator: shapes, paths and type. By the end of the class, you’ll have the essential tools and techniques needed to create any type of graphic. Key skills include:
+
+    Building objects with simple shapes
+    Applying colors and creating swatches
+    Drawing curves with the Pen Tool
+    Making designs with custom type
+    
+Whether you’re opening up Illustrator for the first time or need a refresher on the basics, this class is for you. By the end, you’ll know how to navigate the platform and take advantage of its powerful features so you can start your own projects.",TRAINING,,,,NEW,Beginner,
+1205351860036829,2023-08-25,,2024-01-26,Adam,,,,,2023-08-25,,,,Fundamentals for Beginners | 1:20 h,,,,,
+1205239507244762,2023-08-09,,2023-10-30,Adobe InDesign CC - Essentials Training,INDESIGN ,,,,,,"https://www.skillshare.com/en/classes/Adobe-InDesign-CC-Essentials-Training-Course/1170360090/projects?via=search-layout-grid
+
+
+
+----------------------------------------
+
+
+username: studio@theonlinestudio.co.uk
+pass: Ch4rl0tt3
+
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205257081011217
+
+
+Overview
+Hi there, my name is  Dan. I am a graphic designer and Adobe Certified Instructor (ACI) for InDesign. We will work with colour, picking your own and also using corporate colours. You will explore how to choose & use fonts like a professional. We will find, resize & crop images for your documents.
+There are projects for you to complete, so you can practise your skills & use these for your creative portfolio.
+In this course I supply exercise files so you can play along. I will also save my files as I go through each video so that you can compare yours to mine - handy if something goes wrong.
+Know that I will be around to help - if you get lost you can drop a post on the video 'Questions and Answers' below each video and I'll be sure to get back to you.
+I will share every design trick I have learnt in the last 15 years of designing. My goal is for you to finish this course with all the necessary skills to start making beautiful documents using InDesign.
+
+NOTE: Adobe InDesign CC 2018 or above recommended.  
+Exercise files: https://www.dropbox.com/s/ec9i80lq45bi3ny/Exercise%20Files%20-%20InDesign%20Essentials.zip?dl=0
+Completed files: https://www.dropbox.com/sh/plsvikpfrxt5the/AADBe0OeFxiwaDSEgDm0Q4via?dl=0",TRAINING,,,,NEW,Beginner,
+1205257081011219,2023-08-11,,2023-08-11,Learn Adobe InDesign: By Creating a Recipe Card,INDESIGN ,,,,,,"https://www.skillshare.com/en/classes/Learn-Adobe-InDesign-By-Creating-a-Recipe-Card/920003117?via=search-layout-grid
+
+
+
+----------------------------------------
+
+
+username: studio@theonlinestudio.co.uk
+pass: Ch4rl0tt3
+
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205257081011221
+
+
+
+About This Class
+
+
+Learn Adobe InDesign CC for Beginners: Create a Cookbook layout with Grids, Paragraph Styles, Resizing Images, Shortcuts, Content Aware Fit & export it to a PDF. 
+We will learn a whole bunch of InDesign skills by creating a 2 page spread Recipe Card.
+It is especially a great introduction to InDesign's Paragraph & Character Styles- One of the most useful tools for Text and Typography.
+What we will cover:
+- Setting up a Document
+- Guides
+- Shortcuts
+- Tools
+- Shapes
+- Colors for Print/Web
+- CMYK / RGB
+- Images
+- Fit to Frame
+- Gridify
+- Duplicating
+- Typography
+- Paragraph & Character Styles
+- Saving & Exporting
+
+Are you ready to create your own Recipe Layout?
+Note: To download the course files please go to the 'Projects & Resources' Tab",TRAINING,,,,NEW,Beginner,
+1208527941261203,2024-10-11,,2024-10-11,How to make Transparent Glass in Photoshop,PHOTOSHOP,,,,,,"https://www.youtube.com/watch?v=sSDQM_6igQo
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1208527941261208
+
+
+
+",TRAINING,,,,,,
+1205604731622186,2023-09-28,,2023-09-28,How to Use Sky Replacement Tool effectively ,PHOTOSHOP,,,,,,"https://www.youtube.com/watch?v=ognLpUNLDwM
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205605135994556
+
+
+",TRAINING,,,,,Beginner,
+1205605135994566,2023-09-28,,2023-09-28,Adam,,,,,,,,,How to Use Sky Replacement Tool effectively ,,,,,
+1204358281433728,2023-04-09,,2023-08-11,3 Ways to Add Depth to Your Composite in Photoshop!,PHOTOSHOP,,,,,,"https://www.youtube.com/watch?v=YqQ6yxclfWA
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1204358281433730
+
+
+",TRAINING,,,,,Intermediate,
+1205101408176182,2023-07-20,,2023-07-20,Add your name here when complete,,,,,,,,,3 Ways to Add Depth to Your Composite in Photoshop!,,,,,
+1200130251377696,2021-03-31,,2023-08-11,How to Create ''Microworlds'',PHOTOSHOP,,,,,,"How I Create ''Microworlds''
+https://www.youtube.com/watch?v=Z6yXBh7WsKo
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205159579381456
+
+
+",TRAINING,,,,,Advanced,
+1200140827264639,2021-04-01,2021-04-01,2021-04-01,How to Create ''Microworlds,,,,,,,,,How to Create ''Microworlds'',,,,,
+1200140967786095,2021-04-01,2021-04-01,2021-04-01,How to Create ''Microworlds'',,,,,,,,,How to Create ''Microworlds'',,,,,
+1200140609072930,2021-04-01,2021-04-05,2024-12-26,How to Create ''Microworlds'',,Nilesh Divekar,nilesh@ols.design,,,,,,How to Create ''Microworlds'',,,,,
+1200163029156184,2021-04-07,2021-04-07,2021-04-07,How to Create ''Microworlds'',,Yogesh P. Pore,yogeshpore@amc-studio.com,,,,,,How to Create ''Microworlds'',,,,,
+1200157796967634,2021-04-06,2021-04-06,2024-10-18,How to Create ''Microworlds'',,,,,,,,,How to Create ''Microworlds'',,,,,
+1200162568806189,2021-04-07,2021-04-07,2021-04-07,How to Create ''Microworlds'',,,,,,,,,How to Create ''Microworlds'',,,,,
+1200168376860523,2021-04-08,2021-04-08,2024-10-18,How to Create ''Microworlds'',,,,,,,,,How to Create ''Microworlds'',,,,,
+1200169009088542,2021-04-08,2021-04-08,2021-04-08,How to Create ''Microworlds'',,,,,,,,,How to Create ''Microworlds'',,,,,
+1200182126495270,2021-04-12,2021-04-12,2024-12-19,How to Create ''Microworlds'',,Pankaj Lokhande,pankaj@ols.design,,,,,,How to Create ''Microworlds'',,,,,
+1200295045005320,2021-05-06,2021-05-12,2024-07-15,How to Create ''Microworlds'',,,,,,,,,How to Create ''Microworlds'',,,,,
+1200571227926622,2021-07-07,,2023-08-11,Master Shadows & Lighting in Compositing with Photoshop!,PHOTOSHOP,,,,,,"https://www.youtube.com/watch?v=Da4axkDKzxQ
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205159579381458
+
+
+",TRAINING,,,,,Advanced,
+1200570456352566,2021-07-07,,2021-07-28,Master Shadows & Lighting in Compositing with Photoshop!,,,,,,,,,Master Shadows & Lighting in Compositing with Photoshop!,,,,,
+1200781573599631,2021-08-13,,2024-10-18,Master Shadows & Lighting in Compositing with Photoshop!,,,,,,,,,Master Shadows & Lighting in Compositing with Photoshop!,,,,,
+1200577509516128,2021-07-08,2021-07-08,2021-07-08,Master Shadows & Lighting in Compositing with Photoshop!,,,,,,,,,Master Shadows & Lighting in Compositing with Photoshop!,,,,,
+1200596462292144,2021-07-13,2021-07-08,2021-07-13,Master Shadows & Lighting in Compositing with Photoshop!,,,,,,,,,Master Shadows & Lighting in Compositing with Photoshop!,,,,,
+1200602614773966,2021-07-14,2021-07-14,2021-07-14,Master Shadows & Lighting in Compositing with Photoshop!,,Yogesh P. Pore,yogeshpore@amc-studio.com,,,,,,Master Shadows & Lighting in Compositing with Photoshop!,,,,,
+1200622181012475,2021-07-19,2021-07-19,2024-12-26,Master Shadows & Lighting in Compositing with Photoshop!,,Nilesh Divekar,nilesh@ols.design,,,,,,Master Shadows & Lighting in Compositing with Photoshop!,,,,,
+1200667446575740,2021-07-27,2021-07-27,2024-12-19,Master Shadows & Lighting in Compositing with Photoshop!,,Pankaj Lokhande,pankaj@ols.design,,,,,,Master Shadows & Lighting in Compositing with Photoshop!,,,,,
+1200667446575741,2021-07-27,2021-08-11,2024-10-18,Master Shadows & Lighting in Compositing with Photoshop!,,,,,,,,,Master Shadows & Lighting in Compositing with Photoshop!,,,,,
+1200130251377692,2021-03-31,,2023-08-11,Understanding Depth Of Field,PHOTOSHOP,,,,,,"Understanding Depth Of Field
+https://www.skillshare.com/classes/Understanding-Depth-Of-Field/787298081?via=search-layout-grid",TRAINING,,,,,Intermediate,
+1200168946877516,2021-04-08,2021-04-08,2024-10-18,Understanding Depth Of Field,,,,,,,,,Understanding Depth Of Field,,,,,
+1200140609072931,2021-04-01,2021-04-08,2024-12-26,Understanding Depth Of Field,,Nilesh Divekar,nilesh@ols.design,,,,,,Understanding Depth Of Field,,,,,
+1200168376860524,2021-04-08,2021-04-08,2024-10-18,Understanding Depth Of Field,,,,,,,,,Understanding Depth Of Field,,,,,
+1200162570086260,2021-04-07,2021-04-07,2021-04-07,Understanding Depth Of Field,,,,,,,,,Understanding Depth Of Field,,,,,
+1200151135546378,2021-04-05,2021-04-05,2021-04-05,Understanding Depth Of Field,,,,,,,,,Understanding Depth Of Field,,,,,
+1200163029156185,2021-04-07,2021-04-07,2021-04-07,Understanding Depth Of Field,,Yogesh P. Pore,yogeshpore@amc-studio.com,,,,,,Understanding Depth Of Field,,,,,
+1200163526618185,2021-04-07,2021-04-07,2021-04-07,Understanding Depth Of Field,,,,,,,,,Understanding Depth Of Field,,,,,
+1200169009088543,2021-04-08,2021-04-08,2021-04-08,Understanding Depth Of Field,,,,,,,,,Understanding Depth Of Field,,,,,
+1200295045005321,2021-05-06,2021-05-12,2024-07-15,Understanding Depth Of Field,,,,,,,,,Understanding Depth Of Field,,,,,
+1200295988548780,2021-05-06,2021-05-06,2024-12-19,Understanding Depth Of Field,,Pankaj Lokhande,pankaj@ols.design,,,,,,Understanding Depth Of Field,,,,,
+1200530192359275,2021-06-28,,2023-08-11,Changing Colours using HSB Values,PHOTOSHOP,,,,,,"https://www.youtube.com/watch?v=Anto0kf2kuA&t=442s
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205159579381460
+
+
+",TRAINING,,,,,Intermediate,
+1200535287971840,2021-06-29,2021-06-29,2024-12-19,Changing Colours using HSB Values,,Pankaj Lokhande,pankaj@ols.design,,,,,,Changing Colours using HSB Values,,,,,
+1200564533303713,2021-07-06,2021-07-06,2024-10-18,Changing Colours using HSB Values,,,,,,,,,Changing Colours using HSB Values,,,,,
+1200535221114484,2021-06-29,2021-06-30,2021-06-30,Changing Colours using HSB Values,,,,,,,,,Changing Colours using HSB Values,,,,,
+1200535208617341,2021-06-29,2021-06-29,2021-07-06,Changing Colours using HSB Values,,Yogesh P. Pore,yogeshpore@amc-studio.com,,,,,,Changing Colours using HSB Values,,,,,
+1200564533303711,2021-07-06,2021-07-07,2021-07-07,Changing Colours using HSB Values,,,,,,,,,Changing Colours using HSB Values,,,,,
+1200564553710958,2021-07-06,2021-07-07,2021-07-07,Changing Colours using HSB Values,,,,,,,,,Changing Colours using HSB Values,,,,,
+1200564553710959,2021-07-06,,2024-10-18,Changing Colours using HSB Values,,,,,,,,,Changing Colours using HSB Values,,,,,
+1200614314287620,2021-07-16,2021-07-22,2024-12-26,Changing Colours using HSB Values,,Nilesh Divekar,nilesh@ols.design,,,,,,Changing Colours using HSB Values,,,,,
+1199979779067073,2021-02-25,,2023-08-11,Skillshare: Creating Expert Level Shadows,PHOTOSHOP,,,,,,"When you've finished the course - Tick off you name below
+
+https://www.skillshare.com/classes/Photoshop-Like-a-Professional-Creating-Expert-Level-Shadows/1563565830",TRAINING,,,,,Intermediate,
+1199985258404569,2021-02-25,2021-03-19,2024-12-26,Creating Expert Level Shadows,,Nilesh Divekar,nilesh@ols.design,,,,,,Skillshare: Creating Expert Level Shadows,,,,,
+1199985258409902,2021-02-25,2021-03-01,2024-07-15,Creating Expert Level Shadows. - Done,,,,,,,,,Skillshare: Creating Expert Level Shadows,,,,,
+1199985258415169,2021-02-25,2021-03-08,2024-10-18,Creating Expert Level Shadows,,,,,,,,,Skillshare: Creating Expert Level Shadows,,,,,
+1199985258447771,2021-02-25,2021-03-04,2021-03-04,Creating Expert Level Shadows,,Yogesh P. Pore,yogeshpore@amc-studio.com,,,,,,Skillshare: Creating Expert Level Shadows,,,,,
+1199985258460284,2021-02-25,2021-03-02,2021-03-02,Creating Expert Level Shadows - Done,,,,,,,,,Skillshare: Creating Expert Level Shadows,,,,,
+1199985258468572,2021-02-25,2021-03-02,2021-03-02,Creating Expert Level Shadows,,,,,,,,,Skillshare: Creating Expert Level Shadows,,,,,
+1199985258470928,2021-02-25,2021-03-03,2021-03-03,Creating Expert Level Shadows,,,,,,,,,Skillshare: Creating Expert Level Shadows,,,,,
+1199985258477297,2021-02-25,2021-03-09,2021-03-09,Creating Expert Level Shadows,,,,,,,,,Skillshare: Creating Expert Level Shadows,,,,,
+1200004458350330,2021-03-02,2021-03-03,2021-03-03,Creating Expert Level Shadows,,,,,,,,,Skillshare: Creating Expert Level Shadows,,,,,
+1200005197947328,2021-03-02,2021-03-04,2024-12-19,Creating Expert Level Shadows,,Pankaj Lokhande,pankaj@ols.design,,,,,,Skillshare: Creating Expert Level Shadows,,,,,
+1200016626369764,2021-03-04,2021-03-05,2024-10-18,Creating Expert Level Shadows,,,,,,,,,Skillshare: Creating Expert Level Shadows,,,,,
+1200130251377690,2021-03-31,,2023-08-11,Realistic Shallow Depth of Field Effect Using Depth Maps,PHOTOSHOP,,,,,,"Photoshop Tutorial: Realistic Shallow Depth of Field Effect Using Depth Maps
+https://www.youtube.com/watch?v=sKKhuOXwAAk
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205159579381462
+
+
+",TRAINING,,,,,Intermediate,
+1200168946877517,2021-04-08,,2021-04-08,Realistic Shallow Depth of Field Effect,,,,,,,,,Realistic Shallow Depth of Field Effect Using Depth Maps,,,,,
+1200168946877519,2021-04-08,2021-04-08,2024-10-18,Realistic Shallow Depth of Field Effect,,,,,,,,,Realistic Shallow Depth of Field Effect Using Depth Maps,,,,,
+1200140609072932,2021-04-01,2021-04-06,2024-12-26,Realistic Shallow Depth of Field Effect,,Nilesh Divekar,nilesh@ols.design,,,,,,Realistic Shallow Depth of Field Effect Using Depth Maps,,,,,
+1200156509345436,2021-04-06,2021-04-06,2021-04-06,Realistic Shallow Depth of Field Effect,,,,,,,,,Realistic Shallow Depth of Field Effect Using Depth Maps,,,,,
+1200162660776739,2021-04-07,2021-04-07,2021-04-07,Duplicate of Realistic Shallow Depth of Field Effect,,,,,,,,,Realistic Shallow Depth of Field Effect Using Depth Maps,,,,,
+1200168376860525,2021-04-08,2021-04-08,2024-10-18,Realistic Shallow Depth of Field Effect,,,,,,,,,Realistic Shallow Depth of Field Effect Using Depth Maps,,,,,
+1200168582124084,2021-04-08,2021-04-08,2021-04-08,Realistic Shallow Depth of Field Effect,,,,,,,,,Realistic Shallow Depth of Field Effect Using Depth Maps,,,,,
+1200169009088544,2021-04-08,2021-04-12,2021-04-12,Realistic Shallow Depth of Field Effect,,,,,,,,,Realistic Shallow Depth of Field Effect Using Depth Maps,,,,,
+1200174140064628,2021-04-09,2021-04-09,2021-04-09,Realistic Shallow Depth of Field Effect,,Yogesh P. Pore,yogeshpore@amc-studio.com,,,,,,Realistic Shallow Depth of Field Effect Using Depth Maps,,,,,
+1200182126495271,2021-04-12,2021-05-24,2024-12-19,Realistic Shallow Depth of Field Effect,,Pankaj Lokhande,pankaj@ols.design,,,,,,Realistic Shallow Depth of Field Effect Using Depth Maps,,,,,
+1200295045005322,2021-05-06,2021-06-01,2024-07-15,Realistic Shallow Depth of Field Effect,,,,,,,,,Realistic Shallow Depth of Field Effect Using Depth Maps,,,,,
+1198749041220811,2021-04-09,,2023-08-11,Cutout Hair on a black background,PHOTOSHOP,,,,,,"https://youtu.be/G030sJcK9oA
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205159579381464
+
+
+",TRAINING,,,,,Advanced,
+1200182126495269,2021-04-12,2021-04-12,2024-12-19,Cutout Hair,,Pankaj Lokhande,pankaj@ols.design,,,,,,Cutout Hair on a black background,,,,,
+1200187685750384,2021-04-13,2021-04-15,2024-12-26,Cutout Hair on a black background,,Nilesh Divekar,nilesh@ols.design,,,,,,Cutout Hair on a black background,,,,,
+1200194361237433,2021-04-14,2021-04-14,2024-10-18,Cutout Hair on a black background,,,,,,,,,Cutout Hair on a black background,,,,,
+1200188190886223,2021-04-13,2021-04-14,2021-04-14,Cutout Hair on a black background,,Yogesh P. Pore,yogeshpore@amc-studio.com,,,,,,Cutout Hair on a black background,,,,,
+1200205769543186,2021-04-16,2021-04-16,2021-04-16,Cutout Hair on a black background,,,,,,,,,Cutout Hair on a black background,,,,,
+1200232691784913,2021-04-22,2021-04-22,2021-04-22,Cutout Hair on a black background,,,,,,,,,Cutout Hair on a black background,,,,,
+1200295045005319,2021-05-06,2021-05-07,2024-07-15,Cutout Hair on a black background,,,,,,,,,Cutout Hair on a black background,,,,,
+1200295690979881,2021-05-06,2021-05-06,2024-10-18,Cutout Hair on a black background,,,,,,,,,Cutout Hair on a black background,,,,,
+1200377777804037,2021-05-25,2021-05-25,2021-05-25,Cutout Hair on a black background,,,,,,,,,Cutout Hair on a black background,,,,,
+1200378507554987,2021-05-25,2021-06-03,2021-06-03,Cutout Hair on a black background,,,,,,,,,Cutout Hair on a black background,,,,,
+1200446083187685,2021-06-09,,2023-08-11,How to Place Anything in Perspective in Photoshop,PHOTOSHOP,,,,,,"https://www.youtube.com/watch?v=7MM2_oVDi_o
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205159579381466
+
+
+",TRAINING,,,,,Intermediate,
+1200457921434393,2021-06-11,2021-07-06,2024-12-26,How to Place Anything in Perspective in Photoshop,,Nilesh Divekar,nilesh@ols.design,,,,,,How to Place Anything in Perspective in Photoshop,,,,,
+1200465463179820,2021-06-14,2021-07-13,2024-10-18,How to Place Anything in Perspective in Photoshop,,,,,,,,,How to Place Anything in Perspective in Photoshop,,,,,
+1200452702712595,2021-06-10,2021-06-10,2021-06-10,How to Place Anything in Perspective in Photoshop,,,,,,,,,How to Place Anything in Perspective in Photoshop,,,,,
+1200458043305647,2021-06-11,2021-06-11,2021-06-11,How to Place Anything in Perspective in Photoshop,,Yogesh P. Pore,yogeshpore@amc-studio.com,,,,,,How to Place Anything in Perspective in Photoshop,,,,,
+1200458032439351,2021-06-11,2021-06-11,2024-12-19,How to Place Anything in Perspective in Photoshop,,Pankaj Lokhande,pankaj@ols.design,,,,,,How to Place Anything in Perspective in Photoshop,,,,,
+1200465448277569,2021-06-14,2021-06-11,2021-06-14,How to Place Anything in Perspective in Photoshop,,,,,,,,,How to Place Anything in Perspective in Photoshop,,,,,
+1200466044425843,2021-06-14,2021-06-16,2021-06-16,How to Place Anything in Perspective in Photoshop,,,,,,,,,How to Place Anything in Perspective in Photoshop,,,,,
+1200570619155573,2021-07-07,2021-07-07,2021-08-11,How to Place Anything in Perspective in Photoshop,,,,,,,,,How to Place Anything in Perspective in Photoshop,,,,,
+1200764724049796,2021-08-11,2021-08-11,2024-10-18,How to Place Anything in Perspective in Photoshop,,,,,,,,,How to Place Anything in Perspective in Photoshop,,,,,
+1200200136499569,2021-04-15,,2023-08-11,How to stylish highlights in Photoshop CC,PHOTOSHOP,,,,,,"https://www.youtube.com/watch?v=Y-RXsQLvFNQ
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205159579381468
+
+
+",TRAINING,,,,,Advanced,
+1200213353334934,2021-04-19,,2024-12-26,Stylish highlights in Photoshop CC,,Nilesh Divekar,nilesh@ols.design,,,,,,How to stylish highlights in Photoshop CC,,,,,
+1200458333785889,2021-06-11,2021-06-14,2024-10-18,Stylish highlights in Photoshop CC,,,,,,,,,How to stylish highlights in Photoshop CC,,,,,
+1200213487423133,2021-04-19,2021-04-19,2023-07-14,How to stylish highlights in Photoshop CC,,,,,,,,,How to stylish highlights in Photoshop CC,,,,,
+1200213488914305,2021-04-19,2021-04-22,2023-07-14,Stylish highlights in Photoshop CC,,Yogesh P. Pore,yogeshpore@amc-studio.com,,,,,,How to stylish highlights in Photoshop CC,,,,,
+1200226265139202,2021-04-21,2021-04-21,2023-07-14,Stylish highlights in Photoshop CC,,,,,,,,,How to stylish highlights in Photoshop CC,,,,,
+1200232691784912,2021-04-22,2021-04-22,2023-07-14,Stylish highlights in Photoshop CC,,,,,,,,,How to stylish highlights in Photoshop CC,,,,,
+1200277981237072,2021-05-03,2021-05-07,2024-07-15,Stylish highlights in Photoshop CC,,,,,,,,,How to stylish highlights in Photoshop CC,,,,,
+1200340161692476,2021-05-17,2021-05-17,2023-07-14,Stylish highlights in Photoshop CC,,,,,,,,,How to stylish highlights in Photoshop CC,,,,,
+1200295690979880,2021-05-06,2021-05-06,2024-10-18,https://www.youtube.com/watch?v=Y-RXsQLvFNQ,,,,,,,,,How to stylish highlights in Photoshop CC,,,,,
+1200011983013203,2021-03-04,,2023-08-11,Create Flawless & Seamless Backdrops with Photoshop,PHOTOSHOP,,,,,,"Create Flawless & Seamless Backdrops with Photoshop
+https://www.youtube.com/watch?v=336M9VM5eiI&t=292s
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205159579381470
+
+
+",TRAINING,,,,,Intermediate,
+1200029722704624,2021-03-08,2021-03-19,2024-12-26,Create Flawless & Seamless Backdrops with Photoshop,,Nilesh Divekar,nilesh@ols.design,,,,,,Create Flawless & Seamless Backdrops with Photoshop,,,,,
+1200029722704625,2021-03-08,2021-03-15,2024-07-15,Create Flawless & Seamless Backdrops with Photoshop,,,,,,,,,Create Flawless & Seamless Backdrops with Photoshop,,,,,
+1200029722704626,2021-03-08,,2024-10-18,Create Flawless & Seamless Backdrops with Photoshop,,,,,,,,,Create Flawless & Seamless Backdrops with Photoshop,,,,,
+1200029722704627,2021-03-08,2021-03-24,2021-03-24,Create Flawless & Seamless Backdrops with Photoshop,,Yogesh P. Pore,yogeshpore@amc-studio.com,,,,,,Create Flawless & Seamless Backdrops with Photoshop,,,,,
+1200029722704628,2021-03-08,2021-03-08,2021-03-08,Create Flawless & Seamless Backdrops with Photoshop,,,,,,,,,Create Flawless & Seamless Backdrops with Photoshop,,,,,
+1200029722704629,2021-03-08,2021-03-18,2021-03-18,Create Flawless & Seamless Backdrops with Photoshop,,,,,,,,,Create Flawless & Seamless Backdrops with Photoshop,,,,,
+1200029722704630,2021-03-08,2021-03-08,2021-03-08,Create Flawless & Seamless Backdrops with Photoshop,,,,,,,,,Create Flawless & Seamless Backdrops with Photoshop,,,,,
+1200029722704631,2021-03-08,2021-03-17,2024-10-18,Create Flawless & Seamless Backdrops with Photoshop,,,,,,,,,Create Flawless & Seamless Backdrops with Photoshop,,,,,
+1200029722704632,2021-03-08,2021-03-23,2024-12-19,Create Flawless & Seamless Backdrops with Photoshop,,Pankaj Lokhande,pankaj@ols.design,,,,,,Create Flawless & Seamless Backdrops with Photoshop,,,,,
+1200029722704633,2021-03-08,2021-04-06,2021-04-06,Create Flawless & Seamless Backdrops with Photoshop,,,,,,,,,Create Flawless & Seamless Backdrops with Photoshop,,,,,
+1198749041220838,2021-05-15,,2023-08-11,Remove Halos from Cutout images ,PHOTOSHOP,,,,,,"https://www.youtube.com/watch?v=LNAUh3MfVBs
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205159579381472
+
+
+",TRAINING,,,,,Intermediate,
+1200363791783094,2021-05-21,2021-05-21,2024-12-26,Remove Halos from Cutout images ,,Nilesh Divekar,nilesh@ols.design,,,,,,Remove Halos from Cutout images ,,,,,
+1200340161692475,2021-05-17,2021-05-17,2021-05-17,Remove Halos from Cutout images ,,,,,,,,,Remove Halos from Cutout images ,,,,,
+1200353604999531,2021-05-19,2021-05-19,2021-05-19,Remove Halos from Cutout images ,,,,,,,,,Remove Halos from Cutout images ,,,,,
+1200363791783095,2021-05-21,2021-05-21,2021-05-21,Remove Halos from Cutout images ,,Yogesh P. Pore,yogeshpore@amc-studio.com,,,,,,Remove Halos from Cutout images ,,,,,
+1200364278801609,2021-05-21,2021-05-21,2024-10-18,Remove Halos from Cutout images ,,,,,,,,,Remove Halos from Cutout images ,,,,,
+1200363791783096,2021-05-21,2021-05-24,2024-12-19,Remove Halos from Cutout images ,,Pankaj Lokhande,pankaj@ols.design,,,,,,Remove Halos from Cutout images ,,,,,
+1200363791783097,2021-05-21,2021-05-26,2021-05-26,Remove Halos from Cutout images ,,,,,,,,,Remove Halos from Cutout images ,,,,,
+1200363791783098,2021-05-21,2021-05-27,2024-10-18,Remove Halos from Cutout images ,,,,,,,,,Remove Halos from Cutout images ,,,,,
+1200390213127680,2021-05-27,,2024-07-15,Remove Halos from Cutout images ,,,,,,,,,Remove Halos from Cutout images ,,,,,
+1200403091791608,2021-05-31,2021-05-31,2021-05-31,Remove Halos from Cutout images ,,,,,,,,,Remove Halos from Cutout images ,,,,,
+1200478558663222,2021-06-16,,2023-08-11,How To Draw Perspective Shadow - Drawing Shadows In Perspective,PHOTOSHOP,,,,,,"https://www.youtube.com/watch?v=8XLgmiExAbw
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205159579381474
+
+
+",TRAINING,,,,,Intermediate,
+1200478334268841,2021-06-16,2021-07-28,2021-07-28,How To Draw Perspective Shadow - Drawing Shadows In Perspective,,Yogesh P. Pore,yogeshpore@amc-studio.com,,,,,,How To Draw Perspective Shadow - Drawing Shadows In Perspective,,,,,
+1200596539260097,2021-07-13,2021-07-14,2024-10-18,How To Draw Perspective Shadow - Drawing Shadows In Perspective,,,,,,,,,How To Draw Perspective Shadow - Drawing Shadows In Perspective,,,,,
+1200571502707450,2021-07-07,2021-07-08,2021-07-08,How To Draw Perspective Shadow - Drawing Shadows In Perspective,,,,,,,,,How To Draw Perspective Shadow - Drawing Shadows In Perspective,,,,,
+1200509697374418,2021-06-23,2021-06-23,2021-06-23,How To Draw Perspective Shadow - Drawing Shadows In Perspective,,,,,,,,,How To Draw Perspective Shadow - Drawing Shadows In Perspective,,,,,
+1200528863965904,2021-06-28,2021-06-29,2024-12-19,How To Draw Perspective Shadow - Drawing Shadows In Perspective,,Pankaj Lokhande,pankaj@ols.design,,,,,,How To Draw Perspective Shadow - Drawing Shadows In Perspective,,,,,
+1200570619155577,2021-07-07,2021-07-07,2021-07-07,How To Draw Perspective Shadow - Drawing Shadows In Perspective,,,,,,,,,How To Draw Perspective Shadow - Drawing Shadows In Perspective,,,,,
+1200635272640023,2021-07-21,2021-07-28,2021-07-28,How To Draw Perspective Shadow - Drawing Shadows In Perspective,,,,,,,,,How To Draw Perspective Shadow - Drawing Shadows In Perspective,,,,,
+1200011983013194,2021-03-03,,2023-08-11,Video: How to create stylish highlights,PHOTOSHOP,,,,,,"How to create stylish highlights in Photoshop CC 2020!
+https://www.youtube.com/watch?v=yUPIChL7_x8
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205159579381476
+
+
+",TRAINING,,,,,Advanced,
+1200012332941405,2021-03-03,2021-03-19,2024-12-26,How to create stylish highlights in Photoshop CC 2020!,,Nilesh Divekar,nilesh@ols.design,,,,,,Video: How to create stylish highlights,,,,,
+1200012332941408,2021-03-03,2021-03-09,2024-07-15,How to create stylish highlights in Photoshop CC 2020!,,,,,,,,,Video: How to create stylish highlights,,,,,
+1200012247358930,2021-03-03,2021-03-08,2024-10-18,How to create stylish highlights in Photoshop CC 2020!,,,,,,,,,Video: How to create stylish highlights,,,,,
+1200012247396196,2021-03-03,2021-03-24,2021-03-24,How to create stylish highlights in Photoshop CC 2020!,,Yogesh P. Pore,yogeshpore@amc-studio.com,,,,,,Video: How to create stylish highlights,,,,,
+1200012247408819,2021-03-03,2021-03-08,2021-03-08,How to create stylish highlights in Photoshop CC 2020!,,,,,,,,,Video: How to create stylish highlights,,,,,
+1200012247435079,2021-03-03,2021-03-18,2021-03-18,How to create stylish highlights in Photoshop CC 2020!,,,,,,,,,Video: How to create stylish highlights,,,,,
+1200012247452960,2021-03-03,2021-03-05,2021-03-05,How to create stylish highlights in Photoshop CC 2020!,,,,,,,,,Video: How to create stylish highlights,,,,,
+1200012247476094,2021-03-03,2021-03-24,2024-12-19,How to create stylish highlights in Photoshop CC 2020!,,Pankaj Lokhande,pankaj@ols.design,,,,,,Video: How to create stylish highlights,,,,,
+1200012332999200,2021-03-03,2021-05-03,2024-10-18,How to create stylish highlights in Photoshop CC 2020!,,,,,,,,,Video: How to create stylish highlights,,,,,
+1200157408203468,2021-04-06,2021-04-06,2021-04-06,How to create stylish highlights in Photoshop CC 2020!,,,,,,,,,Video: How to create stylish highlights,,,,,
+1200010754488230,2021-03-03,,2023-08-11,Video: How to Cut Out Backgrounds and KEEP The Original Shadows,PHOTOSHOP,,,,,,"Photoshop: How to Cut Out Backgrounds and KEEP The Original Shadows
+https://www.youtube.com/watch?v=Q4YVE1NPEfg
+
+https://app.asana.com/app/asana/-/get_asset?asset_id=1205159579381478
+
+
+",TRAINING,,,,,Intermediate,
+1200010754488232,2021-03-03,2021-03-19,2024-12-26,How to Cut Out Backgrounds and KEEP The Original Shadows,,Nilesh Divekar,nilesh@ols.design,,,,,,Video: How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,
+1200010754488233,2021-03-03,2021-03-08,2024-07-15,How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,,,,,Video: How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,
+1200010754488234,2021-03-03,2021-03-08,2024-10-18,How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,,,,,Video: How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,
+1200010754488235,2021-03-03,2021-03-05,2021-03-05,How to Cut Out Backgrounds and KEEP The Original Shadows,,Yogesh P. Pore,yogeshpore@amc-studio.com,,,,,,Video: How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,
+1200010754488236,2021-03-03,2021-03-05,2021-03-05,How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,,,,,Video: How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,
+1200010754488237,2021-03-03,2021-03-05,2021-03-05,How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,,,,,Video: How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,
+1200010754488238,2021-03-03,2021-03-05,2021-03-05,How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,,,,,Video: How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,
+1200010754488240,2021-03-03,2021-03-05,2024-10-18,How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,,,,,Video: How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,
+1200021912231435,2021-03-05,2021-04-01,2021-04-01,How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,,,,,Video: How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,
+1200010754488241,2021-03-03,2021-03-04,2024-12-19,How to Cut Out Backgrounds and KEEP The Original Shadows,,Pankaj Lokhande,pankaj@ols.design,,,,,,Video: How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,
+1200035624686404,2021-03-09,2021-03-09,2021-03-09,How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,,,,,Video: How to Cut Out Backgrounds and KEEP The Original Shadows,,,,,

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Resource</title>
+  <style>
+    body {
+      width: 400px;
+      padding: 16px;
+      font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 500;
+      color: #333;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #0070f3;
+      box-shadow: 0 0 0 2px rgba(0,112,243,0.1);
+    }
+    button {
+      background: #0070f3;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background: #0051cc;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .error {
+      color: #dc3545;
+      margin-top: 8px;
+      font-size: 14px;
+      padding: 8px;
+      background: #fdf2f2;
+      border-radius: 4px;
+    }
+    .success {
+      color: #28a745;
+      margin-top: 8px;
+      font-size: 14px;
+      padding: 8px;
+      background: #f0fff4;
+      border-radius: 4px;
+    }
+    #preview-image {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <img id="preview-image" alt="Preview">
+  <div class="form-group">
+    <label for="title">Title</label>
+    <input type="text" id="title" required>
+  </div>
+  <div class="form-group">
+    <label for="url">URL</label>
+    <input type="url" id="url" required>
+  </div>
+  <div class="form-group">
+    <label for="description">Description (optional)</label>
+    <textarea id="description" rows="3"></textarea>
+  </div>
+  <div class="form-group">
+    <label for="category">Category</label>
+    <select id="category" required></select>
+  </div>
+  <button id="submit">Add Resource</button>
+  <div id="message"></div>
+  <script type="module" src="src/popup.js"></script>
+</body>
+</html> 
