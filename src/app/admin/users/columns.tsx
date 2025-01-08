@@ -1,9 +1,15 @@
 import { ColumnDef } from "@tanstack/react-table"
-import { UserRole } from "@prisma/client"
-import { Button } from "@/components/ui/button"
+import { Button } from "react-bootstrap"
 import { MoreHorizontal } from "lucide-react"
 
-export const columns: ColumnDef[] = [
+interface User {
+  id: string
+  email: string
+  name: string
+  isAdmin: boolean
+}
+
+export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "email",
     header: "Email",
@@ -13,10 +19,10 @@ export const columns: ColumnDef[] = [
     header: "Name",
   },
   {
-    accessorKey: "role",
+    accessorKey: "isAdmin",
     header: "Role",
     cell: ({ row }) => (
-      <span className="capitalize">{row.getValue("role")}</span>
+      <span className="capitalize">{row.getValue("isAdmin") ? "Admin" : "User"}</span>
     ),
   },
   {
@@ -25,7 +31,7 @@ export const columns: ColumnDef[] = [
       const user = row.original
       
       return (
-        <Button variant="ghost" size="icon">
+        <Button variant="link" className="p-0">
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       )

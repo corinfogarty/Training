@@ -1,8 +1,14 @@
 import { ColumnDef } from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
+import { Button } from "react-bootstrap"
 import { MoreHorizontal } from "lucide-react"
 
-export const columns: ColumnDef[] = [
+interface Category {
+  id: string
+  name: string
+  slug: string
+}
+
+export const columns: ColumnDef<Category>[] = [
   {
     accessorKey: "name",
     header: "Name",
@@ -17,7 +23,7 @@ export const columns: ColumnDef[] = [
       const category = row.original
       
       return (
-        <Button variant="ghost" size="icon">
+        <Button variant="link" className="p-0">
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       )

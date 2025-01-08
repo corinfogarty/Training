@@ -5,7 +5,12 @@ import { ResourceType, Category } from '@prisma/client'
 import { Button, Modal, Form, Alert } from 'react-bootstrap'
 import { Editor } from '@tinymce/tinymce-react'
 
-export default function AddResourceButton() {
+interface AddResourceButtonProps {
+  categoryId?: string
+  onResourceAdded?: () => void
+}
+
+export default function AddResourceButton({ categoryId, onResourceAdded }: AddResourceButtonProps) {
   const [show, setShow] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -17,7 +22,7 @@ export default function AddResourceButton() {
     description: '',
     url: '',
     type: '' as ResourceType | '',
-    categoryId: ''
+    categoryId: categoryId || ''
   })
 
   useEffect(() => {
@@ -96,7 +101,7 @@ export default function AddResourceButton() {
       }
 
       setShow(false)
-      window.location.reload()
+      onResourceAdded?.()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {

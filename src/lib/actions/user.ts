@@ -1,9 +1,9 @@
-import { db } from "@/lib/db"
+import { prisma } from '@/lib/prisma'
 
 export async function getAllUsers() {
-  return await db.user.findMany({
+  return await prisma.user.findMany({
     orderBy: {
-      createdAt: "desc"
+      name: "asc"
     }
   })
 } 

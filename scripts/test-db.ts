@@ -29,11 +29,12 @@ async function testConnection() {
     
     console.log('Database connection successful!')
   } catch (error) {
-    console.error('Database connection failed:', {
+    console.error('Database connection failed:', error instanceof Error ? {
       name: error.name,
       message: error.message,
       stack: error.stack
-    })
+    } : error)
+    process.exit(1)
   } finally {
     await prisma.$disconnect()
   }

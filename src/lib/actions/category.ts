@@ -1,7 +1,7 @@
-import { db } from "@/lib/db"
+import { prisma } from '@/lib/prisma'
 
 export async function getAllCategories() {
-  return await db.category.findMany({
+  return await prisma.category.findMany({
     orderBy: {
       name: "asc"
     }

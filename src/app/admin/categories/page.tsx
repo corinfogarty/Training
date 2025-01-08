@@ -1,21 +1,62 @@
-import { DataTable } from "@/components/ui/data-table"
-import { columns } from "./columns"
-import { getAllCategories } from "@/lib/actions/category"
-import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+'use client'
 
-export default async function AdminCategoriesPage() {
-  const categories = await getAllCategories()
+import { Table, Button, Container } from 'react-bootstrap'
+import { columns } from "./columns"
+import { Plus } from "lucide-react"
+import { useEffect, useState } from 'react'
+import { prisma } from '@/lib/prisma'
+
+interface Category {
+  id: string
+  name: string
+  slug: string
+}
+
+export default function AdminCategoriesPage() {
+  const [categories, setCategories] = useState<Category[]>([])
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const response = await fetch('/api/categories')
+      if (!response.ok) throw new Error('Failed to fetch categories')
+      const data = await response.json()
+      setCategories(data)
+    }
+    fetchCategories()
+  }, [])
   
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Categories</h1>
+    <Container className="py-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1 className="h3 mb-0">Categories</h1>
         <Button>
-          <Plus className="mr-2 h-4 w-4" /> Add Category
+          <Plus className="me-2" size={16} /> Add Category
         </Button>
       </div>
-      <DataTable columns={columns} data={categories} />
-    </div>
+      <div className="bg-white rounded shadow-sm">
+        <Table responsive hover className="mb-0">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Slug</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {categories.map(category => (
+              <tr key={category.id}>
+                <td>{category.name}</td>
+                <td>{category.slug}</td>
+                <td className="text-end">
+                  <Button variant="link" className="p-0">
+                    <Plus size={16} />
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+    </Container>
   )
 } 
