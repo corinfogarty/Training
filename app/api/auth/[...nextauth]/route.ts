@@ -2,11 +2,12 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import NextAuth from "next-auth"
 import type { NextAuthOptions } from "next-auth"
+import type { Adapter } from "next-auth/adapters"
 import GoogleProvider from "next-auth/providers/google"
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma) as Adapter,
   debug: true,
   providers: [
     GoogleProvider({
@@ -26,6 +27,16 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account }) {
       console.log('Sign in callback:', { user, account })
+      
+      // Update user's lastLogin and ensure image is saved
+      await prisma.user.update({
+        where: { email: user.email! },
+        data: {
+          lastLogin: new Date(),
+          image: user.image || undefined
+        }
+      })
+      
       return true
     },
     async jwt({ token, user, account, trigger }) {

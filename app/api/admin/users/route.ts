@@ -12,7 +12,16 @@ export async function GET() {
 
   try {
     const users = await prisma.user.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      include: {
+        _count: {
+          select: {
+            completed: true,
+            favorites: true,
+            resourceOrders: true
+          }
+        }
+      }
     })
     return NextResponse.json(users)
   } catch (error) {

@@ -1,13 +1,141 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Table, Button, Form } from 'react-bootstrap'
+import { Table, Button, Form, Modal } from 'react-bootstrap'
 import { User } from '@prisma/client'
 import AdminRoute from '@/components/AdminRoute'
 
+interface UserWithCounts extends User {
+  _count: {
+    completed: number;
+    favorites: number;
+    resourceOrders: number;
+  }
+}
+
+interface UserStatsModalProps {
+  user: UserWithCounts;
+  show: boolean;
+  onHide: () => void;
+}
+
+interface Resource {
+  id: string;
+  title: string;
+  type: string;
+  category: {
+    name: string;
+  };
+}
+
+interface UserStats {
+  completed: Resource[];
+  favorites: Resource[];
+  added: Resource[];
+}
+
+function UserStatsModal({ user, show, onHide }: UserStatsModalProps) {
+  const [stats, setStats] = useState<UserStats | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState<'completed' | 'favorites' | 'added'>('completed')
+
+  useEffect(() => {
+    if (show) {
+      fetchStats()
+    } else {
+      setStats(null)
+      setActiveTab('completed')
+    }
+  }, [show, user.id])
+
+  const fetchStats = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/admin/users/${user.id}/stats`)
+      if (!response.ok) throw new Error('Failed to fetch stats')
+      const data = await response.json()
+      setStats(data)
+    } catch (error) {
+      console.error('Error fetching stats:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const renderResourceList = (resources: Resource[]) => (
+    <div className="list-group">
+      {resources.map(resource => (
+        <div key={resource.id} className="list-group-item">
+          <div className="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 className="mb-0">{resource.title}</h6>
+              <small className="text-muted">{resource.category.name}</small>
+            </div>
+            <span className="badge bg-primary">{resource.type}</span>
+          </div>
+        </div>
+      ))}
+      {resources.length === 0 && (
+        <div className="list-group-item text-center text-muted">
+          No resources found
+        </div>
+      )}
+    </div>
+  )
+
+  return (
+    <Modal show={show} onHide={onHide} size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>Stats for {user.name || user.email}</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {loading ? (
+          <div className="text-center p-4">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="btn-group w-100 mb-4">
+              <Button
+                variant={activeTab === 'completed' ? 'primary' : 'outline-primary'}
+                onClick={() => setActiveTab('completed')}
+              >
+                Completed ({user._count.completed})
+              </Button>
+              <Button
+                variant={activeTab === 'favorites' ? 'primary' : 'outline-primary'}
+                onClick={() => setActiveTab('favorites')}
+              >
+                Favorites ({user._count.favorites})
+              </Button>
+              <Button
+                variant={activeTab === 'added' ? 'primary' : 'outline-primary'}
+                onClick={() => setActiveTab('added')}
+              >
+                Added ({user._count.resourceOrders})
+              </Button>
+            </div>
+            {stats && (
+              <>
+                {activeTab === 'completed' && renderResourceList(stats.completed)}
+                {activeTab === 'favorites' && renderResourceList(stats.favorites)}
+                {activeTab === 'added' && renderResourceList(stats.added)}
+              </>
+            )}
+          </>
+        )}
+      </Modal.Body>
+    </Modal>
+  )
+}
+
 export default function AdminUsers() {
-  const [users, setUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<UserWithCounts[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedUser, setSelectedUser] = useState<UserWithCounts | null>(null)
+  const [showStatsModal, setShowStatsModal] = useState(false)
 
   useEffect(() => {
     fetchUsers()
@@ -63,27 +191,87 @@ export default function AdminUsers() {
         <Table hover responsive>
           <thead>
             <tr>
-              <th>Name</th>
+              <th>User</th>
               <th>Email</th>
+              <th>Stats</th>
+              <th>Last Login</th>
               <th>Admin</th>
-              <th>Created</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {users.map((user) => (
               <tr key={user.id}>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-                <td>
+                <td className="align-middle">
+                  <div className="d-flex align-items-center">
+                    {user.image ? (
+                      <img 
+                        src={user.image} 
+                        alt={user.name || ''} 
+                        className="rounded-circle me-2"
+                        width="32" 
+                        height="32"
+                      />
+                    ) : (
+                      <div 
+                        className="rounded-circle me-2 bg-secondary d-flex align-items-center justify-content-center text-white"
+                        style={{ width: '32px', height: '32px' }}
+                      >
+                        {user.name?.[0] || user.email[0]}
+                      </div>
+                    )}
+                    <span>{user.name || 'No name'}</span>
+                  </div>
+                </td>
+                <td className="align-middle">{user.email}</td>
+                <td className="align-middle">
+                  <div className="d-flex gap-3">
+                    <div 
+                      role="button" 
+                      onClick={() => {
+                        setSelectedUser(user)
+                        setShowStatsModal(true)
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <small className="d-block text-muted">Completed</small>
+                      <strong>{user._count.completed}</strong>
+                    </div>
+                    <div 
+                      role="button"
+                      onClick={() => {
+                        setSelectedUser(user)
+                        setShowStatsModal(true)
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <small className="d-block text-muted">Favorites</small>
+                      <strong>{user._count.favorites}</strong>
+                    </div>
+                    <div 
+                      role="button"
+                      onClick={() => {
+                        setSelectedUser(user)
+                        setShowStatsModal(true)
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <small className="d-block text-muted">Added</small>
+                      <strong>{user._count.resourceOrders}</strong>
+                    </div>
+                  </div>
+                </td>
+                <td className="align-middle">
+                  {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
+                </td>
+                <td className="align-middle">
                   <Form.Check
                     type="switch"
                     checked={user.isAdmin}
                     onChange={(e) => toggleAdmin(user.id, e.target.checked)}
                   />
                 </td>
-                <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-                <td>
+                <td className="align-middle">
                   <Button 
                     variant="outline-danger" 
                     size="sm"
@@ -101,6 +289,16 @@ export default function AdminUsers() {
           </tbody>
         </Table>
       </div>
+      {selectedUser && (
+        <UserStatsModal
+          user={selectedUser}
+          show={showStatsModal}
+          onHide={() => {
+            setShowStatsModal(false)
+            setSelectedUser(null)
+          }}
+        />
+      )}
     </AdminRoute>
   )
 } 
