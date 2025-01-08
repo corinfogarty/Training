@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import CategoryList from '@/components/CategoryList'
 import ResourceLightbox from '@/components/ResourceLightbox'
-import type { Resource } from '@prisma/client'
+import type { Resource, Category } from '@prisma/client'
 
 export default function Home() {
   const { data: session, status } = useSession()
@@ -14,12 +14,19 @@ export default function Home() {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null)
   const [showLightbox, setShowLightbox] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin')
       return
     }
+
+    // Fetch categories
+    fetch('/api/categories')
+      .then(res => res.json())
+      .then(data => setCategories(data))
+      .catch(error => console.error('Error fetching categories:', error))
 
     const resourceId = searchParams.get('resource')
     if (resourceId && session?.user) {
@@ -60,7 +67,7 @@ export default function Home() {
 
   return (
     <>
-      <CategoryList />
+      <CategoryList categories={categories} />
       {isLoading && (
         <div 
           className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-dark bg-opacity-50"
