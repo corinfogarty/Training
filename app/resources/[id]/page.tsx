@@ -1,34 +1,100 @@
-import { getServerSession } from 'next-auth'
-import { redirect } from 'next/navigation'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import prisma from '@/lib/prisma'
-import ResourceCard from '@/components/ResourceCard'
+'use client'
 
-export default async function ResourcePage({
+import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import ResourceCard from '@/components/ResourceCard'
+import { Container } from 'react-bootstrap'
+import type { Resource, Category } from '@prisma/client'
+
+interface ResourceWithRelations extends Resource {
+  category: Category | null
+  isFavorite: boolean
+  isCompleted: boolean
+}
+
+export default function ResourcePage({
   params,
 }: {
   params: { id: string }
 }) {
-  const session = await getServerSession(authOptions)
-  
-  if (!session) {
-    redirect('/auth/signin?callbackUrl=' + encodeURIComponent(`/resources/${params.id}`))
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [resource, setResource] = useState<ResourceWithRelations | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin?callbackUrl=' + encodeURIComponent(`/resources/${params.id}`))
+      return
+    }
+
+    if (status === 'authenticated') {
+      fetchResource()
+    }
+  }, [status, params.id])
+
+  const fetchResource = async () => {
+    try {
+      const response = await fetch(`/api/resources/${params.id}`)
+      if (!response.ok) {
+        if (response.status === 404) {
+          router.push('/')
+          return
+        }
+        throw new Error('Failed to fetch resource')
+      }
+      const data = await response.json()
+      setResource(data)
+    } catch (error) {
+      console.error('Error fetching resource:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const resource = await prisma.resource.findUnique({
-    where: { id: params.id },
-    include: {
-      category: true,
-    },
-  })
-
-  if (!resource) {
-    redirect('/')
+  if (loading || !resource) {
+    return (
+      <div className="bg-dark text-white min-vh-100">
+        <Container className="py-5">
+          <div className="d-flex justify-content-center">
+            <div className="spinner-border text-light" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </Container>
+      </div>
+    )
   }
 
   return (
-    <main className="p-8">
-      <ResourceCard resource={resource} />
-    </main>
+    <div className="bg-dark text-white min-vh-100">
+      <Container className="py-5">
+        <ResourceCard
+          resource={resource}
+          standalone={true}
+          isFavorite={resource.isFavorite}
+          isCompleted={resource.isCompleted}
+          onToggleFavorite={async () => {
+            await fetch(`/api/resources/${resource.id}/favorite`, {
+              method: 'POST'
+            })
+            fetchResource()
+          }}
+          onToggleComplete={async () => {
+            await fetch(`/api/resources/${resource.id}/complete`, {
+              method: 'POST'
+            })
+            fetchResource()
+          }}
+          onDelete={async () => {
+            await fetch(`/api/resources/${resource.id}`, {
+              method: 'DELETE'
+            })
+            router.push('/')
+          }}
+        />
+      </Container>
+    </div>
   )
 } 

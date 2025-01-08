@@ -6,9 +6,7 @@ import { Card, Button, Dropdown, Modal } from 'react-bootstrap'
 import { MoreVertical, Star, CheckCircle, Trash2, Edit, ExternalLink, Calendar } from 'lucide-react'
 import { Draggable } from '@hello-pangea/dnd'
 import EditResourceModal from './EditResourceModal'
-import ResourceLightbox from './ResourceLightbox'
 import { signIn, useSession } from 'next-auth/react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 interface ResourceCardProps {
@@ -25,13 +23,6 @@ interface ResourceCardProps {
   standalone?: boolean
 }
 
-const DynamicWrapper = ({ children, href, isLink }: { children: React.ReactNode, href?: string, isLink: boolean }) => {
-  if (isLink && href) {
-    return <Link href={href}>{children}</Link>
-  }
-  return <div>{children}</div>
-}
-
 export default function ResourceCard({
   resource,
   index = 0,
@@ -46,7 +37,6 @@ export default function ResourceCard({
   const { data: session } = useSession()
   const router = useRouter()
   const [showEdit, setShowEdit] = useState(false)
-  const [showLightbox, setShowLightbox] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -54,11 +44,28 @@ export default function ResourceCard({
   const previewImage = resource.previewImage
 
   const handleCardClick = (e: React.MouseEvent) => {
-    if (!standalone) {
-      e.preventDefault()
-      router.push(`/resources/${resource.id}`)
-    } else {
-      setShowLightbox(true)
+    e.preventDefault()
+    e.stopPropagation()
+    router.push(`/?resource=${resource.id}`, { scroll: false })
+  }
+
+  const handleDelete = async () => {
+    try {
+      setDeleting(true)
+      const response = await fetch(`/api/resources/${resource.id}`, {
+        method: 'DELETE'
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete resource')
+      }
+      
+      setShowDeleteConfirm(false)
+      onDelete()
+    } catch (error) {
+      console.error('Error deleting resource:', error)
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -137,45 +144,14 @@ export default function ResourceCard({
     </Card>
   )
 
-  if (standalone) {
-    return (
-      <>
-        {card}
-        {/* ... modals ... */}
-      </>
-    )
-  }
-
-  return (
+  const modals = (
     <>
-      <Draggable draggableId={resource.id} index={index}>
-        {(provided) => (
-          <div
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-            className="mb-3"
-          >
-            <DynamicWrapper isLink={!standalone} href={`/resources/${resource.id}`}>
-              {card}
-            </DynamicWrapper>
-          </div>
-        )}
-      </Draggable>
-
       <EditResourceModal
         resource={resource}
         show={showEdit}
         onHide={() => setShowEdit(false)}
         onSave={onDelete}
       />
-
-      <ResourceLightbox
-        resource={resource}
-        show={showLightbox}
-        onHide={() => setShowLightbox(false)}
-      />
-
       <Modal show={showDeleteConfirm} onHide={() => setShowDeleteConfirm(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Confirm Delete</Modal.Title>
@@ -193,29 +169,40 @@ export default function ResourceCard({
           </Button>
           <Button 
             variant="danger" 
-            onClick={() => {
-              setDeleting(true)
-              fetch(`/api/resources/${resource.id}`, {
-                method: 'DELETE'
-              })
-              .then(response => {
-                if (!response.ok) {
-                  throw new Error('Failed to delete resource')
-                }
-                setShowDeleteConfirm(false)
-                onDelete()
-              })
-              .catch(error => {
-                console.error('Error deleting resource:', error)
-              })
-              .finally(() => setDeleting(false))
-            }}
+            onClick={handleDelete}
             disabled={deleting}
           >
             {deleting ? 'Deleting...' : 'Delete'}
           </Button>
         </Modal.Footer>
       </Modal>
+    </>
+  )
+
+  if (standalone) {
+    return (
+      <>
+        {card}
+        {modals}
+      </>
+    )
+  }
+
+  return (
+    <>
+      <Draggable draggableId={resource.id} index={index}>
+        {(provided) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            className="mb-3"
+          >
+            {card}
+          </div>
+        )}
+      </Draggable>
+      {modals}
     </>
   )
 } 
