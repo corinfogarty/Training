@@ -6,14 +6,12 @@ import { ExternalLink, Calendar, Clock, Link as LinkIcon, Edit } from 'lucide-re
 import { useState } from 'react'
 import EditResourceModal from './EditResourceModal'
 
-interface Props {
+interface ResourceLightboxProps {
   resource: Resource & {
-    category: Category
+    category?: Category | null
   }
   show: boolean
   onHide: () => void
-  onEdit?: () => void
-  onDelete?: () => void
 }
 
 interface FormattedContent {
@@ -27,13 +25,7 @@ interface FormattedContent {
   url?: string
 }
 
-export default function ResourceLightbox({
-  resource,
-  show,
-  onHide,
-  onEdit,
-  onDelete
-}: Props) {
+export default function ResourceLightbox({ resource, show, onHide }: ResourceLightboxProps) {
   const [showEditModal, setShowEditModal] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const previewImage = resource.previewImage
@@ -153,33 +145,9 @@ export default function ResourceLightbox({
               <ExternalLink size={16} className="me-2" />
               Open Resource
             </Button>
-            {onEdit && (
-              <Button 
-                variant="outline-secondary" 
-                onClick={() => {
-                  onHide()
-                  setShowEditModal(true)
-                }}
-              >
-                <Edit size={16} className="me-2" />
-                Edit
-              </Button>
-            )}
           </div>
         </Modal.Body>
       </Modal>
-
-      {onEdit && (
-        <EditResourceModal
-          resource={resource}
-          show={showEditModal}
-          onHide={() => setShowEditModal(false)}
-          onSave={() => {
-            setShowEditModal(false)
-            onEdit()
-          }}
-        />
-      )}
     </>
   )
 } 
