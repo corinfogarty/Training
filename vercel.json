@@ -7,7 +7,7 @@
     }
   ],
   "env": {
-    "NEXTAUTH_URL": "https://training.ols.to"
+    "NEXTAUTH_URL": "${NEXTAUTH_PRODUCTION_URL}"
   },
   "headers": [
     {
