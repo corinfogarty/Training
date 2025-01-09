@@ -5,11 +5,10 @@
   "description": "Add resources to Training Hub directly from any webpage",
   "permissions": [
     "activeTab",
-    "storage",
-    "cookies"
+    "storage"
   ],
   "host_permissions": [
-    "https://training.ols.design/*"
+    "https://training.ols.to/*"
   ],
   "action": {
     "default_popup": "popup.html",

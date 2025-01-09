@@ -54,6 +54,7 @@ export default function CategoryColumn({
                 key={resource.id}
                 resource={resource}  // Resource now includes category
                 index={index}
+                viewType="columns"
                 isFavorite={favorites.includes(resource.id)}
                 isCompleted={completed.includes(resource.id)}
                 onDelete={onResourceDeleted}

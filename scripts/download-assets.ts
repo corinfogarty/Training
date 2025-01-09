@@ -119,8 +119,9 @@ async function downloadAssets() {
 
       let description = resource.description
 
-      for (const [index, asanaUrl] of asanaUrls.entries()) {
-        console.log(`\nDownloading asset ${index + 1} of ${asanaUrls.length}`)
+      for (let i = 0; i < asanaUrls.length; i++) {
+        const asanaUrl = asanaUrls[i]
+        console.log(`\nDownloading asset ${i + 1} of ${asanaUrls.length}`)
         console.log(`URL: ${asanaUrl}`)
 
         const assetId = asanaUrl.match(/asset_id=(\d+)/)?.[1]

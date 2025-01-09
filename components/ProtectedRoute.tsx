@@ -1,10 +1,8 @@
 'use client'
 
-import { signIn, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { Alert, Button } from 'react-bootstrap'
-import { LogIn } from 'lucide-react'
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession()
@@ -12,7 +10,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/')
+      router.push('/auth/signin')
     }
   }, [status, router])
 
@@ -27,20 +25,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   }
 
   if (!session) {
-    return (
-      <Alert variant="warning" className="text-center">
-        <Alert.Heading>Please sign in to access this page</Alert.Heading>
-        <p>You need to be authenticated to view and manage resources.</p>
-        <Button 
-          variant="primary" 
-          onClick={() => signIn()}
-          className="mt-3"
-        >
-          <LogIn size={18} className="me-2" />
-          Sign In
-        </Button>
-      </Alert>
-    )
+    return null
   }
 
   return <>{children}</>
