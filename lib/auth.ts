@@ -36,6 +36,7 @@ export const authOptions: NextAuthOptions = {
           NODE_ENV: process.env.NODE_ENV
         }
       })
+      // Return true immediately to avoid message channel timeout
       return true
     },
     async redirect({ url, baseUrl }) {
@@ -48,34 +49,17 @@ export const authOptions: NextAuthOptions = {
         }
       })
 
-      // List of allowed callback URLs from Google OAuth config
-      const allowedCallbacks = [
-        'http://localhost:3000/api/auth/callback/google',
-        'http://localhost:3000/api/auth/callback',
-        'https://training.ols.to/api/auth/callback/google',
-        'https://training.ols.to/api/auth/callback',
-        'https://training.ols.to'
-      ]
-
-      // Check if URL matches any allowed callback
-      if (allowedCallbacks.some(callback => url.startsWith(callback))) {
-        console.log('Allowing configured callback URL:', url)
+      // Always allow the base URL and its paths
+      if (url.startsWith(baseUrl) || url.startsWith('/')) {
+        console.log('Allowing base URL or path:', url)
         return url
       }
 
-      // Allow relative URLs
-      if (url.startsWith("/")) {
-        const finalUrl = `${baseUrl}${url}`
-        console.log('Allowing relative URL:', finalUrl)
-        return finalUrl
-      }
-
-      // Allow URLs from same origin
+      // For absolute URLs, ensure they're from our domain
       try {
-        const urlOrigin = new URL(url).origin
-        const baseOrigin = new URL(baseUrl).origin
-        if (urlOrigin === baseOrigin) {
-          console.log('Allowing same origin URL:', url)
+        const urlObj = new URL(url)
+        if (urlObj.hostname === 'training.ols.to') {
+          console.log('Allowing training.ols.to URL:', url)
           return url
         }
       } catch (e) {
@@ -98,11 +82,17 @@ export const authOptions: NextAuthOptions = {
       })
       
       if (trigger === 'signIn' || trigger === 'signUp') {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: token.email! }
-        })
-        token.isAdmin = dbUser?.isAdmin || false
-        token.userId = dbUser?.id
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: token.email! }
+          })
+          token.isAdmin = dbUser?.isAdmin || false
+          token.userId = dbUser?.id
+        } catch (e) {
+          console.error('Error fetching user:', e)
+          // Don't fail the auth flow if DB lookup fails
+          token.isAdmin = false
+        }
       }
       
       return token
