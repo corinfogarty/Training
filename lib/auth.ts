@@ -24,36 +24,17 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60,
   },
   callbacks: {
-    async signIn({ user, account }) {
-      console.log('Sign in callback:', { user, account })
-      
-      // Update user's lastLogin and ensure image is saved
-      await prisma.user.update({
-        where: { email: user.email! },
-        data: {
-          lastLogin: new Date(),
-          image: user.image || undefined
-        }
+    async jwt({ token }) {
+      const dbUser = await prisma.user.findUnique({
+        where: { email: token.email! }
       })
-      
-      return true
-    },
-    async jwt({ token, user, account, trigger }) {
-      console.log('JWT callback:', { token, user, trigger })
-      
-      if (trigger === 'signIn' || trigger === 'signUp') {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: token.email! }
-        })
-        token.isAdmin = dbUser?.isAdmin || false
-        token.userId = dbUser?.id
+      if (dbUser) {
+        token.isAdmin = dbUser.isAdmin
+        token.userId = dbUser.id
       }
-      
       return token
     },
     async session({ session, token }) {
-      console.log('Session callback:', { session, token })
-      
       if (session?.user) {
         session.user.isAdmin = token.isAdmin as boolean
         session.user.id = token.userId as string

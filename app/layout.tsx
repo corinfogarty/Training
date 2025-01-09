@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './globals.css'
 import type { Metadata } from 'next'
+import { LoginUpdater } from "@/components/auth/LoginUpdater"
 
 export const metadata: Metadata = {
   title: 'Training Hub',
@@ -25,6 +26,7 @@ export default async function RootLayout({
       </head>
       <body>
         <Providers session={session}>
+          <LoginUpdater />
           <main>
             {children}
           </main>
