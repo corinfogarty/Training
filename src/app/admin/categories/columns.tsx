@@ -9,8 +9,8 @@ interface Category {
   description: string | null
   defaultImage: string | null
   order: number
-  createdAt: string
-  updatedAt: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 export const columns: ColumnDef<Category>[] = [
