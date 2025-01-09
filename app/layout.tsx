@@ -27,9 +27,7 @@ export default async function RootLayout({
       <body>
         <Providers session={session}>
           <LoginUpdater />
-          <main>
-            {children}
-          </main>
+          {children}
         </Providers>
       </body>
     </html>
