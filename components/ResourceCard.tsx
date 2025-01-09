@@ -25,9 +25,9 @@ interface ResourceCardProps {
 export default function ResourceCard({
   resource,
   index,
-  isFavorite,
-  isCompleted,
-  completedAt,
+  isFavorite: initialIsFavorite,
+  isCompleted: initialIsCompleted,
+  completedAt: initialCompletedAt,
   onDelete,
   onToggleFavorite,
   onToggleComplete
@@ -37,6 +37,11 @@ export default function ResourceCard({
   const [showLightbox, setShowLightbox] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [isFavorite, setIsFavorite] = useState(initialIsFavorite)
+  const [isCompleted, setIsCompleted] = useState(initialIsCompleted)
+  const [completedAt, setCompletedAt] = useState(initialCompletedAt)
+  const [loadingFavorite, setLoadingFavorite] = useState(false)
+  const [loadingComplete, setLoadingComplete] = useState(false)
 
   const previewImage = resource.previewImage
 
@@ -61,6 +66,46 @@ export default function ResourceCard({
     }
   }
 
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    try {
+      setLoadingFavorite(true)
+      const response = await fetch(`/api/resources/${resource.id}/favorite`, {
+        method: 'POST'
+      })
+      
+      if (!response.ok) throw new Error('Failed to toggle favorite')
+      
+      setIsFavorite(!isFavorite)
+      onToggleFavorite()
+    } catch (error) {
+      console.error('Error toggling favorite:', error)
+    } finally {
+      setLoadingFavorite(false)
+    }
+  }
+
+  const handleToggleComplete = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    try {
+      setLoadingComplete(true)
+      const response = await fetch(`/api/resources/${resource.id}/complete`, {
+        method: 'POST'
+      })
+      
+      if (!response.ok) throw new Error('Failed to toggle complete')
+      
+      const data = await response.json()
+      setIsCompleted(!isCompleted)
+      setCompletedAt(data.completedAt)
+      onToggleComplete()
+    } catch (error) {
+      console.error('Error toggling complete:', error)
+    } finally {
+      setLoadingComplete(false)
+    }
+  }
+
   return (
     <>
       <Draggable draggableId={resource.id} index={index}>
@@ -70,6 +115,7 @@ export default function ResourceCard({
             {...provided.draggableProps}
             {...provided.dragHandleProps}
             className="mb-3"
+            style={{ position: 'relative' }}
           >
             <Card 
               className="h-100 shadow-sm" 
@@ -89,49 +135,62 @@ export default function ResourceCard({
               <Card.Body className="p-3">
                 <div className="d-flex justify-content-between align-items-start">
                   <h6 className="mb-0 fw-semibold">{resource.title}</h6>
-                  <Dropdown onClick={e => e.stopPropagation()}>
-                    <Dropdown.Toggle variant="link" className="p-0 text-muted">
-                      <MoreVertical size={16} />
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu align="end" style={{ zIndex: 1000 }}>
-                      <Dropdown.Item onClick={onToggleFavorite}>
-                        <Star size={16} className="me-2" />
-                        {isFavorite ? 'Remove Favorite' : 'Add Favorite'}
-                      </Dropdown.Item>
-                      <Dropdown.Item onClick={onToggleComplete}>
-                        <CheckCircle size={16} className="me-2" />
-                        {isCompleted ? 'Mark Incomplete' : 'Mark Complete'}
-                      </Dropdown.Item>
-                      <Dropdown.Item onClick={() => setShowEdit(true)}>
-                        <Edit size={16} className="me-2" />
-                        Edit
-                      </Dropdown.Item>
-                      <Dropdown.Divider />
-                      <Dropdown.Item 
-                        onClick={() => setShowDeleteConfirm(true)}
-                        className="text-danger"
-                      >
-                        <Trash2 size={16} className="me-2" />
-                        Delete
-                      </Dropdown.Item>
-                    </Dropdown.Menu>
-                  </Dropdown>
                 </div>
 
-                <div className="d-flex align-items-center gap-2 mt-2">
-                  {isFavorite && (
-                    <Star size={16} className="text-warning" fill="currentColor" />
-                  )}
-                  {isCompleted && (
-                    <>
-                      <CheckCircle size={16} className="text-success" fill="currentColor" />
-                      {completedAt && (
-                        <div className="small text-muted d-flex align-items-center">
-                          <Calendar size={12} className="me-1" />
-                          {new Date(completedAt).toLocaleDateString()}
-                        </div>
-                      )}
-                    </>
+                <div className="d-flex align-items-center gap-3 mt-3">
+                  <button 
+                    className="btn btn-link p-0 d-flex align-items-center" 
+                    onClick={handleToggleFavorite}
+                    title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                    disabled={loadingFavorite}
+                  >
+                    <Star 
+                      size={16} 
+                      className={`${isFavorite ? 'text-warning' : 'text-muted'} ${loadingFavorite ? 'opacity-50' : ''}`}
+                      fill={isFavorite ? 'currentColor' : 'none'}
+                    />
+                  </button>
+
+                  <button 
+                    className="btn btn-link p-0 d-flex align-items-center"
+                    onClick={handleToggleComplete}
+                    title={isCompleted ? 'Mark as incomplete' : 'Mark as complete'}
+                    disabled={loadingComplete}
+                  >
+                    <CheckCircle 
+                      size={16} 
+                      className={`${isCompleted ? 'text-success' : 'text-muted'} ${loadingComplete ? 'opacity-50' : ''}`}
+                      fill={isCompleted ? 'currentColor' : 'none'}
+                    />
+                  </button>
+
+                  <button 
+                    className="btn btn-link p-0 d-flex align-items-center"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowEdit(true);
+                    }}
+                    title="Edit resource"
+                  >
+                    <Edit size={16} className="text-muted" />
+                  </button>
+
+                  <button 
+                    className="btn btn-link p-0 d-flex align-items-center"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowDeleteConfirm(true);
+                    }}
+                    title="Delete resource"
+                  >
+                    <Trash2 size={16} className="text-danger" />
+                  </button>
+
+                  {completedAt && (
+                    <div className="small text-muted d-flex align-items-center ms-auto" title="Completion date">
+                      <Calendar size={12} className="me-1" />
+                      {new Date(completedAt).toLocaleDateString()}
+                    </div>
                   )}
                 </div>
               </Card.Body>

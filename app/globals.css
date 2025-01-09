@@ -54,11 +54,13 @@ body {
   transition: all 0.2s ease-in-out;
   border: 1px solid var(--ols-border) !important;
   border-radius: 8px !important;
+  position: relative;
 }
 
 .card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
   transform: translateY(-1px);
+  z-index: auto;
 }
 
 .card-title {
@@ -177,6 +179,7 @@ body {
   margin-top: 0.5rem;
   border: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 9999 !important;
 }
 
 .dropdown-item {
@@ -318,4 +321,67 @@ body {
   background: var(--ols-background);
   min-height: 100vh;
   flex-grow: 1;
+}
+
+.card .dropdown {
+  position: relative;
+  z-index: 1000;
+}
+
+.card .dropdown-menu {
+  position: absolute;
+  min-width: 200px;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  right: 0;
+  top: 100%;
+}
+
+.card:hover {
+  z-index: auto;
+}
+
+.dropdown-container {
+  position: relative;
+  z-index: 1000;
+}
+
+.dropdown-container .dropdown-menu {
+  position: absolute;
+  min-width: 200px;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  right: 0;
+  top: 100%;
+}
+
+.card:hover .dropdown-container {
+  z-index: 1000;
+}
+
+.card .btn-link {
+  opacity: 0.6;
+  transition: all 0.2s ease-in-out;
+}
+
+.card .btn-link:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.card:hover .btn-link {
+  opacity: 1;
+}
+
+/* Remove old dropdown styles */
+.dropdown-container,
+.card .dropdown,
+.card .dropdown-menu {
+  display: none;
 } 

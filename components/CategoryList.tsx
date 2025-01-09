@@ -115,7 +115,22 @@ export default function CategoryList() {
         method: 'POST'
       })
       if (!response.ok) throw new Error('Failed to toggle favorite')
-      fetchData()
+      
+      // Update state locally
+      setResources(prevResources => 
+        prevResources.map(resource => {
+          if (resource.id === resourceId) {
+            const isFavorited = resource.favoritedBy.some(u => u.id === session.user?.id)
+            return {
+              ...resource,
+              favoritedBy: isFavorited
+                ? resource.favoritedBy.filter(u => u.id !== session.user?.id)
+                : [...resource.favoritedBy, { id: session.user?.id } as User]
+            }
+          }
+          return resource
+        })
+      )
     } catch (error) {
       console.error('Error toggling favorite:', error)
     }
@@ -128,7 +143,23 @@ export default function CategoryList() {
         method: 'POST'
       })
       if (!response.ok) throw new Error('Failed to toggle complete')
-      fetchData()
+      const data = await response.json()
+      
+      // Update state locally
+      setResources(prevResources => 
+        prevResources.map(resource => {
+          if (resource.id === resourceId) {
+            const isCompleted = resource.completedBy.some(u => u.id === session.user?.id)
+            return {
+              ...resource,
+              completedBy: isCompleted
+                ? resource.completedBy.filter(u => u.id !== session.user?.id)
+                : [...resource.completedBy, { id: session.user?.id } as User]
+            }
+          }
+          return resource
+        })
+      )
     } catch (error) {
       console.error('Error toggling complete:', error)
     }
