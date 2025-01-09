@@ -27,11 +27,26 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      console.log('Sign in callback:', { user, account, profile })
+      console.log('Sign in callback:', { 
+        user, 
+        account, 
+        profile,
+        env: {
+          NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+          NODE_ENV: process.env.NODE_ENV
+        }
+      })
       return true
     },
     async redirect({ url, baseUrl }) {
-      console.log('Redirect callback:', { url, baseUrl })
+      console.log('Redirect callback:', { 
+        url, 
+        baseUrl,
+        env: {
+          NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+          NODE_ENV: process.env.NODE_ENV
+        }
+      })
       // Allow relative URLs
       if (url.startsWith("/")) return `${baseUrl}${url}`
       // Allow URLs from same origin
@@ -39,7 +54,16 @@ export const authOptions: NextAuthOptions = {
       return baseUrl
     },
     async jwt({ token, user, account, trigger }) {
-      console.log('JWT callback:', { token, user, trigger, account })
+      console.log('JWT callback:', { 
+        token, 
+        user, 
+        trigger, 
+        account,
+        env: {
+          NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+          NODE_ENV: process.env.NODE_ENV
+        }
+      })
       
       if (trigger === 'signIn' || trigger === 'signUp') {
         const dbUser = await prisma.user.findUnique({
@@ -52,7 +76,14 @@ export const authOptions: NextAuthOptions = {
       return token
     },
     async session({ session, token }) {
-      console.log('Session callback:', { session, token })
+      console.log('Session callback:', { 
+        session, 
+        token,
+        env: {
+          NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+          NODE_ENV: process.env.NODE_ENV
+        }
+      })
       
       if (session?.user) {
         session.user.isAdmin = token.isAdmin as boolean
