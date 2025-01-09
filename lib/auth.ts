@@ -14,7 +14,9 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       authorization: {
         params: {
-          prompt: "select_account"
+          prompt: "select_account",
+          access_type: "offline",
+          response_type: "code"
         }
       }
     }),
@@ -24,12 +26,20 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60,
   },
   callbacks: {
-    async signIn({ user, account }) {
-      console.log('Sign in callback:', { user, account })
+    async signIn({ user, account, profile }) {
+      console.log('Sign in callback:', { user, account, profile })
       return true
     },
+    async redirect({ url, baseUrl }) {
+      console.log('Redirect callback:', { url, baseUrl })
+      // Allow relative URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      // Allow URLs from same origin
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
+    },
     async jwt({ token, user, account, trigger }) {
-      console.log('JWT callback:', { token, user, trigger })
+      console.log('JWT callback:', { token, user, trigger, account })
       
       if (trigger === 'signIn' || trigger === 'signUp') {
         const dbUser = await prisma.user.findUnique({
