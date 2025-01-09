@@ -4,10 +4,28 @@ import type { NextAuthOptions } from "next-auth"
 import type { Adapter } from "next-auth/adapters"
 import GoogleProvider from "next-auth/providers/google"
 
+// Debug logging helper
+const logEvent = (event: string, data: any) => {
+  console.log(`\n[${new Date().toISOString()}] ${event}:`)
+  console.log(JSON.stringify(data, null, 2))
+  console.log('\n')
+}
+
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   adapter: PrismaAdapter(prisma) as Adapter,
   debug: true,
+  logger: {
+    error(code, ...message) {
+      logEvent(`Error: ${code}`, message)
+    },
+    warn(code, ...message) {
+      logEvent(`Warning: ${code}`, message)
+    },
+    debug(code, ...message) {
+      logEvent(`Debug: ${code}`, message)
+    }
+  },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -27,7 +45,7 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      console.log('Sign in callback:', { 
+      logEvent('signIn callback', { 
         user, 
         account, 
         profile,
@@ -39,7 +57,7 @@ export const authOptions: NextAuthOptions = {
       return true
     },
     async redirect({ url, baseUrl }) {
-      console.log('Redirect callback:', { 
+      logEvent('redirect callback', { 
         url, 
         baseUrl,
         env: {
@@ -48,21 +66,30 @@ export const authOptions: NextAuthOptions = {
         }
       })
 
-      // If we're in production, always redirect to training.ols.to
+      // Allow OAuth callbacks to complete
+      if (url.includes('/api/auth/callback')) {
+        logEvent('allowing callback', { url })
+        return url
+      }
+
+      // For all other URLs in production, redirect to home
       if (process.env.NODE_ENV === 'production') {
-        console.log('Production environment, redirecting to training.ols.to')
-        return 'https://training.ols.to'
+        const redirectUrl = 'https://training.ols.to'
+        logEvent('production redirect', { redirectUrl })
+        return redirectUrl
       }
 
       // In development, use the provided URL or baseUrl
       if (url.startsWith('/') || url.startsWith(baseUrl)) {
+        logEvent('development redirect', { url })
         return url
       }
 
+      logEvent('fallback redirect', { baseUrl })
       return baseUrl
     },
     async jwt({ token, user, account, trigger }) {
-      console.log('JWT callback:', { 
+      logEvent('jwt callback', { 
         token, 
         user, 
         trigger, 
@@ -80,8 +107,9 @@ export const authOptions: NextAuthOptions = {
           })
           token.isAdmin = dbUser?.isAdmin || false
           token.userId = dbUser?.id
+          logEvent('user lookup success', { dbUser })
         } catch (e) {
-          console.error('Error fetching user:', e)
+          logEvent('user lookup error', { error: e })
           token.isAdmin = false
         }
       }
@@ -89,7 +117,7 @@ export const authOptions: NextAuthOptions = {
       return token
     },
     async session({ session, token }) {
-      console.log('Session callback:', { 
+      logEvent('session callback', { 
         session, 
         token,
         env: {
