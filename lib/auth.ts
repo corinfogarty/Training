@@ -48,9 +48,18 @@ export const authOptions: NextAuthOptions = {
         }
       })
 
-      // Allow training.ols.to URLs
-      if (url.includes('training.ols.to')) {
-        console.log('Allowing training.ols.to URL:', url)
+      // List of allowed callback URLs from Google OAuth config
+      const allowedCallbacks = [
+        'http://localhost:3000/api/auth/callback/google',
+        'http://localhost:3000/api/auth/callback',
+        'https://training.ols.to/api/auth/callback/google',
+        'https://training.ols.to/api/auth/callback',
+        'https://training.ols.to'
+      ]
+
+      // Check if URL matches any allowed callback
+      if (allowedCallbacks.some(callback => url.startsWith(callback))) {
+        console.log('Allowing configured callback URL:', url)
         return url
       }
 
