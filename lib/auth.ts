@@ -36,7 +36,6 @@ export const authOptions: NextAuthOptions = {
           NODE_ENV: process.env.NODE_ENV
         }
       })
-      // Return true immediately to avoid message channel timeout
       return true
     },
     async redirect({ url, baseUrl }) {
@@ -49,24 +48,17 @@ export const authOptions: NextAuthOptions = {
         }
       })
 
-      // Always allow the base URL and its paths
-      if (url.startsWith(baseUrl) || url.startsWith('/')) {
-        console.log('Allowing base URL or path:', url)
+      // If we're in production, always redirect to training.ols.to
+      if (process.env.NODE_ENV === 'production') {
+        console.log('Production environment, redirecting to training.ols.to')
+        return 'https://training.ols.to'
+      }
+
+      // In development, use the provided URL or baseUrl
+      if (url.startsWith('/') || url.startsWith(baseUrl)) {
         return url
       }
 
-      // For absolute URLs, ensure they're from our domain
-      try {
-        const urlObj = new URL(url)
-        if (urlObj.hostname === 'training.ols.to') {
-          console.log('Allowing training.ols.to URL:', url)
-          return url
-        }
-      } catch (e) {
-        console.error('Error parsing URL:', e)
-      }
-
-      console.log('Defaulting to baseUrl:', baseUrl)
       return baseUrl
     },
     async jwt({ token, user, account, trigger }) {
@@ -90,7 +82,6 @@ export const authOptions: NextAuthOptions = {
           token.userId = dbUser?.id
         } catch (e) {
           console.error('Error fetching user:', e)
-          // Don't fail the auth flow if DB lookup fails
           token.isAdmin = false
         }
       }
