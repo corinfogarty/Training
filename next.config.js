@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['img.youtube.com', 'i.vimeocdn.com'], // Add other domains if needed
+    domains: ['img.youtube.com', 'i.vimeocdn.com', 'training.ols.to'], // Added training.ols.to
   }
 }
 
