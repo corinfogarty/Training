@@ -45,46 +45,50 @@ export default function CategoryList({ categories: initialCategories }: Category
   }
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable droppableId="categories" direction="horizontal">
-        {(provided) => (
-          <Row
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            className="flex-nowrap overflow-auto"
-          >
-            {categories.map((category, index) => (
-              <Draggable
-                key={category.id}
-                draggableId={category.id}
-                index={index}
-              >
-                {(provided) => (
-                  <Col
-                    xs="auto"
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    style={{
-                      ...provided.draggableProps.style,
-                      width: "300px"
-                    }}
-                  >
-                    <div className="bg-white rounded shadow-sm p-3 mb-3">
-                      <h3 className="h5 mb-3">{category.name}</h3>
-                      <AddResourceButton
-                        categoryId={category.id}
-                        onResourceAdded={handleResourceAdded}
-                      />
-                    </div>
-                  </Col>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </Row>
-        )}
-      </Droppable>
-    </DragDropContext>
+    <div className="d-flex flex-column" style={{ minHeight: "100vh" }}>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="categories" direction="horizontal">
+          {(provided) => (
+            <Row
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className="flex-nowrap overflow-auto flex-grow-1 g-0 m-0"
+            >
+              {categories.map((category, index) => (
+                <Draggable
+                  key={category.id}
+                  draggableId={category.id}
+                  index={index}
+                >
+                  {(provided) => (
+                    <Col
+                      xs="auto"
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      style={{
+                        ...provided.draggableProps.style,
+                        width: "300px",
+                        height: "100%"
+                      }}
+                      className="px-2"
+                    >
+                      <div className="bg-white rounded shadow-sm p-3 h-100">
+                        <h3 className="h5 mb-3">{category.name}</h3>
+                        <AddResourceButton
+                          categoryId={category.id}
+                          onResourceAdded={handleResourceAdded}
+                        />
+                      </div>
+                    </Col>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </Row>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </div>
   )
 } 
