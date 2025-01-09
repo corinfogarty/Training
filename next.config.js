@@ -1,7 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['img.youtube.com', 'i.vimeocdn.com'], // Add other domains if needed
+    domains: [
+      'i.ytimg.com',
+      'img.youtube.com',
+      'lh3.googleusercontent.com',
+      'avatars.githubusercontent.com',
+      'creative.ols.design',
+      'download.blender.org'
+    ]
   }
 }
 
