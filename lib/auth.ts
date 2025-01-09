@@ -47,10 +47,33 @@ export const authOptions: NextAuthOptions = {
           NODE_ENV: process.env.NODE_ENV
         }
       })
+
+      // Allow training.ols.to URLs
+      if (url.includes('training.ols.to')) {
+        console.log('Allowing training.ols.to URL:', url)
+        return url
+      }
+
       // Allow relative URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`
+      if (url.startsWith("/")) {
+        const finalUrl = `${baseUrl}${url}`
+        console.log('Allowing relative URL:', finalUrl)
+        return finalUrl
+      }
+
       // Allow URLs from same origin
-      else if (new URL(url).origin === baseUrl) return url
+      try {
+        const urlOrigin = new URL(url).origin
+        const baseOrigin = new URL(baseUrl).origin
+        if (urlOrigin === baseOrigin) {
+          console.log('Allowing same origin URL:', url)
+          return url
+        }
+      } catch (e) {
+        console.error('Error parsing URL:', e)
+      }
+
+      console.log('Defaulting to baseUrl:', baseUrl)
       return baseUrl
     },
     async jwt({ token, user, account, trigger }) {
