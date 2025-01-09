@@ -95,8 +95,8 @@ export default function ResourceCard({
     }
   }
 
-  const handleToggleFavorite = async (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const handleToggleFavorite = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
     try {
       setLoadingFavorite(true)
       const response = await fetch(`/api/resources/${resource.id}/favorite`, {
@@ -114,8 +114,8 @@ export default function ResourceCard({
     }
   }
 
-  const handleToggleComplete = async (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const handleToggleComplete = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
     try {
       setLoadingComplete(true)
       const response = await fetch(`/api/resources/${resource.id}/complete`, {
@@ -137,94 +137,145 @@ export default function ResourceCard({
 
   if (viewType === 'list') {
     return (
-      <Draggable draggableId={resource.id} index={index}>
-        {(provided) => (
-          <div
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-          >
-            <div 
-              className="d-flex align-items-center resource-list-item" 
-              onClick={handleOpenLightbox}
-              style={{ cursor: 'pointer' }}
+      <>
+        <Draggable draggableId={resource.id} index={index}>
+          {(provided) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.draggableProps}
+              {...provided.dragHandleProps}
             >
               <div 
-                className="me-3 rounded"
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  backgroundImage: previewImage ? `url(${previewImage})` : 'none',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundColor: '#f8f9fa',
-                  flexShrink: 0
-                }}
-              />
-              
-              <div className="flex-grow-1 d-flex align-items-center">
-                <h6 className="mb-0 me-auto">{resource.title}</h6>
-                <div className="d-flex align-items-center gap-2">
-                  <button 
-                    className="btn btn-link p-1" 
-                    onClick={handleToggleFavorite}
-                    title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                    disabled={loadingFavorite}
-                  >
-                    <Star 
-                      size={14} 
-                      className={`${isFavorite ? 'text-warning' : 'text-muted'} ${loadingFavorite ? 'opacity-50' : ''}`}
-                      fill={isFavorite ? 'currentColor' : 'none'}
-                    />
-                  </button>
+                className="d-flex align-items-center resource-list-item" 
+                onClick={handleOpenLightbox}
+                style={{ cursor: 'pointer' }}
+              >
+                <div 
+                  className="me-3 rounded"
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    backgroundImage: previewImage ? `url(${previewImage})` : 'none',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundColor: '#f8f9fa',
+                    flexShrink: 0
+                  }}
+                />
+                
+                <div className="flex-grow-1 d-flex align-items-center">
+                  <h6 className="mb-0 me-auto">{resource.title}</h6>
+                  <div className="d-flex align-items-center gap-2">
+                    <button 
+                      className="btn btn-link p-1" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleFavorite(e);
+                      }}
+                      title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                      disabled={loadingFavorite}
+                    >
+                      <Star 
+                        size={14} 
+                        className={`${isFavorite ? 'text-warning' : 'text-muted'} ${loadingFavorite ? 'opacity-50' : ''}`}
+                        fill={isFavorite ? 'currentColor' : 'none'}
+                      />
+                    </button>
 
-                  <button 
-                    className="btn btn-link p-1"
-                    onClick={handleToggleComplete}
-                    title={isCompleted ? 'Mark as incomplete' : 'Mark as complete'}
-                    disabled={loadingComplete}
-                  >
-                    <CheckCircle 
-                      size={14} 
-                      className={`${isCompleted ? 'text-success' : 'text-muted'} ${loadingComplete ? 'opacity-50' : ''}`}
-                      fill={isCompleted ? 'currentColor' : 'none'}
-                    />
-                  </button>
+                    <button 
+                      className="btn btn-link p-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleComplete(e);
+                      }}
+                      title={isCompleted ? 'Mark as incomplete' : 'Mark as complete'}
+                      disabled={loadingComplete}
+                    >
+                      <CheckCircle 
+                        size={14} 
+                        className={`${isCompleted ? 'text-success' : 'text-muted'} ${loadingComplete ? 'opacity-50' : ''}`}
+                        fill={isCompleted ? 'currentColor' : 'none'}
+                      />
+                    </button>
 
-                  <button 
-                    className="btn btn-link p-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowEdit(true);
-                    }}
-                    title="Edit resource"
-                  >
-                    <Edit size={14} className="text-muted" />
-                  </button>
+                    <button 
+                      className="btn btn-link p-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowEdit(true);
+                      }}
+                      title="Edit resource"
+                    >
+                      <Edit size={14} className="text-muted" />
+                    </button>
 
-                  <button 
-                    className="btn btn-link p-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowDeleteConfirm(true);
-                    }}
-                    title="Delete resource"
-                  >
-                    <Trash2 size={14} className="text-danger" />
-                  </button>
+                    <button 
+                      className="btn btn-link p-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowDeleteConfirm(true);
+                      }}
+                      title="Delete resource"
+                    >
+                      <Trash2 size={14} className="text-danger" />
+                    </button>
 
-                  {completedAt && (
-                    <div className="small text-muted d-flex align-items-center ms-2" title="Completion date">
-                      <Calendar size={12} className="me-1" />
-                      {new Date(completedAt).toLocaleDateString()}
-                    </div>
-                  )}
+                    {completedAt && (
+                      <div className="small text-muted d-flex align-items-center ms-2" title="Completion date">
+                        <Calendar size={12} className="me-1" />
+                        {new Date(completedAt).toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </Draggable>
+          )}
+        </Draggable>
+
+        <EditResourceModal
+          resource={resource}
+          show={showEdit}
+          onHide={() => setShowEdit(false)}
+          onSave={onDelete}
+        />
+
+        <ResourceLightbox
+          resource={resource}
+          show={showLightbox}
+          onHide={handleCloseLightbox}
+          onEdit={() => setShowEdit(true)}
+          isFavorite={isFavorite}
+          isCompleted={isCompleted}
+          onToggleFavorite={handleToggleFavorite}
+          onToggleComplete={handleToggleComplete}
+        />
+
+        <Modal show={showDeleteConfirm} onHide={() => setShowDeleteConfirm(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm Delete</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Are you sure you want to delete "{resource.title}"?
+          </Modal.Body>
+          <Modal.Footer>
+            <Button 
+              variant="secondary" 
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="danger" 
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? 'Deleting...' : 'Delete'}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </>
     )
   }
 
@@ -263,7 +314,10 @@ export default function ResourceCard({
                 <div className="d-flex align-items-center gap-3 mt-3">
                   <button 
                     className="btn btn-link p-0 d-flex align-items-center" 
-                    onClick={handleToggleFavorite}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleFavorite(e);
+                    }}
                     title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
                     disabled={loadingFavorite}
                   >
@@ -276,7 +330,10 @@ export default function ResourceCard({
 
                   <button 
                     className="btn btn-link p-0 d-flex align-items-center"
-                    onClick={handleToggleComplete}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleComplete(e);
+                    }}
                     title={isCompleted ? 'Mark as incomplete' : 'Mark as complete'}
                     disabled={loadingComplete}
                   >
@@ -333,6 +390,11 @@ export default function ResourceCard({
         resource={resource}
         show={showLightbox}
         onHide={handleCloseLightbox}
+        onEdit={() => setShowEdit(true)}
+        isFavorite={isFavorite}
+        isCompleted={isCompleted}
+        onToggleFavorite={handleToggleFavorite}
+        onToggleComplete={handleToggleComplete}
       />
 
       <Modal show={showDeleteConfirm} onHide={() => setShowDeleteConfirm(false)}>

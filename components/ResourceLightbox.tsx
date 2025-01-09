@@ -3,7 +3,7 @@
 import React from 'react'
 import { Resource, Category } from '@prisma/client'
 import { Modal, Button, Badge } from 'react-bootstrap'
-import { ExternalLink, Calendar, Clock, Link as LinkIcon, Edit } from 'lucide-react'
+import { ExternalLink, Calendar, Clock, Link as LinkIcon, Edit, Star, CheckCircle } from 'lucide-react'
 import { useState } from 'react'
 import EditResourceModal from './EditResourceModal'
 
@@ -15,6 +15,10 @@ interface Props {
   onHide: () => void
   onEdit?: () => void
   onDelete?: () => void
+  isFavorite?: boolean
+  isCompleted?: boolean
+  onToggleFavorite?: (e?: React.MouseEvent) => void | Promise<void>
+  onToggleComplete?: (e?: React.MouseEvent) => void | Promise<void>
 }
 
 interface FormattedContent {
@@ -33,10 +37,16 @@ export default function ResourceLightbox({
   show,
   onHide,
   onEdit,
-  onDelete
+  onDelete,
+  isFavorite = false,
+  isCompleted = false,
+  onToggleFavorite,
+  onToggleComplete
 }: Props) {
   const [showEditModal, setShowEditModal] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [loadingFavorite, setLoadingFavorite] = useState(false)
+  const [loadingComplete, setLoadingComplete] = useState(false)
   const previewImage = resource.previewImage
 
   const getFormattedContent = (): FormattedContent => {
@@ -164,6 +174,40 @@ export default function ResourceLightbox({
               >
                 <Edit size={16} className="me-2" />
                 Edit
+              </Button>
+            )}
+            {onToggleFavorite && (
+              <Button
+                variant={isFavorite ? 'danger' : 'outline-danger'}
+                className="d-flex align-items-center"
+                onClick={() => {
+                  onToggleFavorite()
+                }}
+                disabled={loadingFavorite}
+              >
+                <Star 
+                  size={16} 
+                  className={`me-2 ${loadingFavorite ? 'opacity-50' : ''}`}
+                  fill={isFavorite ? 'white' : 'none'}
+                />
+                {isFavorite ? 'Favorited' : 'Add to Favorites'}
+              </Button>
+            )}
+            {onToggleComplete && (
+              <Button
+                variant={isCompleted ? 'info' : 'outline-info'}
+                className="d-flex align-items-center"
+                onClick={() => {
+                  onToggleComplete()
+                }}
+                disabled={loadingComplete}
+              >
+                <CheckCircle 
+                  size={16} 
+                  className={`me-2 ${loadingComplete ? 'opacity-50' : ''}`}
+                  fill={isCompleted ? 'white' : 'none'}
+                />
+                {isCompleted ? 'Completed' : 'Mark Complete'}
               </Button>
             )}
           </div>

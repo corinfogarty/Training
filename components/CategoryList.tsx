@@ -6,8 +6,8 @@ import type { Category, Resource, User, ResourceOrder } from '@prisma/client'
 import ResourceCard from './ResourceCard'
 import Debug from './Debug'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
-import { Container, Alert, Row, Col, Image, ButtonGroup, Button } from 'react-bootstrap'
-import { Grid, List, Columns } from 'lucide-react'
+import { Container, Alert, Row, Col, Image, ButtonGroup, Button, Modal } from 'react-bootstrap'
+import { Grid, List, Columns, HelpCircle } from 'lucide-react'
 import CategoryFilter from './CategoryFilter'
 import { useSession } from 'next-auth/react'
 import AddResourceButton from './AddResourceButton'
@@ -37,6 +37,7 @@ export default function CategoryList() {
     return (savedView as ViewType) || 'grid'
   })
   const { data: session } = useSession()
+  const [showInstallHelp, setShowInstallHelp] = useState(false)
 
   // Save view preference when it changes
   useEffect(() => {
@@ -228,7 +229,7 @@ export default function CategoryList() {
   }
 
   return (
-    <div className="bg-dark text-white min-vh-100">
+    <div className="bg-light min-vh-100">
       <div className="py-3">
         <Container fluid className="header-container">
           <Row className="align-items-center mb-4">
@@ -285,6 +286,13 @@ export default function CategoryList() {
                 }} 
               />
               <AddResourceButton />
+              <Button
+                variant="outline-secondary"
+                onClick={() => setShowInstallHelp(true)}
+                title="Extension Installation Help"
+              >
+                <HelpCircle size={16} />
+              </Button>
               <AuthButton />
             </Col>
           </Row>
@@ -292,59 +300,100 @@ export default function CategoryList() {
 
         <div className="container-fluid px-4">
           <DragDropContext onDragEnd={handleDragEnd}>
-            <div className={`
-              ${viewType === 'grid' ? 'pb-4' : ''}
-              ${viewType === 'list' ? 'pb-4' : ''}
-              ${viewType === 'columns' ? 'kanban-board d-flex gap-4 overflow-auto pb-4' : ''}
-            `}>
-              {categories.map((category) => (
-                <div 
-                  key={category.id} 
-                  className={`
-                    ${viewType === 'grid' ? 'mb-4' : ''}
-                    ${viewType === 'list' ? 'mb-4' : ''}
-                    ${viewType === 'columns' ? 'kanban-column' : ''}
-                  `}
-                  style={viewType === 'columns' ? { minWidth: '340px', maxWidth: '340px' } : {}}
-                >
-                  <div className={`
-                    bg-white rounded-3 shadow-sm
-                    ${viewType === 'list' ? 'list-view' : ''}
-                    ${viewType === 'columns' ? 'h-100 d-flex flex-column' : ''}
-                  `}>
-                    <div className="p-3 border-bottom category-header">
-                      <h3 className="h5 mb-0">{category.name}</h3>
-                      {category.description && (
-                        <small className="text-muted">{category.description}</small>
-                      )}
-                    </div>
-
-                    <Droppable droppableId={category.id}>
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className={`
-                            p-3
-                            ${viewType === 'columns' ? 'flex-grow-1' : ''}
-                          `}
-                          style={viewType === 'columns' ? { 
-                            minHeight: '100px',
-                            overflowY: 'auto',
-                            maxHeight: 'calc(100vh - 200px)'
-                          } : {}}
-                        >
-                          <div className={`
-                            ${viewType === 'grid' ? 'grid-tiles' : ''}
-                            ${viewType === 'list' ? 'list-view table-striped' : ''}
-                            ${viewType === 'columns' ? 'd-flex flex-column gap-3' : ''}
-                          `}>
-                            {filteredResources(category.id).map((resource, index) => (
-                              <div 
-                                key={resource.id}
-                                className={viewType === 'list' ? 'w-100' : ''}
-                              >
+            <div className="mt-4">
+              {viewType === 'columns' ? (
+                <div className="d-flex justify-content-center">
+                  <div 
+                    className="d-flex gap-4" 
+                    style={{ 
+                      overflowX: 'auto',
+                      paddingBottom: '1rem'
+                    }}
+                  >
+                    {categories.map(category => (
+                      <div 
+                        key={category.id} 
+                        className="bg-white rounded-3 shadow-sm text-dark"
+                        style={{ 
+                          minWidth: '350px',
+                          maxWidth: '350px'
+                        }}
+                      >
+                        <div className="p-3 border-bottom bg-light">
+                          <h3 className="h5 mb-0 d-flex justify-content-between align-items-center">
+                            <span>{category.name}</span>
+                            <small className="text-muted">
+                              {filteredResources(category.id).length} resources
+                            </small>
+                          </h3>
+                          {category.description && (
+                            <small className="text-muted">{category.description}</small>
+                          )}
+                        </div>
+                        <Droppable droppableId={category.id}>
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.droppableProps}
+                              className="p-3"
+                              style={{ 
+                                minHeight: '100px',
+                                overflowY: 'auto',
+                                maxHeight: 'calc(100vh - 300px)'
+                              }}
+                            >
+                              <div className="d-flex flex-column gap-3">
+                                {filteredResources(category.id).map((resource, index) => (
+                                  <ResourceCard
+                                    key={resource.id}
+                                    resource={resource}
+                                    onDelete={fetchData}
+                                    index={index}
+                                    viewType={viewType}
+                                    isFavorite={resource.favoritedBy?.some(u => u.id === session?.user?.id)}
+                                    isCompleted={resource.completedBy?.some(u => u.id === session?.user?.id)}
+                                    onToggleFavorite={() => handleToggleFavorite(resource.id)}
+                                    onToggleComplete={() => handleToggleComplete(resource.id)}
+                                  />
+                                ))}
+                                {provided.placeholder}
+                              </div>
+                            </div>
+                          )}
+                        </Droppable>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="container-fluid px-4">
+                  <div className={viewType === 'grid' ? 'grid-tiles' : ''}>
+                    {categories.map((category) => (
+                      <div key={category.id} className="mb-5">
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                          <div>
+                            <h3 className="h5 mb-0 d-flex align-items-center gap-2">
+                              {category.name}
+                              <small className="text-muted">
+                                {filteredResources(category.id).length} resources
+                              </small>
+                            </h3>
+                            {category.description && (
+                              <small className="text-muted">{category.description}</small>
+                            )}
+                          </div>
+                        </div>
+                        <Droppable droppableId={category.id}>
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.droppableProps}
+                              className={viewType === 'list' ? 'list-view' : 'droppable-container'}
+                              style={viewType === 'grid' ? { display: 'flex', flexWrap: 'wrap', gap: '1.5rem' } : undefined}
+                            >
+                              {filteredResources(category.id).map((resource, index) => (
                                 <ResourceCard
+                                  key={resource.id}
                                   resource={resource}
                                   onDelete={fetchData}
                                   index={index}
@@ -354,20 +403,46 @@ export default function CategoryList() {
                                   onToggleFavorite={() => handleToggleFavorite(resource.id)}
                                   onToggleComplete={() => handleToggleComplete(resource.id)}
                                 />
-                              </div>
-                            ))}
-                            {provided.placeholder}
-                          </div>
-                        </div>
-                      )}
-                    </Droppable>
+                              ))}
+                              {provided.placeholder}
+                            </div>
+                          )}
+                        </Droppable>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
+              )}
             </div>
           </DragDropContext>
         </div>
       </div>
+
+      <Modal show={showInstallHelp} onHide={() => setShowInstallHelp(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Install Chrome Extension (Developer Mode)</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <ol className="mb-4">
+            <li className="mb-2">Download the extension ZIP file from <a href="/extension.zip" className="text-primary">here</a></li>
+            <li className="mb-2">Unzip the file to a location on your computer</li>
+            <li className="mb-2">Open Chrome and go to <code>chrome://extensions</code></li>
+            <li className="mb-2">Enable "Developer mode" using the toggle in the top right</li>
+            <li className="mb-2">Click "Load unpacked" button in the top left</li>
+            <li className="mb-2">Select the unzipped extension folder</li>
+            <li>The extension should now appear in your Chrome toolbar</li>
+          </ol>
+          <Alert variant="info">
+            <Alert.Heading>Note</Alert.Heading>
+            <p className="mb-0">This is a temporary installation method while we await approval from the Chrome Web Store. Once approved, you'll be able to install directly from the store.</p>
+          </Alert>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowInstallHelp(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   )
 } 

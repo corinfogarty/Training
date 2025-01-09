@@ -412,15 +412,15 @@ body {
 .list-view .resource-list-item {
   transition: background-color 0.2s ease-in-out;
   border-bottom: 1px solid var(--ols-border);
-  padding: 0.75rem 1rem;
+  padding: 1rem;
 }
 
 .list-view .resource-list-item:nth-child(odd) {
-  background-color: white;
+  background-color: var(--ols-surface);
 }
 
 .list-view .resource-list-item:nth-child(even) {
-  background-color: #f8fafc;
+  background-color: var(--ols-background);
 }
 
 .list-view .resource-list-item:hover {
@@ -446,12 +446,80 @@ body {
   opacity: 1;
 }
 
+/* Remove old list view styles */
+.list-view .resource-card {
+  display: none;
+}
+
 /* Grid View */
 .grid-tiles {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 340px));
-  gap: 1rem;
-  justify-content: flex-start;
+  width: 100%;
+}
+
+.grid-tiles .droppable-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* Make grid cards match column view exactly */
+.grid-tiles .droppable-container > [data-rfd-draggable-context-id] {
+  width: 350px !important;
+  flex: 0 0 350px !important;
+  margin-bottom: 1rem !important;
+}
+
+.grid-tiles .card {
+  height: 100%;
+  margin: 0;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.grid-tiles .card .card-img-top {
+  height: 120px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--ols-background);
+}
+
+.grid-tiles .card .card-body {
+  padding: 1rem;
+}
+
+.grid-tiles .card .card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--ols-primary);
+}
+
+.grid-tiles .card .btn-link {
+  padding: 0;
+  margin-right: 0.5rem;
+}
+
+/* Category spacing */
+.grid-tiles .mb-5 {
+  margin-bottom: 3rem !important;
+}
+
+/* Remove any conflicting styles */
+.grid-tiles .resource-list-item {
+  display: none;
+}
+
+/* Remove the conflicting grid styles at the bottom */
+.grid-tiles {
+  display: block !important;
+}
+
+.grid-tiles [data-rfd-draggable-context-id] {
+  background: transparent !important;
+  padding: 0 !important;
 }
 
 /* List View */
@@ -538,8 +606,34 @@ body {
 }
 
 .header-search {
-  max-width: 800px;
-  margin: 0 auto;
+  position: relative;
+}
+
+.header-search .search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ols-text-light);
+  pointer-events: none;
+}
+
+.header-search input {
+  background-color: var(--ols-surface) !important;
+  border: 1px solid var(--ols-border) !important;
+  border-radius: 8px !important;
+  padding: 0.75rem 1rem 0.75rem 2.75rem !important;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.header-search input:focus {
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2) !important;
+  border-color: var(--ols-brand) !important;
+}
+
+.header-search input::placeholder {
+  color: var(--ols-text-light);
 }
 
 @media (max-width: 768px) {
@@ -572,4 +666,96 @@ body {
 
 .btn-link:hover .text-success {
   color: #4F46E5 !important; /* Darker blue/purple */
+} 
+
+.resource-list-item:nth-child(even) {
+  background-color: var(--bs-white) !important;
+}
+
+.resource-list-item:nth-child(odd) {
+  background-color: var(--bs-light) !important;
+}
+
+.resource-list-item {
+  transition: background-color 0.2s ease;
+}
+
+.resource-list-item:hover {
+  background-color: var(--bs-gray-100) !important;
+} 
+
+/* List View Container */
+.list-view {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+/* Target the draggable wrapper div */
+.list-view > [data-rfd-draggable-context-id] {
+  background-color: white;
+}
+
+.list-view > [data-rfd-draggable-context-id]:nth-child(even) {
+  background-color: var(--ols-background);
+}
+
+/* Style the actual list item */
+.list-view .resource-list-item {
+  padding: 1.25rem;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid var(--ols-border);
+}
+
+.list-view > [data-rfd-draggable-context-id]:last-child .resource-list-item {
+  border-bottom: none;
+}
+
+.list-view .resource-list-item:hover {
+  background-color: rgba(14, 165, 233, 0.05);
+}
+
+/* Button styles */
+.list-view .btn-link {
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.list-view .resource-list-item:hover .btn-link {
+  opacity: 1;
+}
+
+/* Remove any conflicting styles */
+.list-view .resource-card,
+.resource-list-item:nth-child(odd),
+.resource-list-item:nth-child(even) {
+  background-color: transparent !important;
+}
+
+/* Grid View */
+.grid-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 340px));
+  gap: 1rem;
+  justify-content: flex-start;
+} 
+
+/* Header Search */
+.header-search input {
+  background-color: var(--ols-surface) !important;
+  border: 1px solid var(--ols-border) !important;
+  border-radius: 8px !important;
+  padding: 0.75rem 1rem 0.75rem 2.75rem !important;
+  transition: all 0.2s ease;
+}
+
+.header-search input:focus {
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2) !important;
+  border-color: var(--ols-brand) !important;
+}
+
+.header-search input::placeholder {
+  color: var(--ols-text-light);
 } 
