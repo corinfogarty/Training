@@ -7,7 +7,8 @@ import ResourceCard from './ResourceCard'
 import Debug from './Debug'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
 import { Container, Alert, Row, Col, Image, ButtonGroup, Button, Modal } from 'react-bootstrap'
-import { Grid, List, Columns, HelpCircle } from 'lucide-react'
+import { Grid, List, Columns } from 'lucide-react'
+import { Chrome } from 'lucide-react'
 import CategoryFilter from './CategoryFilter'
 import { useSession } from 'next-auth/react'
 import AddResourceButton from './AddResourceButton'
@@ -238,6 +239,9 @@ export default function CategoryList() {
                 src="/logo-ols-2023.png" 
                 alt="Logo" 
                 className="header-logo"
+                width={40}
+                height={40}
+                style={{ objectFit: 'contain' }}
               />
             </Col>
             <Col className="header-search">
@@ -291,7 +295,7 @@ export default function CategoryList() {
                 onClick={() => setShowInstallHelp(true)}
                 title="Extension Installation Help"
               >
-                <HelpCircle size={16} />
+                <Chrome size={16} />
               </Button>
               <AuthButton />
             </Col>

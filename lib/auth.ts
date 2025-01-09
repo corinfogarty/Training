@@ -16,7 +16,9 @@ const getBaseUrl = () => {
   if (process.env.NODE_ENV === 'production') {
     return process.env.NEXTAUTH_URL || 'https://training.ols.to'
   }
-  return process.env.NEXTAUTH_URL || 'http://localhost:3000'
+  // Try port 3001 if 3000 is in use
+  const port = process.env.PORT || '3001'
+  return process.env.NEXTAUTH_URL || `http://localhost:${port}`
 }
 
 export const authOptions: NextAuthOptions = {
@@ -80,7 +82,12 @@ export const authOptions: NextAuthOptions = {
       }
 
       // In development, use the provided URL or baseUrl
-      if (url.startsWith('/') || url.startsWith(baseUrl)) {
+      if (url.startsWith('/')) {
+        logEvent('development redirect', { url: `${envBaseUrl}${url}` })
+        return `${envBaseUrl}${url}`
+      }
+
+      if (url.startsWith(baseUrl)) {
         logEvent('development redirect', { url })
         return url
       }
