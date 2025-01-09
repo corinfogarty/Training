@@ -7,6 +7,9 @@
   --ols-border: #E2E8F0;
   --ols-text: #334155;
   --ols-text-light: #94A3B8;
+  --ols-brand: #0EA5E9;
+  --ols-favorite: #EC4899;  /* Pink */
+  --ols-complete: #6366F1;  /* Blue/Purple */
 }
 
 body {
@@ -74,8 +77,8 @@ body {
 }
 
 .btn-primary {
-  background: var(--ols-accent) !important;
-  border-color: var(--ols-accent) !important;
+  background: var(--ols-brand) !important;
+  border-color: var(--ols-brand) !important;
   font-weight: 500;
 }
 
@@ -85,7 +88,7 @@ body {
 }
 
 .btn-link {
-  color: var(--ols-accent) !important;
+  color: var(--ols-brand) !important;
   font-weight: 500;
 }
 
@@ -384,4 +387,189 @@ body {
 .card .dropdown,
 .card .dropdown-menu {
   display: none;
+}
+
+/* View Types */
+.list-view .resource-card {
+  transition: transform 0.2s ease-in-out;
+}
+
+.list-view .resource-card:hover {
+  transform: translateY(-1px);
+}
+
+.columns-view {
+  column-gap: 1rem;
+  column-fill: balance;
+}
+
+.columns-view .resource-card {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+}
+
+/* View Types */
+.list-view .resource-list-item {
+  transition: background-color 0.2s ease-in-out;
+  border-bottom: 1px solid var(--ols-border);
+  padding: 0.75rem 1rem;
+}
+
+.list-view .resource-list-item:nth-child(odd) {
+  background-color: white;
+}
+
+.list-view .resource-list-item:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+.list-view .resource-list-item:hover {
+  background-color: rgba(14, 165, 233, 0.05);
+}
+
+.list-view .resource-list-item:last-child {
+  border-bottom: none;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+.list-view .resource-list-item:first-child {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.list-view .btn-link {
+  opacity: 0.6;
+}
+
+.list-view .resource-list-item:hover .btn-link {
+  opacity: 1;
+}
+
+/* Grid View */
+.grid-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 340px));
+  gap: 1rem;
+  justify-content: flex-start;
+}
+
+/* List View */
+.list-view .resource-list-item {
+  transition: background-color 0.2s ease-in-out;
+  border-bottom: 1px solid var(--ols-border);
+}
+
+.list-view .resource-list-item:nth-child(odd) {
+  background-color: var(--ols-surface);
+}
+
+.list-view .resource-list-item:nth-child(even) {
+  background-color: var(--ols-background);
+}
+
+.list-view .resource-list-item:hover {
+  background-color: rgba(14, 165, 233, 0.05);
+}
+
+.list-view .resource-list-item:last-child {
+  border-bottom: none;
+}
+
+.list-view .btn-link {
+  opacity: 0.6;
+}
+
+.list-view .resource-list-item:hover .btn-link {
+  opacity: 1;
+}
+
+/* Kanban Board (Columns View) */
+.kanban-board {
+  padding: 1.5rem;
+  background: var(--ols-background);
+  min-height: calc(100vh - 64px);
+}
+
+.kanban-column {
+  background: var(--ols-background);
+  border-radius: 12px;
+}
+
+/* Category Headers */
+.category-header {
+  color: var(--ols-primary);
+}
+
+.category-header h3 {
+  color: var(--ols-primary);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.category-header small {
+  color: var(--ols-secondary);
+}
+
+/* List View */
+.list-view .resource-list-item h6 {
+  color: var(--ols-primary);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+/* Grid and Column Views */
+.card h6 {
+  color: var(--ols-primary);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+/* Header Layout */
+.header-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.header-logo {
+  height: 50px;
+  width: auto;
+}
+
+.header-search {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .header-logo {
+    height: 40px;
+  }
+  
+  .header-container {
+    padding: 0 1rem;
+  }
+  
+  .header-search {
+    max-width: 100%;
+  }
+} 
+
+/* Action Colors */
+.text-warning {
+  color: var(--ols-favorite) !important;
+}
+
+.text-success {
+  color: var(--ols-complete) !important;
+}
+
+/* Hover states for action buttons */
+.btn-link:hover .text-warning {
+  color: #DB2777 !important; /* Darker pink */
+}
+
+.btn-link:hover .text-success {
+  color: #4F46E5 !important; /* Darker blue/purple */
 } 

@@ -6,13 +6,16 @@ import type { Category, Resource, User, ResourceOrder } from '@prisma/client'
 import ResourceCard from './ResourceCard'
 import Debug from './Debug'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
-import { Container, Alert, Row, Col, Image } from 'react-bootstrap'
+import { Container, Alert, Row, Col, Image, ButtonGroup, Button } from 'react-bootstrap'
+import { Grid, List, Columns } from 'lucide-react'
 import CategoryFilter from './CategoryFilter'
 import { useSession } from 'next-auth/react'
 import AddResourceButton from './AddResourceButton'
 import SearchBar from './SearchBar'
 import AuthButton from './AuthButton'
+import Cookies from 'js-cookie'
 
+type ViewType = 'grid' | 'list' | 'columns'
 type FilterType = 'all' | 'favorites' | 'completed' | 'incomplete'
 type ActiveFilters = Set<Exclude<FilterType, 'all'>>
 
@@ -29,7 +32,16 @@ export default function CategoryList() {
   const [loading, setLoading] = useState(true)
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>(new Set())
   const [searchTerm, setSearchTerm] = useState('')
+  const [viewType, setViewType] = useState<ViewType>(() => {
+    const savedView = Cookies.get('preferredView')
+    return (savedView as ViewType) || 'grid'
+  })
   const { data: session } = useSession()
+
+  // Save view preference when it changes
+  useEffect(() => {
+    Cookies.set('preferredView', viewType, { expires: 365 })
+  }, [viewType])
 
   useEffect(() => {
     fetchData()
@@ -218,16 +230,16 @@ export default function CategoryList() {
   return (
     <div className="bg-dark text-white min-vh-100">
       <div className="py-3">
-        <Container>
+        <Container fluid className="header-container">
           <Row className="align-items-center mb-4">
             <Col xs="auto">
               <Image 
                 src="/logo-ols-2023.png" 
                 alt="Logo" 
-                height={40}
+                className="header-logo"
               />
             </Col>
-            <Col>
+            <Col className="header-search">
               <SearchBar 
                 searchTerm={searchTerm} 
                 onSearchChange={setSearchTerm} 
@@ -235,6 +247,29 @@ export default function CategoryList() {
               />
             </Col>
             <Col xs="auto" className="d-flex gap-3 align-items-center">
+              <ButtonGroup>
+                <Button 
+                  variant={viewType === 'grid' ? 'primary' : 'light'}
+                  onClick={() => setViewType('grid')}
+                  title="Grid view"
+                >
+                  <Grid size={16} />
+                </Button>
+                <Button 
+                  variant={viewType === 'list' ? 'primary' : 'light'}
+                  onClick={() => setViewType('list')}
+                  title="List view"
+                >
+                  <List size={16} />
+                </Button>
+                <Button 
+                  variant={viewType === 'columns' ? 'primary' : 'light'}
+                  onClick={() => setViewType('columns')}
+                  title="Columns view"
+                >
+                  <Columns size={16} />
+                </Button>
+              </ButtonGroup>
               <CategoryFilter 
                 activeFilters={activeFilters} 
                 onFilterChange={(filter: Exclude<FilterType, 'all'>) => {
@@ -255,61 +290,74 @@ export default function CategoryList() {
           </Row>
         </Container>
 
-        <div className="px-4">
+        <div className="container-fluid px-4">
           <DragDropContext onDragEnd={handleDragEnd}>
-            <div className="kanban-board d-flex gap-4 overflow-auto pb-4">
+            <div className={`
+              ${viewType === 'grid' ? 'pb-4' : ''}
+              ${viewType === 'list' ? 'pb-4' : ''}
+              ${viewType === 'columns' ? 'kanban-board d-flex gap-4 overflow-auto pb-4' : ''}
+            `}>
               {categories.map((category) => (
                 <div 
                   key={category.id} 
-                  className="kanban-column"
-                  style={{ minWidth: '340px', maxWidth: '340px' }}
+                  className={`
+                    ${viewType === 'grid' ? 'mb-4' : ''}
+                    ${viewType === 'list' ? 'mb-4' : ''}
+                    ${viewType === 'columns' ? 'kanban-column' : ''}
+                  `}
+                  style={viewType === 'columns' ? { minWidth: '340px', maxWidth: '340px' } : {}}
                 >
-                  <div className="bg-white rounded-3 h-100 d-flex flex-column shadow-sm">
-                    {category.defaultImage ? (
-                      <div 
-                        className="rounded-top-3" 
-                        style={{ 
-                          height: '50px',
-                          backgroundImage: `url(${category.defaultImage})`,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center'
-                        }}
-                      />
-                    ) : (
-                      <div className="p-3 border-bottom">
-                        <h3 className="h5 mb-1">{category.name}</h3>
-                        {category.description && (
-                          <small className="text-muted">{category.description}</small>
-                        )}
-                      </div>
-                    )}
+                  <div className={`
+                    bg-white rounded-3 shadow-sm
+                    ${viewType === 'list' ? 'list-view' : ''}
+                    ${viewType === 'columns' ? 'h-100 d-flex flex-column' : ''}
+                  `}>
+                    <div className="p-3 border-bottom category-header">
+                      <h3 className="h5 mb-0">{category.name}</h3>
+                      {category.description && (
+                        <small className="text-muted">{category.description}</small>
+                      )}
+                    </div>
+
                     <Droppable droppableId={category.id}>
                       {(provided) => (
                         <div
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="p-3 flex-grow-1"
-                          style={{ 
+                          className={`
+                            p-3
+                            ${viewType === 'columns' ? 'flex-grow-1' : ''}
+                          `}
+                          style={viewType === 'columns' ? { 
                             minHeight: '100px',
                             overflowY: 'auto',
                             maxHeight: 'calc(100vh - 200px)'
-                          }}
+                          } : {}}
                         >
-                          <div className="d-flex flex-column gap-3">
+                          <div className={`
+                            ${viewType === 'grid' ? 'grid-tiles' : ''}
+                            ${viewType === 'list' ? 'list-view table-striped' : ''}
+                            ${viewType === 'columns' ? 'd-flex flex-column gap-3' : ''}
+                          `}>
                             {filteredResources(category.id).map((resource, index) => (
-                              <ResourceCard
+                              <div 
                                 key={resource.id}
-                                resource={resource}
-                                onDelete={fetchData}
-                                index={index}
-                                isFavorite={resource.favoritedBy?.some(u => u.id === session?.user?.id)}
-                                isCompleted={resource.completedBy?.some(u => u.id === session?.user?.id)}
-                                onToggleFavorite={() => handleToggleFavorite(resource.id)}
-                                onToggleComplete={() => handleToggleComplete(resource.id)}
-                              />
+                                className={viewType === 'list' ? 'w-100' : ''}
+                              >
+                                <ResourceCard
+                                  resource={resource}
+                                  onDelete={fetchData}
+                                  index={index}
+                                  viewType={viewType}
+                                  isFavorite={resource.favoritedBy?.some(u => u.id === session?.user?.id)}
+                                  isCompleted={resource.completedBy?.some(u => u.id === session?.user?.id)}
+                                  onToggleFavorite={() => handleToggleFavorite(resource.id)}
+                                  onToggleComplete={() => handleToggleComplete(resource.id)}
+                                />
+                              </div>
                             ))}
+                            {provided.placeholder}
                           </div>
-                          {provided.placeholder}
                         </div>
                       )}
                     </Droppable>

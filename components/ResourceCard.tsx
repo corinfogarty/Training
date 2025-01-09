@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Resource, Category } from '@prisma/client'
 import { Card, Button, Dropdown, Modal } from 'react-bootstrap'
 import { MoreVertical, Star, CheckCircle, Trash2, Edit, ExternalLink, Calendar } from 'lucide-react'
@@ -8,12 +8,14 @@ import { Draggable } from '@hello-pangea/dnd'
 import EditResourceModal from './EditResourceModal'
 import ResourceLightbox from './ResourceLightbox'
 import { signIn, useSession } from 'next-auth/react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 interface ResourceCardProps {
   resource: Resource & {
     category?: Category | null
   }
   index: number
+  viewType: 'grid' | 'list' | 'columns'
   isFavorite?: boolean
   isCompleted?: boolean
   completedAt?: Date
@@ -25,6 +27,7 @@ interface ResourceCardProps {
 export default function ResourceCard({
   resource,
   index,
+  viewType,
   isFavorite: initialIsFavorite,
   isCompleted: initialIsCompleted,
   completedAt: initialCompletedAt,
@@ -32,6 +35,8 @@ export default function ResourceCard({
   onToggleFavorite,
   onToggleComplete
 }: ResourceCardProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const { data: session } = useSession()
   const [showEdit, setShowEdit] = useState(false)
   const [showLightbox, setShowLightbox] = useState(false)
@@ -44,6 +49,30 @@ export default function ResourceCard({
   const [loadingComplete, setLoadingComplete] = useState(false)
 
   const previewImage = resource.previewImage
+
+  // Check URL for resource ID on mount and when URL changes
+  useEffect(() => {
+    const resourceId = searchParams.get('resource')
+    if (resourceId === resource.id) {
+      setShowLightbox(true)
+    }
+  }, [searchParams, resource.id])
+
+  const handleOpenLightbox = () => {
+    // Update URL with resource ID
+    const newUrl = new URL(window.location.href)
+    newUrl.searchParams.set('resource', resource.id)
+    router.push(newUrl.pathname + newUrl.search)
+    setShowLightbox(true)
+  }
+
+  const handleCloseLightbox = () => {
+    // Remove resource ID from URL
+    const newUrl = new URL(window.location.href)
+    newUrl.searchParams.delete('resource')
+    router.push(newUrl.pathname + newUrl.search)
+    setShowLightbox(false)
+  }
 
   const handleDelete = async () => {
     try {
@@ -106,6 +135,100 @@ export default function ResourceCard({
     }
   }
 
+  if (viewType === 'list') {
+    return (
+      <Draggable draggableId={resource.id} index={index}>
+        {(provided) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+          >
+            <div 
+              className="d-flex align-items-center resource-list-item" 
+              onClick={handleOpenLightbox}
+              style={{ cursor: 'pointer' }}
+            >
+              <div 
+                className="me-3 rounded"
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  backgroundImage: previewImage ? `url(${previewImage})` : 'none',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundColor: '#f8f9fa',
+                  flexShrink: 0
+                }}
+              />
+              
+              <div className="flex-grow-1 d-flex align-items-center">
+                <h6 className="mb-0 me-auto">{resource.title}</h6>
+                <div className="d-flex align-items-center gap-2">
+                  <button 
+                    className="btn btn-link p-1" 
+                    onClick={handleToggleFavorite}
+                    title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                    disabled={loadingFavorite}
+                  >
+                    <Star 
+                      size={14} 
+                      className={`${isFavorite ? 'text-warning' : 'text-muted'} ${loadingFavorite ? 'opacity-50' : ''}`}
+                      fill={isFavorite ? 'currentColor' : 'none'}
+                    />
+                  </button>
+
+                  <button 
+                    className="btn btn-link p-1"
+                    onClick={handleToggleComplete}
+                    title={isCompleted ? 'Mark as incomplete' : 'Mark as complete'}
+                    disabled={loadingComplete}
+                  >
+                    <CheckCircle 
+                      size={14} 
+                      className={`${isCompleted ? 'text-success' : 'text-muted'} ${loadingComplete ? 'opacity-50' : ''}`}
+                      fill={isCompleted ? 'currentColor' : 'none'}
+                    />
+                  </button>
+
+                  <button 
+                    className="btn btn-link p-1"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowEdit(true);
+                    }}
+                    title="Edit resource"
+                  >
+                    <Edit size={14} className="text-muted" />
+                  </button>
+
+                  <button 
+                    className="btn btn-link p-1"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowDeleteConfirm(true);
+                    }}
+                    title="Delete resource"
+                  >
+                    <Trash2 size={14} className="text-danger" />
+                  </button>
+
+                  {completedAt && (
+                    <div className="small text-muted d-flex align-items-center ms-2" title="Completion date">
+                      <Calendar size={12} className="me-1" />
+                      {new Date(completedAt).toLocaleDateString()}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </Draggable>
+    )
+  }
+
+  // Grid and Columns view (original card layout)
   return (
     <>
       <Draggable draggableId={resource.id} index={index}>
@@ -119,7 +242,7 @@ export default function ResourceCard({
           >
             <Card 
               className="h-100 shadow-sm" 
-              onClick={() => setShowLightbox(true)}
+              onClick={handleOpenLightbox}
               style={{ cursor: 'pointer' }}
             >
               <div 
@@ -209,7 +332,7 @@ export default function ResourceCard({
       <ResourceLightbox
         resource={resource}
         show={showLightbox}
-        onHide={() => setShowLightbox(false)}
+        onHide={handleCloseLightbox}
       />
 
       <Modal show={showDeleteConfirm} onHide={() => setShowDeleteConfirm(false)}>

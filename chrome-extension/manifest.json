@@ -4,10 +4,11 @@
   "version": "1.0",
   "description": "Add resources to Training Hub directly from any webpage",
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "storage"
   ],
   "host_permissions": [
-    "https://training-hub-production.vercel.app/*"
+    "https://training.ols.to/*"
   ],
   "action": {
     "default_popup": "popup.html",

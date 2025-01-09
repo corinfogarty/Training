@@ -2,12 +2,22 @@
 
 import { useState, useEffect } from 'react'
 import { Table, Button, Form } from 'react-bootstrap'
-import { User } from '@prisma/client'
+import { User, Resource, CompletedResource } from '@prisma/client'
 import AdminRoute from '@/components/AdminRoute'
+import UserDetailsModal from '@/components/admin/UserDetailsModal'
+
+type UserWithDetails = User & {
+  completedResources: (CompletedResource & {
+    resource: Resource
+  })[]
+  favorites: Resource[]
+}
 
 export default function AdminUsers() {
-  const [users, setUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<UserWithDetails[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedUser, setSelectedUser] = useState<UserWithDetails | null>(null)
+  const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
     fetchUsers()
@@ -40,6 +50,11 @@ export default function AdminUsers() {
     }
   }
 
+  const handleShowDetails = (user: UserWithDetails) => {
+    setSelectedUser(user)
+    setShowModal(true)
+  }
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
@@ -66,7 +81,8 @@ export default function AdminUsers() {
               <th>Name</th>
               <th>Email</th>
               <th>Admin</th>
-              <th>Created</th>
+              <th>Last Login</th>
+              <th>Completed</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -82,8 +98,21 @@ export default function AdminUsers() {
                     onChange={(e) => toggleAdmin(user.id, e.target.checked)}
                   />
                 </td>
-                <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                 <td>
+                  {user.lastLogin
+                    ? new Date(user.lastLogin).toLocaleDateString()
+                    : 'Never'}
+                </td>
+                <td>{user.completedResources.length}</td>
+                <td>
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    className="me-2"
+                    onClick={() => handleShowDetails(user)}
+                  >
+                    Details
+                  </Button>
                   <Button 
                     variant="outline-danger" 
                     size="sm"
@@ -100,6 +129,15 @@ export default function AdminUsers() {
             ))}
           </tbody>
         </Table>
+
+        <UserDetailsModal
+          user={selectedUser}
+          show={showModal}
+          onHide={() => {
+            setShowModal(false)
+            setSelectedUser(null)
+          }}
+        />
       </div>
     </AdminRoute>
   )

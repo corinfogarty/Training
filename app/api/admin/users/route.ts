@@ -1,35 +1,70 @@
 import { NextResponse } from 'next/server'
+import { PrismaClient } from '@prisma/client'
 import { getServerSession } from 'next-auth'
-import { prisma } from '../../../../lib/prisma'
-import { authOptions } from '../../../../lib/auth'
+import { authOptions } from '@/lib/auth'
+
+const prisma = new PrismaClient()
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  const session = await getServerSession(authOptions)
-  
-  if (!session?.user?.isAdmin) {
-    return new NextResponse('Unauthorized', { status: 401 })
-  }
-
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.isAdmin) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const users = await prisma.user.findMany({
-      orderBy: { createdAt: 'desc' }
+      include: {
+        completedResources: {
+          include: {
+            resource: true
+          },
+          orderBy: {
+            completedAt: 'desc'
+          }
+        },
+        favorites: true
+      },
+      orderBy: {
+        lastLogin: 'desc'
+      }
     })
+
     return NextResponse.json(users)
   } catch (error) {
     console.error('Error fetching users:', error)
-    return new NextResponse('Internal Server Error', { status: 500 })
+    return NextResponse.json(
+      { error: 'Failed to fetch users' },
+      { status: 500 }
+    )
   }
 }
 
-export async function POST() {
-  const session = await getServerSession(authOptions)
-  
-  if (!session?.user?.isAdmin) {
-    return new NextResponse('Unauthorized', { status: 401 })
-  }
+export async function PATCH(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.isAdmin) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-  // TODO: Implement user creation if needed
-  return new NextResponse('Not implemented', { status: 501 })
+    const { isAdmin } = await request.json()
+    const userId = params.id
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { isAdmin }
+    })
+
+    return NextResponse.json(updatedUser)
+  } catch (error) {
+    console.error('Error updating user:', error)
+    return NextResponse.json(
+      { error: 'Failed to update user' },
+      { status: 500 }
+    )
+  }
 } 
