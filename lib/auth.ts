@@ -11,21 +11,18 @@ const logEvent = (event: string, data: any) => {
   console.log('\n')
 }
 
+// Get the base URL based on environment
+const getBaseUrl = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://training.ols.to'
+  }
+  return process.env.NEXTAUTH_URL || 'http://localhost:3000'
+}
+
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   adapter: PrismaAdapter(prisma) as Adapter,
   debug: true,
-  logger: {
-    error(code, ...message) {
-      logEvent(`Error: ${code}`, message)
-    },
-    warn(code, ...message) {
-      logEvent(`Warning: ${code}`, message)
-    },
-    debug(code, ...message) {
-      logEvent(`Debug: ${code}`, message)
-    }
-  },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -51,15 +48,18 @@ export const authOptions: NextAuthOptions = {
         profile,
         env: {
           NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-          NODE_ENV: process.env.NODE_ENV
+          NODE_ENV: process.env.NODE_ENV,
+          baseUrl: getBaseUrl()
         }
       })
       return true
     },
     async redirect({ url, baseUrl }) {
+      const envBaseUrl = getBaseUrl()
       logEvent('redirect callback', { 
         url, 
         baseUrl,
+        envBaseUrl,
         env: {
           NEXTAUTH_URL: process.env.NEXTAUTH_URL,
           NODE_ENV: process.env.NODE_ENV
@@ -74,7 +74,7 @@ export const authOptions: NextAuthOptions = {
 
       // For all other URLs in production, redirect to home
       if (process.env.NODE_ENV === 'production') {
-        const redirectUrl = 'https://training.ols.to'
+        const redirectUrl = envBaseUrl
         logEvent('production redirect', { redirectUrl })
         return redirectUrl
       }
@@ -85,8 +85,8 @@ export const authOptions: NextAuthOptions = {
         return url
       }
 
-      logEvent('fallback redirect', { baseUrl })
-      return baseUrl
+      logEvent('fallback redirect', { baseUrl: envBaseUrl })
+      return envBaseUrl
     },
     async jwt({ token, user, account, trigger }) {
       logEvent('jwt callback', { 
@@ -96,7 +96,8 @@ export const authOptions: NextAuthOptions = {
         account,
         env: {
           NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-          NODE_ENV: process.env.NODE_ENV
+          NODE_ENV: process.env.NODE_ENV,
+          baseUrl: getBaseUrl()
         }
       })
       
@@ -122,7 +123,8 @@ export const authOptions: NextAuthOptions = {
         token,
         env: {
           NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-          NODE_ENV: process.env.NODE_ENV
+          NODE_ENV: process.env.NODE_ENV,
+          baseUrl: getBaseUrl()
         }
       })
       
