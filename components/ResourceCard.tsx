@@ -37,7 +37,6 @@ export default function ResourceCard({
   const [showLightbox, setShowLightbox] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
-  const [dropdownOpen, setDropdownOpen] = useState(false)
 
   const previewImage = resource.previewImage
 
@@ -75,11 +74,7 @@ export default function ResourceCard({
             <Card 
               className="h-100 shadow-sm" 
               onClick={() => setShowLightbox(true)}
-              style={{ 
-                cursor: 'pointer',
-                position: 'relative',
-                zIndex: dropdownOpen ? 1000 : 'auto'
-              }}
+              style={{ cursor: 'pointer' }}
             >
               <div 
                 className="card-img-top"
@@ -94,10 +89,7 @@ export default function ResourceCard({
               <Card.Body className="p-3">
                 <div className="d-flex justify-content-between align-items-start">
                   <h6 className="mb-0 fw-semibold">{resource.title}</h6>
-                  <Dropdown 
-                    onClick={e => e.stopPropagation()}
-                    onToggle={(isOpen) => setDropdownOpen(isOpen)}
-                  >
+                  <Dropdown onClick={e => e.stopPropagation()}>
                     <Dropdown.Toggle variant="link" className="p-0 text-muted">
                       <MoreVertical size={16} />
                     </Dropdown.Toggle>

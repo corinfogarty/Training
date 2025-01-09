@@ -11,9 +11,9 @@ async function main() {
   for (const resource of resources) {
     if (resource.additionalUrls && resource.additionalUrls.length > 0) {
       // Clean up URLs by removing escaped quotes and duplicates
-      const cleanUrls = [...new Set(
+      const cleanUrls = Array.from(new Set(
         resource.additionalUrls.map(url => url.replace(/\\"/g, '').trim())
-      )]
+      ))
       
       // Only update if we cleaned any URLs
       if (JSON.stringify(cleanUrls) !== JSON.stringify(resource.additionalUrls)) {

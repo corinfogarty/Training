@@ -5,7 +5,12 @@ import { ResourceType, Category } from '@prisma/client'
 import { Button, Modal, Form, Alert } from 'react-bootstrap'
 import { Editor } from '@tinymce/tinymce-react'
 
-export default function AddResourceButton() {
+interface AddResourceButtonProps {
+  categoryId?: string
+  onResourceAdded?: () => void
+}
+
+export default function AddResourceButton({ categoryId, onResourceAdded }: AddResourceButtonProps) {
   const [show, setShow] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -17,7 +22,7 @@ export default function AddResourceButton() {
     description: '',
     url: '',
     type: '' as ResourceType | '',
-    categoryId: ''
+    categoryId: categoryId || ''
   })
 
   useEffect(() => {
@@ -38,6 +43,10 @@ export default function AddResourceButton() {
       if (!response.ok) throw new Error('Failed to fetch categories')
       const data = await response.json()
       setCategories(data)
+      if (categoryId) {
+        const category = data.find((c: Category) => c.id === categoryId)
+        setSelectedCategory(category || null)
+      }
     } catch (err) {
       setError('Failed to load categories')
     }
@@ -96,7 +105,9 @@ export default function AddResourceButton() {
       }
 
       setShow(false)
-      window.location.reload()
+      if (onResourceAdded) {
+        onResourceAdded()
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -215,24 +226,26 @@ export default function AddResourceButton() {
               </Form.Select>
             </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label htmlFor="categoryId">Category</Form.Label>
-              <Form.Select
-                id="categoryId"
-                value={formData.categoryId}
-                onChange={(e) => handleCategoryChange(e.target.value)}
-                required
-                aria-label="Category"
-                title="Select category"
-              >
-                <option value="">Select a category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
+            {!categoryId && (
+              <Form.Group className="mb-3">
+                <Form.Label htmlFor="categoryId">Category</Form.Label>
+                <Form.Select
+                  id="categoryId"
+                  value={formData.categoryId}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  required
+                  aria-label="Category"
+                  title="Select category"
+                >
+                  <option value="">Select a category</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            )}
 
             <div className="d-flex justify-content-end gap-2">
               <Button 

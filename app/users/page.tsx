@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Container, Table, Button } from 'react-bootstrap'
 import { Calendar, Clock, CheckCircle, Eye } from 'lucide-react'
-import UserActivityModal from '@/components/UserActivityModal'
+import UserActivityModal from '../../components/UserActivityModal'
 import { useSession } from 'next-auth/react'
 
 interface User {
@@ -22,7 +22,22 @@ interface User {
 export default function UsersPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [users, setUsers] = useState<User[]>([])
   const { data: session } = useSession()
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch('/api/users')
+        const data = await response.json()
+        setUsers(data)
+      } catch (error) {
+        console.error('Error fetching users:', error)
+      }
+    }
+
+    fetchUsers()
+  }, [])
 
   const handleViewActivity = (user: User) => {
     setSelectedUser(user)

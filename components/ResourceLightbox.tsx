@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { Resource, Category } from '@prisma/client'
 import { Modal, Button, Badge } from 'react-bootstrap'
 import { ExternalLink, Calendar, Clock, Link as LinkIcon, Edit } from 'lucide-react'
@@ -8,7 +9,7 @@ import EditResourceModal from './EditResourceModal'
 
 interface Props {
   resource: Resource & {
-    category: Category
+    category?: Category | null
   }
   show: boolean
   onHide: () => void

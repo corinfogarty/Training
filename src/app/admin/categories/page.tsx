@@ -1,7 +1,8 @@
-import { DataTable } from "@/components/ui/data-table"
+import React from 'react'
+import { DataTable } from "../../../../components/ui/data-table"
 import { columns } from "./columns"
-import { getAllCategories } from "@/lib/actions/category"
-import { Button } from "@/components/ui/button"
+import { getAllCategories } from "../../../../lib/actions/category"
+import { Button } from "react-bootstrap"
 import { Plus } from "lucide-react"
 
 export default async function AdminCategoriesPage() {
