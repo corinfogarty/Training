@@ -14,7 +14,7 @@ const logEvent = (event: string, data: any) => {
 // Get the base URL based on environment
 const getBaseUrl = () => {
   if (process.env.NODE_ENV === 'production') {
-    return 'https://training.ols.to'
+    return process.env.NEXTAUTH_URL || 'https://training.ols.to'
   }
   return process.env.NEXTAUTH_URL || 'http://localhost:3000'
 }
@@ -101,18 +101,17 @@ export const authOptions: NextAuthOptions = {
         }
       })
       
-      if (trigger === 'signIn' || trigger === 'signUp') {
-        try {
-          const dbUser = await prisma.user.findUnique({
-            where: { email: token.email! }
-          })
-          token.isAdmin = dbUser?.isAdmin || false
-          token.userId = dbUser?.id
-          logEvent('user lookup success', { dbUser })
-        } catch (e) {
-          logEvent('user lookup error', { error: e })
-          token.isAdmin = false
-        }
+      // Always check admin status on token refresh
+      try {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: token.email! }
+        })
+        token.isAdmin = dbUser?.isAdmin || false
+        token.userId = dbUser?.id
+        logEvent('user lookup success', { dbUser })
+      } catch (e) {
+        logEvent('user lookup error', { error: e })
+        token.isAdmin = false
       }
       
       return token

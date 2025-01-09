@@ -84,7 +84,8 @@ export default function AddResourceButton({ categoryId, onResourceAdded }: AddRe
         url: formData.url,
         type: formData.type as ResourceType,
         categoryId: formData.categoryId,
-        previewImage: previewImage || selectedCategory?.defaultImage || ''
+        previewImage: previewImage || selectedCategory?.defaultImage || '',
+        additionalUrls: []
       }
 
       if (!data.title || !data.description || !data.url || !data.type || !data.categoryId) {
@@ -99,9 +100,10 @@ export default function AddResourceButton({ categoryId, onResourceAdded }: AddRe
         body: JSON.stringify(data)
       })
 
+      const responseData = await response.json()
+
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to add resource')
+        throw new Error(responseData.error || 'Failed to add resource')
       }
 
       setShow(false)
@@ -109,6 +111,7 @@ export default function AddResourceButton({ categoryId, onResourceAdded }: AddRe
         onResourceAdded()
       }
     } catch (err) {
+      console.error('Error creating resource:', err)
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setLoading(false)

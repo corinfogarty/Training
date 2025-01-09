@@ -3,7 +3,7 @@ const config = {
     apiUrl: 'http://localhost:3000'
   },
   production: {
-    apiUrl: 'https://training.ols.design'  // Replace with your actual production URL
+    apiUrl: 'https://training-hub-production.vercel.app'
   }
 };
 

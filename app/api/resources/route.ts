@@ -54,14 +54,29 @@ export async function POST(request: Request) {
     // If no preview image is provided, try to use category's default image
     const previewImage = data.previewImage || category.defaultImage || null
 
+    // Parse description if it's already a JSON string
+    let description = data.description
+    try {
+      JSON.parse(data.description)
+    } catch {
+      // If it's not valid JSON, stringify it
+      description = JSON.stringify({
+        title: data.title,
+        description: data.description,
+        credentials: {},
+        courseContent: []
+      })
+    }
+
     const resource = await prisma.resource.create({ 
       data: {
         title: data.title,
-        description: data.description,
+        description,
         url: data.url,
         type: data.type,
         categoryId: data.categoryId,
-        previewImage
+        previewImage,
+        additionalUrls: data.additionalUrls || [] // Add default empty array
       } 
     })
 

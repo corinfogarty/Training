@@ -21,8 +21,15 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => {
-        console.log('Authorization check:', { token })
+      authorized: ({ token, req }) => {
+        console.log('Authorization check:', { token, path: req.nextUrl.pathname })
+        
+        // For admin routes, require admin status
+        if (req.nextUrl.pathname.startsWith('/admin')) {
+          return !!token?.isAdmin
+        }
+        
+        // For other routes, just require authentication
         return !!token
       }
     }
