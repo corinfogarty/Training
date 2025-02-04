@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 interface FormattedContent {
   title: string
   description: string
-  credentials: {
+  credentials?: {
     username?: string
     password?: string
   }
@@ -73,7 +73,33 @@ async function convertResources() {
       console.log(`\nConverting: ${resource.title}`)
       
       try {
-        const content: FormattedContent = JSON.parse(resource.description)
+        let content: FormattedContent
+        
+        try {
+          // Try to parse as JSON first
+          content = JSON.parse(resource.description)
+        } catch {
+          // If not JSON, treat as plain text
+          const lines = resource.description.split('\n')
+          const urlMatch = lines.find(line => line.trim().startsWith('http'))
+          const credentialsLine = lines.find(line => line.toLowerCase().includes('username:') || line.toLowerCase().includes('pass:'))
+          
+          let credentials = undefined
+          if (credentialsLine) {
+            const username = credentialsLine.match(/username:\s*([^\s]+)/i)?.[1]
+            const password = credentialsLine.match(/pass(?:word)?:\s*([^\s]+)/i)?.[1]
+            if (username || password) {
+              credentials = { username, password }
+            }
+          }
+
+          content = {
+            title: resource.title,
+            description: resource.description,
+            url: urlMatch,
+            credentials
+          }
+        }
         
         // Convert the plain text description to rich text
         const richTextDescription = convertToRichText(content.description)
@@ -100,7 +126,7 @@ async function convertResources() {
 
     console.log('\nConversion complete!')
   } catch (error) {
-    console.error('Error converting resources:', error)
+    console.error('Error:', error)
   } finally {
     await prisma.$disconnect()
   }

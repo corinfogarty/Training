@@ -219,31 +219,41 @@ body {
 .resource-modal .modal-content {
   border: none;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
 }
 
 .resource-modal .modal-header {
+  padding: 1.5rem;
   padding-bottom: 0;
+  border-bottom: none;
 }
 
 .resource-modal .modal-body {
   padding: 1.5rem;
 }
 
+.resource-modal .modal-title {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
 .resource-modal code {
-  background: #fff;
+  background: #f8f9fa;
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
   font-size: 0.9em;
+  color: #e83e8c;
 }
 
 .resource-modal h6 {
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
 }
 
 .resource-modal .bg-light {
-  background-color: rgba(0, 0, 0, 0.03) !important;
+  background-color: #f8f9fa !important;
 }
 
 .resource-modal a {
@@ -252,19 +262,22 @@ body {
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: all 0.2s ease;
 }
 
 .resource-modal a:hover {
   color: var(--ols-accent);
-  text-decoration: underline;
+  text-decoration: none;
+  background-color: #f1f5f9;
 }
 
 .resource-modal .text-truncate {
-  max-width: calc(100% - 24px); /* Account for icon */
+  max-width: calc(100% - 24px);
 }
 
 .resource-modal .formatted-content {
   line-height: 1.6;
+  font-size: 0.95rem;
 }
 
 .resource-modal .formatted-content p {
@@ -279,6 +292,8 @@ body {
 .resource-modal .formatted-content h6 {
   margin-top: 1.5rem;
   margin-bottom: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
 }
 
 .resource-modal .formatted-content ul,
@@ -290,10 +305,37 @@ body {
 .resource-modal .formatted-content a {
   color: var(--ols-accent);
   text-decoration: none;
+  background: none;
 }
 
 .resource-modal .formatted-content a:hover {
   text-decoration: underline;
+  background: none;
+}
+
+.resource-modal .badge {
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  padding: 0.5em 0.75em;
+}
+
+.resource-modal .btn {
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.resource-modal .btn:hover {
+  transform: translateY(-1px);
+}
+
+.resource-modal .btn-link {
+  padding: 0.25rem 0.5rem;
+}
+
+.resource-modal .btn-link:hover {
+  background-color: #f8f9fa;
+  transform: none;
 }
 
 .user-table th {

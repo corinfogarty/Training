@@ -1,73 +1,93 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { ContentType } from '@prisma/client'
+
+export const dynamic = 'force-dynamic'
 
 export async function PUT(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const { title, url, type, description, previewImage } = await request.json()
+    const data = await request.json()
+
+    // Validate required fields
+    if (!data.title || !data.description || !data.url || !data.categoryId || !data.contentType) {
+      return NextResponse.json(
+        { error: 'All fields are required' },
+        { status: 400 }
+      )
+    }
+
+    // Validate content type
+    if (!Object.values(ContentType).includes(data.contentType)) {
+      return NextResponse.json(
+        { error: 'Invalid content type' },
+        { status: 400 }
+      )
+    }
+
+    // Validate category exists
+    const category = await prisma.category.findUnique({
+      where: { id: data.categoryId }
+    })
+
+    if (!category) {
+      return NextResponse.json(
+        { error: 'Category not found' },
+        { status: 404 }
+      )
+    }
 
     const resource = await prisma.resource.update({
       where: { id: params.id },
       data: {
-        title,
-        url,
-        type,
-        description,
-        previewImage
+        title: data.title,
+        description: data.description,
+        url: data.url,
+        contentType: data.contentType,
+        categoryId: data.categoryId,
+        previewImage: data.previewImage || null,
+        additionalUrls: data.additionalUrls || []
       }
     })
 
     return NextResponse.json(resource)
-  } catch (error) {
-    console.error('Error updating resource:', error)
-    return NextResponse.json(
-      { error: 'Failed to update resource' },
-      { status: 500 }
-    )
+  } catch (err) {
+    console.error('Error updating resource:', err)
+    const error = err instanceof Error ? err.message : 'Failed to update resource'
+    return NextResponse.json({ error }, { status: 500 })
   }
 }
 
-export async function GET(
+export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const session = await getServerSession(authOptions)
-  
-  if (!session?.user) {
-    return new NextResponse('Unauthorized', { status: 401 })
-  }
-
   try {
-    const resource = await prisma.resource.findUnique({
-      where: { id: params.id },
-      include: {
-        category: true,
-        favoritedBy: {
-          where: { id: session.user.id },
-          select: { id: true }
-        },
-        completedBy: {
-          where: { id: session.user.id },
-          select: { id: true }
-        }
-      }
-    })
-
-    if (!resource) {
-      return new NextResponse('Resource not found', { status: 404 })
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.isAdmin) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    return NextResponse.json({
-      ...resource,
-      isFavorite: resource.favoritedBy.length > 0,
-      isCompleted: resource.completedBy.length > 0
-    })
+    // Delete related records first
+    await prisma.$transaction([
+      prisma.resourceOrder.deleteMany({
+        where: { resourceId: params.id }
+      }),
+      prisma.resource.delete({
+        where: { id: params.id }
+      })
+    ])
+
+    return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error fetching resource:', error)
-    return new NextResponse('Internal Server Error', { status: 500 })
+    console.error('Error deleting resource:', error)
+    return NextResponse.json(
+      { error: 'Failed to delete resource' },
+      { status: 500 }
+    )
   }
 } 

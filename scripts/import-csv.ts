@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, ContentType } from '@prisma/client'
 import fs from 'fs'
 import { parse } from 'csv-parse'
 import path from 'path'
@@ -26,41 +26,34 @@ interface CSVRecord {
   'TICKET STATUS': string
 }
 
-type ResourceType = 'VIDEO' | 'DOCUMENT' | 'IMAGE' | 'LINK'
-
-function determineResourceType(record: CSVRecord): ResourceType {
-  const type = record.Tags.toLowerCase()
-  if (type.includes('video')) return 'VIDEO'
-  if (type.includes('document')) return 'DOCUMENT'
-  if (type.includes('image')) return 'IMAGE'
-  return 'LINK'
+function determineContentType(record: CSVRecord): ContentType {
+  const tags = record.Tags?.toLowerCase() || ''
+  if (tags.includes('shortcut')) return 'Shortcut'
+  if (tags.includes('resource')) return 'Resource'
+  return 'Training'
 }
 
-function getPreviewImage(url: string, type: ResourceType): string | null {
+function getPreviewImage(url: string): string | null {
   if (!url || url === '#pending' || url === 'NEW') return null
 
-  if (type === 'VIDEO') {
-    // YouTube
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      const videoId = url.match(/(?:v=|youtu\.be\/)([\w-]{11})(?:\?|$|&)/)?.[1]
-      if (videoId) {
-        return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-      }
-    }
-    // Vimeo
-    if (url.includes('vimeo.com')) {
-      const videoId = url.match(/vimeo\.com\/(\d+)/)?.[1]
-      if (videoId) {
-        return `https://vimeo.com/api/v2/video/${videoId}/thumbnail_large.jpg`
-      }
+  if (url.includes('youtube.com') || url.includes('youtu.be')) {
+    const videoId = url.match(/(?:v=|youtu\.be\/)([\w-]{11})(?:\?|$|&)/)?.[1]
+    if (videoId) {
+      return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
     }
   }
 
-  if (type === 'IMAGE' && url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+  if (url.includes('vimeo.com')) {
+    const videoId = url.match(/vimeo\.com\/(\d+)/)?.[1]
+    if (videoId) {
+      return `https://vimeo.com/api/v2/video/${videoId}/thumbnail_large.jpg`
+    }
+  }
+
+  if (url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
     return url
   }
 
-  // For documents, could add logic for PDF thumbnails, Google Doc previews, etc.
   return null
 }
 
@@ -109,14 +102,14 @@ async function importCSV() {
         .map((url: string) => cleanUrl(url))
         .filter((url: string) => url !== '#pending')
 
-      const type = determineResourceType(record)
+      const type = determineContentType(record)
       const mainUrl = cleanUrl(record.NEW)
 
       // Try to find a preview image from any valid URL
       const previewImage = 
-        getPreviewImage(mainUrl, type) || 
+        getPreviewImage(mainUrl) || 
         additionalUrls
-          .map((url: string) => getPreviewImage(url, type))
+          .map((url: string) => getPreviewImage(url))
           .find((img: string | null): img is string => img !== null) ||
         null
 
@@ -127,7 +120,7 @@ async function importCSV() {
           description: record.Notes || 'No description provided',
           url: mainUrl,
           additionalUrls,
-          type,
+          contentType: type,
           previewImage,
           categoryId: category.id,
           createdAt: new Date(record['Created At']),

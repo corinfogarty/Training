@@ -2,13 +2,18 @@
 const nextConfig = {
   images: {
     domains: [
-      'i.ytimg.com',
       'img.youtube.com',
-      'lh3.googleusercontent.com',
-      'avatars.githubusercontent.com',
-      'creative.ols.design',
-      'download.blender.org'
-    ]
+      'i.vimeocdn.com', 
+      'training.ols.to',
+      'localhost',
+      'static.skillshare.com',
+      'www.cgfasttrack.com',
+      'cdn.sanity.io',
+      'ssl.gstatic.com',
+      'download.blender.org',
+      'cdn.motiondesign.school',
+      'i.ytimg.com'
+    ],
   }
 }
 

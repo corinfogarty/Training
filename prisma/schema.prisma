@@ -25,7 +25,7 @@ model Resource {
   description String
   url         String
   additionalUrls String[]
-  type        ResourceType
+  contentType  ContentType @default(Training)
   previewImage String?
   category    Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId  String
@@ -37,11 +37,10 @@ model Resource {
   completions CompletedResource[]
 }
 
-enum ResourceType {
-  VIDEO
-  IMAGE
-  DOCUMENT
-  LINK
+enum ContentType {
+  Resource
+  Training
+  Shortcut
 }
 
 model User {

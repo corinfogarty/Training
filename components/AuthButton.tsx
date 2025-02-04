@@ -5,7 +5,11 @@ import { Button, Dropdown } from 'react-bootstrap'
 import { LogIn, LogOut, User, Settings } from 'lucide-react'
 import Link from 'next/link'
 
-export default function AuthButton() {
+interface AuthButtonProps {
+  onAdminClick?: () => void
+}
+
+export default function AuthButton({ onAdminClick }: AuthButtonProps) {
   const { data: session, status } = useSession()
 
   if (status === 'loading') {
@@ -20,18 +24,31 @@ export default function AuthButton() {
   if (session) {
     return (
       <Dropdown align="end">
-        <Dropdown.Toggle variant="outline-light" id="user-menu">
-          <User size={18} className="me-2" />
-          {session.user?.name || session.user?.email}
+        <Dropdown.Toggle variant="outline-secondary" className="d-flex align-items-center gap-2">
+          {session.user?.image ? (
+            <img
+              src={session.user.image}
+              alt={session.user.name || ''}
+              className="rounded-circle"
+              width={24}
+              height={24}
+              style={{ objectFit: 'cover' }}
+            />
+          ) : (
+            <User size={16} />
+          )}
+          {session.user?.name || 'User'}
         </Dropdown.Toggle>
+
         <Dropdown.Menu>
           {session.user?.isAdmin && (
-            <Link href="/admin/users" className="dropdown-item">
-              <Settings size={16} className="me-2" />
-              Admin Panel
-            </Link>
+            <>
+              <Dropdown.Item onClick={onAdminClick}>
+                Admin Dashboard
+              </Dropdown.Item>
+              <Dropdown.Divider />
+            </>
           )}
-          {session.user?.isAdmin && <Dropdown.Divider />}
           <Dropdown.Item onClick={() => signOut()}>
             <LogOut size={16} className="me-2" />
             Sign Out

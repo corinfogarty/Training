@@ -5,19 +5,90 @@ import { PrismaClient } from '@prisma/client'
 import { createHash } from 'crypto'
 
 const prisma = new PrismaClient()
-const ASSETS_DIR = path.join(process.cwd(), 'public', 'assets')
+const ASSETS_DIR = path.join(process.cwd(), 'public', 'assets', 'previews')
+const FALLBACK_DIR = path.join(process.cwd(), 'public', 'images', 'fallbacks')
 
-async function ensureAssetsDir() {
+// Fallback images for sites that block direct access
+const FALLBACK_IMAGES: Record<string, string> = {
+  'skillshare.com': 'skillshare.png',
+  'cgfasttrack.com': 'cgfasttrack.png',
+  'figma.com': 'figma.png',
+  'motiondesign.school': 'mds.png',
+  'adobe.com': 'adobe.png',
+  'blender.org': 'blender.png',
+  'photoshop.com': 'photoshop.png',
+  'aftereffects.com': 'aftereffects.png',
+  'illustrator.com': 'illustrator.png',
+  'indesign.com': 'indesign.png',
+  'cdn.sanity.io': 'default.png'
+}
+
+// Category-based fallback images
+const CATEGORY_FALLBACKS: Record<string, string> = {
+  'BLENDER': 'blender.png',
+  'PHOTOSHOP': 'photoshop.png',
+  'AFTER EFFECTS': 'aftereffects.png',
+  'ILLUSTRATOR': 'illustrator.png',
+  'INDESIGN': 'indesign.png',
+  'FIGMA': 'figma.png'
+}
+
+async function ensureDirectories() {
   try {
     await fs.access(ASSETS_DIR)
   } catch {
     await fs.mkdir(ASSETS_DIR, { recursive: true })
   }
+  try {
+    await fs.access(FALLBACK_DIR)
+  } catch {
+    await fs.mkdir(FALLBACK_DIR, { recursive: true })
+  }
 }
 
-async function downloadImage(url: string, filename: string): Promise<string> {
+async function copyFallbackImage(fallbackImage: string, resourceId: string): Promise<string> {
+  if (!fallbackImage) return ''
+
+  const sourcePath = path.join(FALLBACK_DIR, fallbackImage)
+  const filename = `resource-${resourceId}-preview.${fallbackImage.split('.').pop()}`
+  const targetPath = path.join(ASSETS_DIR, filename)
+
   try {
-    // First request to get the redirect URL
+    await fs.copyFile(sourcePath, targetPath)
+    return `/assets/previews/${filename}`
+  } catch (error) {
+    console.error(`Failed to copy fallback image ${fallbackImage}:`, error)
+    return ''
+  }
+}
+
+async function downloadImage(url: string, filename: string, category?: string): Promise<string> {
+  try {
+    // Check if we should use a fallback image based on URL
+    const urlObj = new URL(url)
+    const hostname = urlObj.hostname.toLowerCase()
+    for (const [domain, fallbackImage] of Object.entries(FALLBACK_IMAGES)) {
+      if (hostname.includes(domain)) {
+        console.log(`Using fallback image for ${domain}`)
+        return await copyFallbackImage(fallbackImage, filename.split('-')[1])
+      }
+    }
+
+    // Handle YouTube thumbnail URLs directly
+    if (hostname.includes('img.youtube.com') || hostname.includes('i.ytimg.com')) {
+      const imageResponse = await fetch(url)
+      if (!imageResponse.ok) {
+        throw new Error(`Failed to fetch YouTube image: ${imageResponse.statusText}`)
+      }
+      const buffer = await imageResponse.buffer()
+      const ext = 'jpg'
+      const finalFilename = `${filename}.${ext}`
+      const localPath = path.join(ASSETS_DIR, finalFilename)
+      await fs.writeFile(localPath, buffer)
+      return `/assets/previews/${finalFilename}`
+    }
+
+    // First request to get potential redirects
     const initialResponse = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -25,34 +96,17 @@ async function downloadImage(url: string, filename: string): Promise<string> {
         'Accept-Language': 'en-US,en;q=0.9',
         'Cache-Control': 'no-cache',
         'Pragma': 'no-cache',
-        'Referer': 'https://app.asana.com/',
-        'Cookie': process.env.ASANA_COOKIE || ''
+        'Referer': 'https://www.google.com/'
       },
-      redirect: 'manual'
+      redirect: 'follow'
     })
 
-    // Get the S3 URL from the redirect
-    const s3Url = initialResponse.headers.get('location')
-    if (!s3Url) {
-      throw new Error('No redirect URL found')
-    }
-
-    console.log('Following redirect to:', s3Url)
-
-    // Now fetch the actual image from S3
-    const imageResponse = await fetch(s3Url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8'
-      }
-    })
-
-    if (!imageResponse.ok) {
-      throw new Error(`Failed to fetch image: ${imageResponse.statusText} (${imageResponse.status})`)
+    if (!initialResponse.ok) {
+      throw new Error(`Failed to fetch image: ${initialResponse.statusText}`)
     }
 
     // Verify content type
-    const contentType = imageResponse.headers.get('content-type')
+    const contentType = initialResponse.headers.get('content-type')
     if (!contentType?.startsWith('image/')) {
       throw new Error(`Invalid content type: ${contentType}`)
     }
@@ -62,7 +116,7 @@ async function downloadImage(url: string, filename: string): Promise<string> {
     const finalFilename = `${filename}.${ext}`
 
     // Get the binary data
-    const buffer = await imageResponse.buffer()
+    const buffer = await initialResponse.buffer()
 
     // Verify file size
     if (buffer.length < 1000) { // Less than 1KB is probably not a valid image
@@ -84,78 +138,107 @@ async function downloadImage(url: string, filename: string): Promise<string> {
       throw new Error('File size mismatch after writing')
     }
 
-    return `/assets/${finalFilename}`
+    return `/assets/previews/${finalFilename}`
   } catch (error) {
     console.error(`Failed to download image from ${url}:`, error)
-    return '' // Return empty string if download fails
+    
+    // Try category fallback if available
+    if (category && CATEGORY_FALLBACKS[category]) {
+      console.log(`Using category fallback for ${category}`)
+      return await copyFallbackImage(CATEGORY_FALLBACKS[category], filename.split('-')[1])
+    }
+    
+    // Use default fallback as last resort
+    console.log('Using default fallback image')
+    return await copyFallbackImage('default.png', filename.split('-')[1])
   }
-}
-
-async function findAsanaUrls(text: string): Promise<string[]> {
-  const asanaUrlRegex = /https:\/\/app\.asana\.com\/app\/asana\/-\/get_asset\?[^\s"')]+/g
-  return text.match(asanaUrlRegex) || []
 }
 
 async function downloadAssets() {
   try {
-    await ensureAssetsDir()
+    await ensureDirectories()
 
+    // First, check for resources with external URLs
     const resources = await prisma.resource.findMany({
       where: {
-        description: {
-          contains: 'get_asset?asset_id='
+        OR: [
+          { previewImage: { startsWith: 'http' } },
+          { previewImage: null },
+          { previewImage: '' }
+        ]
+      },
+      include: {
+        category: true
+      }
+    })
+
+    console.log(`Found ${resources.length} resources that need preview images`)
+
+    for (const resource of resources) {
+      console.log(`\nProcessing "${resource.title}"`)
+      
+      let previewImage = null
+      const filename = `resource-${resource.id}-preview`
+
+      if (resource.previewImage?.startsWith('http')) {
+        console.log(`URL: ${resource.previewImage}`)
+        previewImage = await downloadImage(resource.previewImage, filename, resource.category?.name)
+      } else if (!resource.previewImage && resource.category?.name) {
+        // Try category fallback for resources without preview image
+        console.log('No preview image, using category fallback')
+        if (CATEGORY_FALLBACKS[resource.category.name]) {
+          previewImage = await copyFallbackImage(CATEGORY_FALLBACKS[resource.category.name], resource.id)
+        }
+      }
+
+      // Use default fallback if nothing else worked
+      if (!previewImage) {
+        console.log('Using default fallback')
+        previewImage = await copyFallbackImage('default.png', resource.id)
+      }
+
+      if (previewImage) {
+        await prisma.resource.update({
+          where: { id: resource.id },
+          data: { previewImage }
+        })
+        console.log('✓ Updated preview image path')
+      }
+    }
+
+    // Now check for any resources with missing local files
+    const localResources = await prisma.resource.findMany({
+      where: {
+        previewImage: {
+          startsWith: '/assets/previews/'
         }
       }
     })
 
-    console.log(`Found ${resources.length} resources with Asana assets`)
+    console.log(`\nChecking ${localResources.length} resources with local preview images`)
 
-    for (const resource of resources) {
-      const asanaUrls = await findAsanaUrls(resource.description)
-      
-      if (asanaUrls.length === 0) continue
+    for (const resource of localResources) {
+      if (!resource.previewImage) continue
 
-      console.log(`\nProcessing ${resource.title} (${asanaUrls.length} assets)`)
-
-      let description = resource.description
-
-      for (let i = 0; i < asanaUrls.length; i++) {
-        const asanaUrl = asanaUrls[i]
-        console.log(`\nDownloading asset ${i + 1} of ${asanaUrls.length}`)
-        console.log(`URL: ${asanaUrl}`)
-
-        const assetId = asanaUrl.match(/asset_id=(\d+)/)?.[1]
-        if (!assetId) continue
-
-        const filename = `resource-${resource.id}-asset-${assetId}.png`
-        const localPath = await downloadImage(asanaUrl, filename)
-
-        if (localPath) {
-          // Replace the Asana URL with the local path in the description
-          description = description.replace(asanaUrl, localPath)
-
-          // Set as preview image if none exists
-          if (!resource.previewImage) {
-            await prisma.resource.update({
-              where: { id: resource.id },
-              data: { previewImage: localPath }
-            })
-            console.log('✓ Set as preview image')
-          }
-        }
+      const localPath = path.join(process.cwd(), 'public', resource.previewImage)
+      try {
+        await fs.access(localPath)
+      } catch {
+        console.log(`\nMissing local file for "${resource.title}"`)
+        console.log(`Path: ${localPath}`)
+        
+        // Reset the preview image to trigger re-download
+        await prisma.resource.update({
+          where: { id: resource.id },
+          data: { previewImage: null }
+        })
+        console.log('Reset preview image path to trigger re-download')
       }
-
-      // Update the resource with the modified description
-      await prisma.resource.update({
-        where: { id: resource.id },
-        data: { description }
-      })
-      console.log('✓ Updated resource description')
     }
 
-    console.log('\nAsset download complete!')
+    console.log('\nPreview image download complete!')
   } catch (error) {
-    console.error('Error during asset download:', error)
+    console.error('Error during preview image download:', error)
   } finally {
     await prisma.$disconnect()
   }

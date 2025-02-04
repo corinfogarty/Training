@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ResourceType, Category } from '@prisma/client'
+import { Category, ContentType } from '@prisma/client'
 import { Button, Modal, Form, Alert } from 'react-bootstrap'
 import { Editor } from '@tinymce/tinymce-react'
 
@@ -21,8 +21,8 @@ export default function AddResourceButton({ categoryId, onResourceAdded }: AddRe
     title: '',
     description: '',
     url: '',
-    type: '' as ResourceType | '',
-    categoryId: categoryId || ''
+    categoryId: categoryId || '',
+    contentType: '' as ContentType | '',
   })
 
   useEffect(() => {
@@ -43,6 +43,10 @@ export default function AddResourceButton({ categoryId, onResourceAdded }: AddRe
       if (!response.ok) throw new Error('Failed to fetch categories')
       const data = await response.json()
       setCategories(data)
+      if (categoryId) {
+        const category = data.find((c: Category) => c.id === categoryId)
+        setSelectedCategory(category || null)
+      }
     } catch (err) {
       setError('Failed to load categories')
     }
@@ -78,12 +82,13 @@ export default function AddResourceButton({ categoryId, onResourceAdded }: AddRe
         title: formData.title,
         description: JSON.stringify(content),
         url: formData.url,
-        type: formData.type as ResourceType,
         categoryId: formData.categoryId,
-        previewImage: previewImage || selectedCategory?.defaultImage || ''
+        previewImage: previewImage || selectedCategory?.defaultImage || '',
+        additionalUrls: [],
+        contentType: formData.contentType as ContentType,
       }
 
-      if (!data.title || !data.description || !data.url || !data.type || !data.categoryId) {
+      if (!data.title || !data.description || !data.url || !data.categoryId || !data.contentType) {
         throw new Error('All fields are required')
       }
 
@@ -95,14 +100,18 @@ export default function AddResourceButton({ categoryId, onResourceAdded }: AddRe
         body: JSON.stringify(data)
       })
 
+      const responseData = await response.json()
+
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to add resource')
+        throw new Error(responseData.error || 'Failed to add resource')
       }
 
       setShow(false)
-      onResourceAdded?.()
+      if (onResourceAdded) {
+        onResourceAdded()
+      }
     } catch (err) {
+      console.error('Error creating resource:', err)
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setLoading(false)
@@ -201,41 +210,41 @@ export default function AddResourceButton({ categoryId, onResourceAdded }: AddRe
               )}
             </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label htmlFor="resourceType">Resource Type</Form.Label>
-              <Form.Select 
-                id="resourceType"
-                value={formData.type}
-                onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as ResourceType }))}
-                required
-                aria-label="Resource type"
-                title="Select resource type"
-              >
-                <option value="">Select a type</option>
-                {Object.values(ResourceType).map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
+            {!categoryId && (
+              <Form.Group className="mb-3">
+                <Form.Label htmlFor="categoryId">Category</Form.Label>
+                <Form.Select
+                  id="categoryId"
+                  value={formData.categoryId}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  required
+                  aria-label="Category"
+                  title="Select category"
+                >
+                  <option value="">Select a category</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            )}
 
             <Form.Group className="mb-3">
-              <Form.Label htmlFor="categoryId">Category</Form.Label>
+              <Form.Label htmlFor="contentType">Content Type</Form.Label>
               <Form.Select
-                id="categoryId"
-                value={formData.categoryId}
-                onChange={(e) => handleCategoryChange(e.target.value)}
+                id="contentType"
+                value={formData.contentType}
+                onChange={(e) => setFormData(prev => ({ ...prev, contentType: e.target.value as ContentType }))}
                 required
-                aria-label="Category"
-                title="Select category"
+                aria-label="Content type"
+                title="Select content type"
               >
-                <option value="">Select a category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
+                <option value="">Select a type...</option>
+                <option value="Resource">Resource</option>
+                <option value="Training">Training</option>
+                <option value="Shortcut">Shortcut</option>
               </Form.Select>
             </Form.Group>
 
