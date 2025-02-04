@@ -16,8 +16,8 @@ const getBaseUrl = () => {
   if (process.env.NODE_ENV === 'production') {
     return process.env.NEXTAUTH_URL || 'https://training.ols.to'
   }
-  // Try port 3001 if 3000 is in use
-  const port = process.env.PORT || '3001'
+  // Default to port 3000 to match NEXTAUTH_URL
+  const port = process.env.PORT || '3000'
   return process.env.NEXTAUTH_URL || `http://localhost:${port}`
 }
 
@@ -43,17 +43,34 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60,
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
-      logEvent('signIn callback', { 
-        user, 
-        account, 
-        profile,
-        env: {
-          NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-          NODE_ENV: process.env.NODE_ENV,
-          baseUrl: getBaseUrl()
-        }
+    async signIn({ user, account, profile, email }) {
+      if (!user.email) return false
+      
+      // Check if this Google account already exists
+      const userExists = await prisma.user.findUnique({
+        where: { email: user.email },
+        include: { accounts: true },
       })
+
+      if (userExists) {
+        // If the user exists and doesn't have a Google account linked, link it
+        if (!userExists.accounts.some(acc => acc.provider === 'google')) {
+          await prisma.account.create({
+            data: {
+              userId: userExists.id,
+              type: account?.type!,
+              provider: account?.provider!,
+              providerAccountId: account?.providerAccountId!,
+              access_token: account?.access_token,
+              token_type: account?.token_type,
+              scope: account?.scope,
+              id_token: account?.id_token,
+            },
+          })
+        }
+        return true
+      }
+
       return true
     },
     async redirect({ url, baseUrl }) {
