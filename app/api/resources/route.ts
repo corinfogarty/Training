@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '../../../lib/prisma'
-import { ResourceType } from '@prisma/client'
+import { ContentType } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,17 +24,17 @@ export async function POST(request: Request) {
     const data = await request.json()
 
     // Validate required fields
-    if (!data.title || !data.description || !data.url || !data.type || !data.categoryId) {
+    if (!data.title || !data.description || !data.url || !data.categoryId) {
       return NextResponse.json(
         { error: 'All fields are required' },
         { status: 400 }
       )
     }
 
-    // Validate resource type
-    if (!Object.values(ResourceType).includes(data.type)) {
+    // Validate content type
+    if (!Object.values(ContentType).includes(data.contentType)) {
       return NextResponse.json(
-        { error: 'Invalid resource type' },
+        { error: 'Invalid content type' },
         { status: 400 }
       )
     }
@@ -73,9 +73,9 @@ export async function POST(request: Request) {
         title: data.title,
         description,
         url: data.url,
-        type: data.type,
         categoryId: data.categoryId,
         previewImage,
+        contentType: data.contentType,
         additionalUrls: data.additionalUrls || [] // Add default empty array
       } 
     })

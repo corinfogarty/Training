@@ -3,48 +3,71 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  // Create initial categories
+  // Create categories
   const gettingStarted = await prisma.category.create({
     data: {
       name: 'Getting Started',
-      description: 'Essential resources for new team members',
+      description: 'Essential resources for getting started',
+      order: 0,
       resources: {
         create: [
           {
             title: 'Welcome Guide',
-            description: 'Introduction to the company and team',
+            description: JSON.stringify({
+              title: 'Welcome Guide',
+              description: 'Welcome to our platform! This guide will help you get started.',
+              credentials: {},
+              courseContent: []
+            }),
             url: 'https://example.com/welcome',
-            type: 'DOCUMENT'
+            contentType: 'Training',
+            previewImage: null,
+            additionalUrls: []
           },
           {
-            title: 'Setup Tutorial',
-            description: 'How to set up your development environment',
-            url: 'https://youtube.com/setup',
-            type: 'VIDEO'
+            title: 'Quick Start Video',
+            description: JSON.stringify({
+              title: 'Quick Start Video',
+              description: 'A quick video tutorial to help you get started.',
+              credentials: {},
+              courseContent: []
+            }),
+            url: 'https://example.com/quickstart',
+            contentType: 'Training',
+            previewImage: null,
+            additionalUrls: []
           }
         ]
       }
     }
   })
 
-  const development = await prisma.category.create({
+  const tutorials = await prisma.category.create({
     data: {
-      name: 'Development',
-      description: 'Development resources and documentation',
+      name: 'Tutorials',
+      description: 'Step-by-step tutorials and guides',
+      order: 1,
       resources: {
         create: [
           {
-            title: 'Coding Standards',
-            description: 'Our team coding guidelines',
-            url: 'https://example.com/standards',
-            type: 'DOCUMENT'
+            title: 'Basic Tutorial',
+            description: JSON.stringify({
+              title: 'Basic Tutorial',
+              description: 'Learn the basics with this comprehensive tutorial.',
+              credentials: {},
+              courseContent: []
+            }),
+            url: 'https://example.com/basic-tutorial',
+            contentType: 'Training',
+            previewImage: null,
+            additionalUrls: []
           }
         ]
       }
     }
   })
 
-  console.log({ gettingStarted, development })
+  console.log('Database has been seeded')
 }
 
 main()

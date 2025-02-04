@@ -1,115 +1,118 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Modal, Form, Button } from 'react-bootstrap'
-import { Resource, ResourceType } from '@prisma/client'
+import { Modal, Form, Button, Alert } from 'react-bootstrap'
+import { Resource, Category, ContentType } from '@prisma/client'
 import { Editor } from '@tinymce/tinymce-react'
 
 interface EditResourceModalProps {
-  resource: Resource
+  resource: Resource & {
+    category?: Category | null
+  }
   show: boolean
   onHide: () => void
   onSave: () => void
 }
 
-interface FormattedContent {
-  title: string
-  description: string
-  credentials: {
-    username?: string
-    password?: string
-  }
-  courseContent?: string[]
-  previewImage?: string
-  url?: string
-}
-
 export default function EditResourceModal({ resource, show, onHide, onSave }: EditResourceModalProps) {
-  const [saving, setSaving] = useState(false)
   const [title, setTitle] = useState(resource.title)
+  const [description, setDescription] = useState('')
   const [url, setUrl] = useState(resource.url)
-  const [type, setType] = useState(resource.type)
+  const [contentType, setContentType] = useState(resource.contentType)
+  const [categoryId, setCategoryId] = useState(resource.categoryId)
+  const [categories, setCategories] = useState<Category[]>([])
   const [previewImage, setPreviewImage] = useState(resource.previewImage || '')
-  const [content, setContent] = useState<FormattedContent>(() => {
-    try {
-      return JSON.parse(resource.description)
-    } catch {
-      return {
-        title: resource.title,
-        description: resource.description,
-        credentials: {},
-        courseContent: []
-      }
-    }
-  })
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (show) {
       setTitle(resource.title)
       setUrl(resource.url)
-      setType(resource.type)
+      setContentType(resource.contentType)
+      setCategoryId(resource.categoryId)
       setPreviewImage(resource.previewImage || '')
+      fetchCategories()
+      
       try {
-        setContent(JSON.parse(resource.description))
+        const content = JSON.parse(resource.description)
+        setDescription(content.description)
       } catch {
-        setContent({
-          title: resource.title,
-          description: resource.description,
-          credentials: {},
-          courseContent: []
-        })
+        setDescription(resource.description)
       }
     }
   }, [show, resource])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/categories')
+      if (!response.ok) throw new Error('Failed to fetch categories')
+      const data = await response.json()
+      setCategories(data)
+    } catch (err) {
+      setError('Failed to load categories')
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setSaving(true)
+    setError(null)
+    setLoading(true)
 
     try {
-      const updatedContent = {
-        ...content,
+      const content = {
         title,
-        previewImage
+        description,
+        credentials: {},
+        courseContent: []
       }
 
       const response = await fetch(`/api/resources/${resource.id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           title,
+          description: JSON.stringify(content),
           url,
-          type,
-          previewImage,
-          description: JSON.stringify(updatedContent, null, 2)
-        }),
+          contentType,
+          categoryId,
+          previewImage
+        })
       })
 
       if (!response.ok) {
-        throw new Error('Failed to update resource')
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to update resource')
       }
 
-      onSave()
       onHide()
-    } catch (error) {
-      console.error('Error updating resource:', error)
+      onSave()
+    } catch (err) {
+      console.error('Error updating resource:', err)
+      setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
-      setSaving(false)
+      setLoading(false)
     }
   }
 
   return (
     <Modal show={show} onHide={onHide} size="lg">
-      <Form onSubmit={handleSubmit}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Resource</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
+      <Modal.Header closeButton>
+        <Modal.Title>Edit Resource</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {error && (
+          <Alert variant="danger" className="mb-3">
+            {error}
+          </Alert>
+        )}
+        <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
-            <Form.Label>Title</Form.Label>
+            <Form.Label htmlFor="title">Title</Form.Label>
             <Form.Control
+              id="title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -118,58 +121,12 @@ export default function EditResourceModal({ resource, show, onHide, onSave }: Ed
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>URL</Form.Label>
-            <Form.Control
-              type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Preview Image URL</Form.Label>
-            <Form.Control
-              type="url"
-              value={previewImage}
-              onChange={(e) => setPreviewImage(e.target.value)}
-              placeholder="Enter image URL or /assets/... path"
-            />
-            {previewImage && (
-              <div className="mt-2">
-                <img 
-                  src={previewImage} 
-                  alt="Preview"
-                  className="img-fluid rounded"
-                  style={{ maxHeight: '200px' }}
-                />
-              </div>
-            )}
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Type</Form.Label>
-            <Form.Select 
-              value={type}
-              onChange={(e) => setType(e.target.value as ResourceType)}
-              aria-label="Resource type"
-            >
-              <option value="LINK">Link</option>
-              <option value="VIDEO">Video</option>
-              <option value="DOCUMENT">Document</option>
-              <option value="IMAGE">Image</option>
-            </Form.Select>
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Description</Form.Label>
+            <Form.Label htmlFor="description">Description</Form.Label>
             <Editor
               apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
-              value={content.description}
-              onEditorChange={(newValue) => {
-                setContent(prev => ({
-                  ...prev,
-                  description: newValue
-                }))
+              value={description}
+              onEditorChange={(content) => {
+                setDescription(content)
               }}
               init={{
                 height: 300,
@@ -189,48 +146,89 @@ export default function EditResourceModal({ resource, show, onHide, onSave }: Ed
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Credentials</Form.Label>
-            <div className="bg-light rounded p-3">
-              <Form.Group className="mb-2">
-                <Form.Label>Username</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={content.credentials?.username || ''}
-                  onChange={(e) => setContent(prev => ({
-                    ...prev,
-                    credentials: {
-                      ...prev.credentials,
-                      username: e.target.value
-                    }
-                  }))}
-                />
-              </Form.Group>
-              <Form.Group>
-                <Form.Label>Password</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={content.credentials?.password || ''}
-                  onChange={(e) => setContent(prev => ({
-                    ...prev,
-                    credentials: {
-                      ...prev.credentials,
-                      password: e.target.value
-                    }
-                  }))}
-                />
-              </Form.Group>
-            </div>
+            <Form.Label htmlFor="url">URL</Form.Label>
+            <Form.Control
+              id="url"
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              required
+            />
           </Form.Group>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={onHide} disabled={saving}>
-            Cancel
-          </Button>
-          <Button variant="primary" type="submit" disabled={saving}>
-            {saving ? 'Saving...' : 'Save Changes'}
-          </Button>
-        </Modal.Footer>
-      </Form>
+
+          <Form.Group className="mb-3">
+            <Form.Label htmlFor="contentType">Content Type</Form.Label>
+            <Form.Select
+              id="contentType"
+              value={contentType}
+              onChange={(e) => setContentType(e.target.value as ContentType)}
+              required
+              aria-label="Content type"
+              title="Select content type"
+            >
+              <option value="Resource">Resource</option>
+              <option value="Training">Training</option>
+              <option value="Shortcut">Shortcut</option>
+            </Form.Select>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label htmlFor="categoryId">Category</Form.Label>
+            <Form.Select
+              id="categoryId"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              required
+              aria-label="Category"
+              title="Select category"
+            >
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label htmlFor="previewImage">Preview Image URL</Form.Label>
+            <Form.Control
+              id="previewImage"
+              type="url"
+              value={previewImage}
+              onChange={(e) => setPreviewImage(e.target.value)}
+              placeholder="Enter image URL or /assets/... path"
+            />
+            {previewImage && (
+              <div className="mt-2">
+                <img 
+                  src={previewImage} 
+                  alt="Preview"
+                  className="img-fluid rounded"
+                  style={{ maxHeight: '200px' }}
+                />
+              </div>
+            )}
+          </Form.Group>
+
+          <div className="d-flex justify-content-end gap-2">
+            <Button 
+              variant="secondary" 
+              onClick={onHide}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="primary" 
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
+        </Form>
+      </Modal.Body>
     </Modal>
   )
 } 

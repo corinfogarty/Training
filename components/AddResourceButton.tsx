@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ResourceType, Category } from '@prisma/client'
+import { Category, ContentType } from '@prisma/client'
 import { Button, Modal, Form, Alert } from 'react-bootstrap'
 import { Editor } from '@tinymce/tinymce-react'
 
@@ -21,8 +21,8 @@ export default function AddResourceButton({ categoryId, onResourceAdded }: AddRe
     title: '',
     description: '',
     url: '',
-    type: '' as ResourceType | '',
-    categoryId: categoryId || ''
+    categoryId: categoryId || '',
+    contentType: '' as ContentType | '',
   })
 
   useEffect(() => {
@@ -82,13 +82,13 @@ export default function AddResourceButton({ categoryId, onResourceAdded }: AddRe
         title: formData.title,
         description: JSON.stringify(content),
         url: formData.url,
-        type: formData.type as ResourceType,
         categoryId: formData.categoryId,
         previewImage: previewImage || selectedCategory?.defaultImage || '',
-        additionalUrls: []
+        additionalUrls: [],
+        contentType: formData.contentType as ContentType,
       }
 
-      if (!data.title || !data.description || !data.url || !data.type || !data.categoryId) {
+      if (!data.title || !data.description || !data.url || !data.categoryId || !data.contentType) {
         throw new Error('All fields are required')
       }
 
@@ -210,25 +210,6 @@ export default function AddResourceButton({ categoryId, onResourceAdded }: AddRe
               )}
             </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label htmlFor="resourceType">Resource Type</Form.Label>
-              <Form.Select 
-                id="resourceType"
-                value={formData.type}
-                onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as ResourceType }))}
-                required
-                aria-label="Resource type"
-                title="Select resource type"
-              >
-                <option value="">Select a type</option>
-                {Object.values(ResourceType).map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-
             {!categoryId && (
               <Form.Group className="mb-3">
                 <Form.Label htmlFor="categoryId">Category</Form.Label>
@@ -249,6 +230,23 @@ export default function AddResourceButton({ categoryId, onResourceAdded }: AddRe
                 </Form.Select>
               </Form.Group>
             )}
+
+            <Form.Group className="mb-3">
+              <Form.Label htmlFor="contentType">Content Type</Form.Label>
+              <Form.Select
+                id="contentType"
+                value={formData.contentType}
+                onChange={(e) => setFormData(prev => ({ ...prev, contentType: e.target.value as ContentType }))}
+                required
+                aria-label="Content type"
+                title="Select content type"
+              >
+                <option value="">Select a type...</option>
+                <option value="Resource">Resource</option>
+                <option value="Training">Training</option>
+                <option value="Shortcut">Shortcut</option>
+              </Form.Select>
+            </Form.Group>
 
             <div className="d-flex justify-content-end gap-2">
               <Button 
