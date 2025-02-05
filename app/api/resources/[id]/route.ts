@@ -1,122 +1,87 @@
-import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { ContentType } from '@prisma/client'
 
-export const dynamic = 'force-dynamic'
-
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const resourceId = params.id
     const resource = await prisma.resource.findUnique({
-      where: { id: params.id },
+      where: { id: resourceId },
+      include: {
+        category: true,
+        favoritedBy: {
+          where: { id: session.user.id },
+          select: { id: true }
+        },
+        completedBy: {
+          where: { id: session.user.id },
+          select: { id: true }
+        }
+      }
+    })
+
+    if (!resource) {
+      return Response.json({ error: 'Resource not found' }, { status: 404 })
+    }
+
+    return Response.json({
+      ...resource,
+      isFavorite: resource.favoritedBy.length > 0,
+      isCompleted: resource.completedBy.length > 0,
+      favoritedBy: undefined,
+      completedBy: undefined
+    })
+  } catch (error) {
+    console.error('Error fetching resource:', error)
+    return Response.json({ error: 'Internal Server Error' }, { status: 500 })
+  }
+}
+
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.isAdmin) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const resourceId = params.id
+    const data = await req.json()
+
+    const resource = await prisma.resource.update({
+      where: { id: resourceId },
+      data,
       include: {
         category: true
       }
     })
 
-    if (!resource) {
-      return NextResponse.json(
-        { error: 'Resource not found' },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json(resource)
+    return Response.json(resource)
   } catch (error) {
-    console.error('Error fetching resource:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch resource' },
-      { status: 500 }
-    )
+    console.error('Error updating resource:', error)
+    return Response.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const data = await request.json()
-
-    // Validate required fields
-    if (!data.title || !data.description || !data.url || !data.categoryId || !data.contentType) {
-      return NextResponse.json(
-        { error: 'All fields are required' },
-        { status: 400 }
-      )
-    }
-
-    // Validate content type
-    if (!Object.values(ContentType).includes(data.contentType)) {
-      return NextResponse.json(
-        { error: 'Invalid content type' },
-        { status: 400 }
-      )
-    }
-
-    // Validate category exists
-    const category = await prisma.category.findUnique({
-      where: { id: data.categoryId }
-    })
-
-    if (!category) {
-      return NextResponse.json(
-        { error: 'Category not found' },
-        { status: 404 }
-      )
-    }
-
-    const resource = await prisma.resource.update({
-      where: { id: params.id },
-      data: {
-        title: data.title,
-        description: data.description,
-        url: data.url,
-        contentType: data.contentType,
-        categoryId: data.categoryId,
-        previewImage: data.previewImage || null,
-        additionalUrls: data.additionalUrls || []
-      }
-    })
-
-    return NextResponse.json(resource)
-  } catch (err) {
-    console.error('Error updating resource:', err)
-    const error = err instanceof Error ? err.message : 'Failed to update resource'
-    return NextResponse.json({ error }, { status: 500 })
-  }
-}
-
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.isAdmin) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Delete related records first
-    await prisma.$transaction([
-      prisma.resourceOrder.deleteMany({
-        where: { resourceId: params.id }
-      }),
-      prisma.resource.delete({
-        where: { id: params.id }
-      })
-    ])
+    const resourceId = params.id
+    await prisma.resource.delete({
+      where: { id: resourceId }
+    })
 
-    return NextResponse.json({ success: true })
+    return Response.json({ success: true })
   } catch (error) {
     console.error('Error deleting resource:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete resource' },
-      { status: 500 }
-    )
+    return Response.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 } 

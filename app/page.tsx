@@ -36,7 +36,15 @@ export default function Home() {
     try {
       setIsLoading(true)
       const response = await fetch(`/api/resources/${id}`)
-      if (!response.ok) throw new Error('Failed to fetch resource')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Resource fetch failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        })
+        throw new Error(`Failed to fetch resource: ${response.status} ${response.statusText}`)
+      }
       const data = await response.json()
       setSelectedResource(data)
       setShowLightbox(true)
