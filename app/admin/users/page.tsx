@@ -22,7 +22,7 @@ interface UserStatsModalProps {
 interface Resource {
   id: string;
   title: string;
-  type: string;
+  contentType: string;
   category: {
     name: string;
   };
@@ -71,7 +71,7 @@ function UserStatsModal({ user, show, onHide }: UserStatsModalProps) {
               <h6 className="mb-0">{resource.title}</h6>
               <small className="text-muted">{resource.category.name}</small>
             </div>
-            <span className="badge bg-primary">{resource.type}</span>
+            <span className="badge bg-primary">{resource.contentType}</span>
           </div>
         </div>
       ))}

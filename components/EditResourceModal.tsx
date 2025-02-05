@@ -24,6 +24,7 @@ export default function EditResourceModal({ resource, show, onHide, onSave }: Ed
   const [previewImage, setPreviewImage] = useState(resource.previewImage || '')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
   useEffect(() => {
     if (show) {
@@ -54,46 +55,66 @@ export default function EditResourceModal({ resource, show, onHide, onSave }: Ed
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setLoading(true)
 
     try {
-      const content = {
-        title,
-        description,
-        credentials: {},
-        courseContent: []
+      let finalPreviewImage = previewImage
+
+      // If a file is selected, upload it first
+      if (selectedFile) {
+        const formData = new FormData()
+        formData.append('file', selectedFile)
+        
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        })
+
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload preview image')
+        }
+
+        const { path } = await uploadResponse.json()
+        finalPreviewImage = path
       }
 
       const response = await fetch(`/api/resources/${resource.id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           title,
-          description: JSON.stringify(content),
+          description,
           url,
           contentType,
           categoryId,
-          previewImage
-        })
+          previewImage: finalPreviewImage,
+        }),
       })
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to update resource')
+        throw new Error('Failed to update resource')
       }
 
-      onHide()
       onSave()
     } catch (err) {
-      console.error('Error updating resource:', err)
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      // Create a preview URL for the selected file
+      const previewUrl = URL.createObjectURL(file)
+      setPreviewImage(previewUrl)
     }
   }
 
@@ -191,21 +212,47 @@ export default function EditResourceModal({ resource, show, onHide, onSave }: Ed
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label htmlFor="previewImage">Preview Image URL</Form.Label>
-            <Form.Control
-              id="previewImage"
-              type="url"
-              value={previewImage}
-              onChange={(e) => setPreviewImage(e.target.value)}
-              placeholder="Enter image URL or /assets/... path"
-            />
+            <Form.Label>Preview Image</Form.Label>
+            <div className="d-flex gap-3 align-items-start">
+              <div className="flex-grow-1">
+                <Form.Control
+                  type="text"
+                  value={previewImage || ''}
+                  onChange={(e) => setPreviewImage(e.target.value)}
+                  placeholder="Enter image URL or /assets/previews/... path"
+                />
+                <Form.Text className="text-muted">
+                  Enter a URL or use the file selector to upload an image
+                </Form.Text>
+              </div>
+              <div>
+                <Form.Control
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="d-none"
+                  id="preview-image-upload"
+                  aria-label="Choose preview image file"
+                />
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => document.getElementById('preview-image-upload')?.click()}
+                >
+                  Choose File
+                </Button>
+              </div>
+            </div>
             {previewImage && (
               <div className="mt-2">
                 <img 
-                  src={previewImage} 
+                  src={previewImage}
                   alt="Preview"
                   className="img-fluid rounded"
                   style={{ maxHeight: '200px' }}
+                  onError={(e) => {
+                    const img = e.target as HTMLImageElement
+                    img.style.display = 'none'
+                  }}
                 />
               </div>
             )}

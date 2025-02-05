@@ -6,9 +6,11 @@ import GoogleProvider from "next-auth/providers/google"
 
 // Debug logging helper
 const logEvent = (event: string, data: any) => {
-  console.log(`\n[${new Date().toISOString()}] ${event}:`)
-  console.log(JSON.stringify(data, null, 2))
-  console.log('\n')
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`\n[${new Date().toISOString()}] ${event}:`)
+    console.log(JSON.stringify(data, null, 2))
+    console.log('\n')
+  }
 }
 
 // Get the base URL based on environment
@@ -24,7 +26,6 @@ const getBaseUrl = () => {
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   adapter: PrismaAdapter(prisma) as Adapter,
-  debug: true,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,

@@ -3,7 +3,7 @@
 import React from 'react'
 import { Resource, Category } from '@prisma/client'
 import { Modal, Button, Badge } from 'react-bootstrap'
-import { ExternalLink, Calendar, Clock, Link as LinkIcon, Edit, Star, CheckCircle, List, Key, Link2 } from 'lucide-react'
+import { ExternalLink, Calendar, Link as LinkIcon, Edit, Star, CheckCircle, List, Link2 } from 'lucide-react'
 import { useState } from 'react'
 import EditResourceModal from './EditResourceModal'
 
@@ -24,10 +24,6 @@ interface Props {
 interface FormattedContent {
   title: string
   description: string
-  credentials: {
-    username?: string
-    password?: string
-  }
   courseContent?: string[]
   url?: string
 }
@@ -55,13 +51,16 @@ export default function ResourceLightbox({
     } catch {
       return {
         title: resource.title,
-        description: resource.description,
-        credentials: {}
+        description: resource.description
       }
     }
   }
 
   const content = getFormattedContent()
+
+  const handleEdit = () => {
+    setShowEditModal(true)
+  }
 
   return (
     <>
@@ -69,9 +68,6 @@ export default function ResourceLightbox({
         <Modal.Header closeButton>
           <Modal.Title className="d-flex align-items-center gap-2">
             {resource.title}
-            <Badge bg="secondary" className="ms-2">
-              {resource.contentType}
-            </Badge>
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -90,7 +86,7 @@ export default function ResourceLightbox({
             </div>
           )}
 
-          <div className="d-flex align-items-center gap-3 mb-4">
+          <div className="d-flex align-items-center flex-wrap gap-3 mb-4">
             <Badge bg="primary" className="text-uppercase">
               {resource.contentType}
             </Badge>
@@ -99,6 +95,47 @@ export default function ResourceLightbox({
                 {resource.category.name}
               </Badge>
             )}
+            <div className="d-flex align-items-center gap-2">
+              {onToggleFavorite && (
+                <Button
+                  variant="link"
+                  className="d-flex align-items-center p-1"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onToggleFavorite(e)
+                  }}
+                  disabled={loadingFavorite}
+                  title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                  style={{ marginLeft: '4px' }}
+                >
+                  <Star 
+                    size={22} 
+                    className={`${isFavorite ? 'text-danger' : 'text-muted'} ${loadingFavorite ? 'opacity-50' : ''}`}
+                    fill={isFavorite ? 'currentColor' : 'none'}
+                    strokeWidth={1.5}
+                  />
+                </Button>
+              )}
+              {onToggleComplete && (
+                <Button
+                  variant="link"
+                  className="d-flex align-items-center p-1"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onToggleComplete(e)
+                  }}
+                  disabled={loadingComplete}
+                  title={isCompleted ? "Mark as incomplete" : "Mark as complete"}
+                >
+                  <CheckCircle 
+                    size={22} 
+                    className={`${isCompleted ? 'text-success' : 'text-muted'} ${loadingComplete ? 'opacity-50' : ''}`}
+                    fill={isCompleted ? 'currentColor' : 'none'}
+                    strokeWidth={1.5}
+                  />
+                </Button>
+              )}
+            </div>
             <div className="ms-auto d-flex align-items-center gap-2 text-muted">
               <Calendar size={14} />
               <small>Added {new Date(resource.createdAt).toLocaleDateString()}</small>
@@ -106,28 +143,6 @@ export default function ResourceLightbox({
           </div>
 
           <div className="mb-4">
-            <h6 className="text-uppercase text-muted mb-3 d-flex align-items-center gap-2">
-              <div className="bg-primary rounded-circle p-1">
-                <LinkIcon size={12} className="text-white" />
-              </div>
-              Main Resource
-            </h6>
-            <a 
-              href={resource.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="d-block p-3 bg-light rounded text-decoration-none"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="d-flex align-items-center gap-2">
-                <span className="text-break flex-grow-1">{resource.url}</span>
-                <ExternalLink size={14} className="text-muted flex-shrink-0" />
-              </div>
-            </a>
-          </div>
-
-          <div className="mb-4">
-            <h6 className="text-uppercase text-muted mb-3">Description</h6>
             <div 
               className="formatted-content bg-light rounded p-3"
               dangerouslySetInnerHTML={{ __html: content.description }}
@@ -151,31 +166,6 @@ export default function ResourceLightbox({
                     </li>
                   ))}
                 </ul>
-              </div>
-            </div>
-          )}
-
-          {content.credentials && (content.credentials.username || content.credentials.password) && (
-            <div className="mb-4">
-              <h6 className="text-uppercase text-muted mb-3 d-flex align-items-center gap-2">
-                <div className="bg-primary rounded-circle p-1">
-                  <Key size={12} className="text-white" />
-                </div>
-                Credentials
-              </h6>
-              <div className="bg-light rounded p-3">
-                {content.credentials.username && (
-                  <div className="mb-2">
-                    <div className="small text-muted mb-1">Username</div>
-                    <code className="p-2 bg-white rounded d-inline-block">{content.credentials.username}</code>
-                  </div>
-                )}
-                {content.credentials.password && (
-                  <div>
-                    <div className="small text-muted mb-1">Password</div>
-                    <code className="p-2 bg-white rounded d-inline-block">{content.credentials.password}</code>
-                  </div>
-                )}
               </div>
             </div>
           )}
@@ -225,48 +215,11 @@ export default function ResourceLightbox({
             {onEdit && (
               <Button 
                 variant="outline-secondary" 
-                onClick={() => {
-                  onHide()
-                  setShowEditModal(true)
-                }}
+                onClick={handleEdit}
                 className="d-flex align-items-center"
               >
                 <Edit size={16} className="me-2" />
                 Edit
-              </Button>
-            )}
-            {onToggleFavorite && (
-              <Button
-                variant={isFavorite ? 'danger' : 'outline-danger'}
-                className="d-flex align-items-center"
-                onClick={() => {
-                  onToggleFavorite()
-                }}
-                disabled={loadingFavorite}
-              >
-                <Star 
-                  size={16} 
-                  className={`me-2 ${loadingFavorite ? 'opacity-50' : ''}`}
-                  fill={isFavorite ? 'white' : 'none'}
-                />
-                {isFavorite ? 'Favorited' : 'Add to Favorites'}
-              </Button>
-            )}
-            {onToggleComplete && (
-              <Button
-                variant={isCompleted ? 'success' : 'outline-success'}
-                className="d-flex align-items-center"
-                onClick={() => {
-                  onToggleComplete()
-                }}
-                disabled={loadingComplete}
-              >
-                <CheckCircle 
-                  size={16} 
-                  className={`me-2 ${loadingComplete ? 'opacity-50' : ''}`}
-                  fill={isCompleted ? 'white' : 'none'}
-                />
-                {isCompleted ? 'Completed' : 'Mark Complete'}
               </Button>
             )}
           </div>
@@ -277,9 +230,13 @@ export default function ResourceLightbox({
         <EditResourceModal
           resource={resource}
           show={showEditModal}
-          onHide={() => setShowEditModal(false)}
+          onHide={() => {
+            setShowEditModal(false)
+            onHide()
+          }}
           onSave={() => {
             setShowEditModal(false)
+            onHide()
             onEdit()
           }}
         />

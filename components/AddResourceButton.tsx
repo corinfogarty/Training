@@ -261,7 +261,7 @@ export default function AddResourceButton({ categoryId, onResourceAdded }: AddRe
                 type="submit"
                 disabled={loading}
               >
-                {loading ? 'Adding...' : 'Add'}
+                {loading ? 'Adding...' : 'Add Resource'}
               </Button>
             </div>
           </Form>

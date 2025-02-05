@@ -1,11 +1,17 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
 
+type RouteContext = {
+  params: {
+    id: string
+  }
+}
+
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: RouteContext
 ) {
   const session = await getServerSession(authOptions)
   
@@ -17,7 +23,7 @@ export async function PATCH(
     const { isAdmin } = await request.json()
     
     const user = await prisma.user.update({
-      where: { id: params.id },
+      where: { id: context.params.id },
       data: { isAdmin }
     })
     
@@ -29,8 +35,8 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: RouteContext
 ) {
   const session = await getServerSession(authOptions)
   
@@ -40,7 +46,7 @@ export async function DELETE(
 
   try {
     await prisma.user.delete({
-      where: { id: params.id }
+      where: { id: context.params.id }
     })
     
     return new NextResponse(null, { status: 204 })

@@ -7,9 +7,42 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   try {
     const resources = await prisma.resource.findMany({
-      include: {
-        favoritedBy: true,
-        completedBy: true
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        url: true,
+        additionalUrls: true,
+        contentType: true,
+        previewImage: true,
+        category: true,
+        categoryId: true,
+        createdAt: true,
+        updatedAt: true,
+        favoritedBy: {
+          select: {
+            id: true
+          }
+        },
+        completedBy: {
+          select: {
+            id: true
+          }
+        },
+        orders: {
+          select: {
+            id: true,
+            userId: true,
+            order: true
+          }
+        },
+        completions: {
+          select: {
+            id: true,
+            userId: true,
+            completedAt: true
+          }
+        }
       }
     })
     return NextResponse.json(resources || [])

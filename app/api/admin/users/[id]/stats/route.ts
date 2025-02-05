@@ -16,44 +16,40 @@ export async function GET(
   try {
     const userId = params.id
     const [completed, favorites, added] = await Promise.all([
-      prisma.resource.findMany({
-        where: {
-          completedBy: {
-            some: {
-              id: userId
-            }
-          }
-        },
+      prisma.user.findUnique({
+        where: { id: userId },
         select: {
-          id: true,
-          title: true,
-          type: true,
-          category: {
+          completed: {
             select: {
-              name: true
+              id: true,
+              title: true,
+              contentType: true,
+              category: {
+                select: {
+                  name: true
+                }
+              }
             }
           }
         }
-      }),
-      prisma.resource.findMany({
-        where: {
-          favoritedBy: {
-            some: {
-              id: userId
-            }
-          }
-        },
+      }).then(user => user?.completed || []),
+      prisma.user.findUnique({
+        where: { id: userId },
         select: {
-          id: true,
-          title: true,
-          type: true,
-          category: {
+          favorites: {
             select: {
-              name: true
+              id: true,
+              title: true,
+              contentType: true,
+              category: {
+                select: {
+                  name: true
+                }
+              }
             }
           }
         }
-      }),
+      }).then(user => user?.favorites || []),
       prisma.resource.findMany({
         where: {
           orders: {
@@ -65,7 +61,7 @@ export async function GET(
         select: {
           id: true,
           title: true,
-          type: true,
+          contentType: true,
           category: {
             select: {
               name: true

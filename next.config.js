@@ -14,7 +14,17 @@ const nextConfig = {
       'cdn.motiondesign.school',
       'i.ytimg.com'
     ],
-  }
+  },
+  webpack: (config, { dev, isServer }) => {
+    // Add any webpack customizations here
+    return config
+  },
+  // Remove experimental features that might cause issues
+  experimental: {
+    optimizePackageImports: ['@auth/prisma-adapter']
+  },
+  // Ensure we generate source maps in development
+  productionBrowserSourceMaps: true
 }
 
 module.exports = nextConfig 

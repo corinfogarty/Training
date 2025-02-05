@@ -58,12 +58,12 @@ body {
   border: 1px solid var(--ols-border) !important;
   border-radius: 8px !important;
   position: relative;
+  overflow: visible !important;
 }
 
 .card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
   transform: translateY(-1px);
-  z-index: auto;
 }
 
 .card-title {
@@ -330,12 +330,41 @@ body {
 }
 
 .resource-modal .btn-link {
-  padding: 0.25rem 0.5rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin: -0.5rem;
+  color: var(--ols-text-light);
+  transition: all 0.15s ease;
 }
 
 .resource-modal .btn-link:hover {
-  background-color: #f8f9fa;
-  transform: none;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--ols-text);
+  transform: scale(1.1);
+}
+
+.resource-modal .text-danger {
+  color: var(--ols-favorite) !important;
+}
+
+.resource-modal .text-success {
+  color: var(--ols-complete) !important;
+}
+
+.resource-modal .text-muted {
+  color: var(--ols-text-light) !important;
+}
+
+.resource-modal .btn-link:hover .text-danger {
+  color: #DC2626 !important;
+}
+
+.resource-modal .btn-link:hover .text-success {
+  color: #059669 !important;
+}
+
+.resource-modal .btn-link:hover .text-muted {
+  color: var(--ols-text) !important;
 }
 
 .user-table th {
@@ -391,7 +420,8 @@ body {
 
 .card .dropdown {
   position: relative;
-  z-index: 1000;
+  z-index: 1050;
+  display: block !important;
 }
 
 .card .dropdown-menu {
@@ -401,39 +431,35 @@ body {
   margin-top: 0.5rem;
   border: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  z-index: 1050;
   right: 0;
   top: 100%;
 }
 
 .card:hover {
-  z-index: auto;
+  z-index: 1050;
 }
 
 .dropdown-container {
   position: relative;
-  z-index: 1000;
+  z-index: 1050;
+  display: block !important;
 }
 
 .dropdown-container .dropdown-menu {
-  position: absolute;
-  min-width: 200px;
-  padding: 0.5rem;
-  margin-top: 0.5rem;
-  border: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  right: 0;
-  top: 100%;
+  z-index: 1050;
 }
 
 .card:hover .dropdown-container {
-  z-index: 1000;
+  z-index: 1050;
 }
 
 .card .btn-link {
   opacity: 0.6;
   transition: all 0.2s ease-in-out;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .card .btn-link:hover {
@@ -443,13 +469,6 @@ body {
 
 .card:hover .btn-link {
   opacity: 1;
-}
-
-/* Remove old dropdown styles */
-.dropdown-container,
-.card .dropdown,
-.card .dropdown-menu {
-  display: none;
 }
 
 /* View Types */
@@ -516,21 +535,27 @@ body {
 
 /* Grid View */
 .grid-tiles {
-  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  padding: 1rem;
+}
+
+/* Make grid cards match column view exactly */
+.grid-tiles .droppable-container > [data-rfd-draggable-context-id] {
+  width: 100% !important;
+  flex: 1 1 auto !important;
+  margin-bottom: 0 !important;
+  min-width: 280px;
+  max-width: 350px;
 }
 
 .grid-tiles .droppable-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
+  gap: 2rem;
   width: 100%;
-}
-
-/* Make grid cards match column view exactly */
-.grid-tiles .droppable-container > [data-rfd-draggable-context-id] {
-  width: 350px !important;
-  flex: 0 0 350px !important;
-  margin-bottom: 1rem !important;
+  padding: 1rem;
 }
 
 .grid-tiles .card {
@@ -586,33 +611,63 @@ body {
 }
 
 /* List View */
+.list-view {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  padding: 1.5rem;
+}
+
 .list-view .resource-list-item {
-  transition: background-color 0.2s ease-in-out;
-  border-bottom: 1px solid var(--ols-border);
-}
-
-.list-view .resource-list-item:nth-child(odd) {
-  background-color: var(--ols-surface);
-}
-
-.list-view .resource-list-item:nth-child(even) {
-  background-color: var(--ols-background);
-}
-
-.list-view .resource-list-item:hover {
-  background-color: rgba(14, 165, 233, 0.05);
+  padding: 1.5rem;
+  border-radius: 6px;
+  border-bottom: 1px solid var(--bs-border-color);
+  transition: background-color 0.2s ease;
 }
 
 .list-view .resource-list-item:last-child {
   border-bottom: none;
 }
 
-.list-view .btn-link {
-  opacity: 0.6;
+.list-view .resource-list-item:hover {
+  background-color: var(--bs-gray-100);
 }
 
-.list-view .resource-list-item:hover .btn-link {
-  opacity: 1;
+.list-view .resource-list-item h6 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+}
+
+.list-view .resource-list-item .btn-link {
+  color: var(--bs-gray-600);
+  transition: color 0.2s ease;
+}
+
+.list-view .resource-list-item .btn-link:hover {
+  color: var(--bs-primary);
+}
+
+/* Hide card view in list mode */
+.list-view .resource-card {
+  display: none;
+}
+
+/* Grid View */
+.grid-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.grid-tiles .resource-list-item {
+  display: none;
+}
+
+/* Columns View */
+.columns-view .resource-list-item {
+  display: none;
 }
 
 /* Kanban Board (Columns View) */
@@ -683,21 +738,22 @@ body {
 }
 
 .header-search input {
-  background-color: var(--ols-surface) !important;
-  border: 1px solid var(--ols-border) !important;
+  background-color: #F1F5F9 !important;  /* Light grey background */
+  border: 1px solid #E2E8F0 !important;
   border-radius: 8px !important;
   padding: 0.75rem 1rem 0.75rem 2.75rem !important;
   transition: all 0.2s ease;
-  width: 100%;
+  color: var(--ols-text) !important;  /* Dark grey text */
 }
 
 .header-search input:focus {
+  background-color: white !important;
   box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2) !important;
   border-color: var(--ols-brand) !important;
 }
 
 .header-search input::placeholder {
-  color: var(--ols-text-light);
+  color: #94A3B8 !important;  /* Lighter text for placeholder */
 }
 
 @media (max-width: 768px) {
@@ -748,56 +804,6 @@ body {
   background-color: var(--bs-gray-100) !important;
 } 
 
-/* List View Container */
-.list-view {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  margin-bottom: 2rem;
-}
-
-/* Target the draggable wrapper div */
-.list-view > [data-rfd-draggable-context-id] {
-  background-color: white;
-}
-
-.list-view > [data-rfd-draggable-context-id]:nth-child(even) {
-  background-color: var(--ols-background);
-}
-
-/* Style the actual list item */
-.list-view .resource-list-item {
-  padding: 1.25rem;
-  transition: background-color 0.2s ease;
-  border-bottom: 1px solid var(--ols-border);
-}
-
-.list-view > [data-rfd-draggable-context-id]:last-child .resource-list-item {
-  border-bottom: none;
-}
-
-.list-view .resource-list-item:hover {
-  background-color: rgba(14, 165, 233, 0.05);
-}
-
-/* Button styles */
-.list-view .btn-link {
-  opacity: 0.6;
-  transition: opacity 0.2s ease;
-}
-
-.list-view .resource-list-item:hover .btn-link {
-  opacity: 1;
-}
-
-/* Remove any conflicting styles */
-.list-view .resource-card,
-.resource-list-item:nth-child(odd),
-.resource-list-item:nth-child(even) {
-  background-color: transparent !important;
-}
-
 /* Grid View */
 .grid-tiles {
   display: grid;
@@ -808,18 +814,44 @@ body {
 
 /* Header Search */
 .header-search input {
-  background-color: var(--ols-surface) !important;
-  border: 1px solid var(--ols-border) !important;
+  background-color: #F1F5F9 !important;  /* Light grey background */
+  border: 1px solid #E2E8F0 !important;
   border-radius: 8px !important;
   padding: 0.75rem 1rem 0.75rem 2.75rem !important;
   transition: all 0.2s ease;
+  color: var(--ols-text) !important;  /* Dark grey text */
 }
 
 .header-search input:focus {
+  background-color: white !important;
   box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2) !important;
   border-color: var(--ols-brand) !important;
 }
 
 .header-search input::placeholder {
+  color: #94A3B8 !important;  /* Lighter text for placeholder */
+}
+
+.resource-modal .hover-scale {
+  transition: transform 0.2s ease;
+}
+
+.resource-modal .hover-scale:hover {
+  transform: scale(1.15);
+}
+
+.resource-modal .btn-link {
   color: var(--ols-text-light);
+}
+
+.resource-modal .btn-link:hover {
+  color: var(--ols-text);
+}
+
+.resource-modal .btn-link:hover .text-danger {
+  color: #DC2626 !important;
+}
+
+.resource-modal .btn-link:hover .text-success {
+  color: #059669 !important;
 } 

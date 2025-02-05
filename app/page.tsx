@@ -2,63 +2,91 @@
 
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import CategoryList from '@/components/CategoryList'
 import ResourceLightbox from '@/components/ResourceLightbox'
-import type { Resource, Category } from '@prisma/client'
+import type { Resource, Category, User } from '@prisma/client'
+
+interface ResourceWithRelations extends Resource {
+  category?: Category | null
+  favoritedBy?: { id: string }[]
+  completedBy?: { id: string }[]
+}
 
 export default function Home() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [selectedResource, setSelectedResource] = useState<Resource | null>(null)
+  const resourceId = searchParams.get('resource')
+  
+  const [selectedResource, setSelectedResource] = useState<ResourceWithRelations | null>(null)
   const [showLightbox, setShowLightbox] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [categories, setCategories] = useState<Category[]>([])
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin')
-      return
-    }
-
-    // Fetch categories
-    fetch('/api/categories')
-      .then(res => res.json())
-      .then(data => setCategories(data))
-      .catch(error => console.error('Error fetching categories:', error))
-
-    const resourceId = searchParams.get('resource')
-    if (resourceId && session?.user) {
-      // Only fetch if it's a different resource
-      if (!selectedResource || selectedResource.id !== resourceId) {
-        setIsLoading(true)
-        fetch(`/api/resources/${resourceId}`)
-          .then(res => res.json())
-          .then(data => {
-            setSelectedResource(data)
-            setShowLightbox(true)
-          })
-          .catch(() => {
-            router.push('/')
-          })
-          .finally(() => {
-            setIsLoading(false)
-          })
-      }
+    if (resourceId) {
+      fetchResource(resourceId)
     } else {
-      // Only close if we're not on a resource URL
-      if (showLightbox) {
-        setShowLightbox(false)
-        setSelectedResource(null)
-      }
+      setShowLightbox(false)
+      setSelectedResource(null)
     }
-  }, [searchParams, session, status, selectedResource])
+  }, [resourceId])
+
+  const fetchResource = async (id: string) => {
+    try {
+      setIsLoading(true)
+      const response = await fetch(`/api/resources/${id}`)
+      if (!response.ok) throw new Error('Failed to fetch resource')
+      const data = await response.json()
+      setSelectedResource(data)
+      setShowLightbox(true)
+    } catch (error) {
+      console.error('Error fetching resource:', error)
+      router.push('/', { scroll: false })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleLightboxClose = () => {
     setShowLightbox(false)
     setSelectedResource(null)
     router.push('/', { scroll: false })
+  }
+
+  const handleToggleFavorite = async () => {
+    if (!selectedResource || !session?.user) return
+    try {
+      const response = await fetch(`/api/resources/${selectedResource.id}/favorite`, {
+        method: 'POST'
+      })
+      if (!response.ok) throw new Error('Failed to toggle favorite')
+      await fetchResource(selectedResource.id)
+    } catch (error) {
+      console.error('Error toggling favorite:', error)
+    }
+  }
+
+  const handleToggleComplete = async () => {
+    if (!selectedResource || !session?.user) return
+    try {
+      const response = await fetch(`/api/resources/${selectedResource.id}/complete`, {
+        method: 'POST'
+      })
+      if (!response.ok) throw new Error('Failed to toggle complete')
+      await fetchResource(selectedResource.id)
+    } catch (error) {
+      console.error('Error toggling complete:', error)
+    }
+  }
+
+  const handleEdit = async () => {
+    if (!selectedResource) return
+    try {
+      await fetchResource(selectedResource.id)
+    } catch (error) {
+      console.error('Error refreshing resource:', error)
+    }
   }
 
   if (status === 'loading') {
@@ -67,7 +95,7 @@ export default function Home() {
 
   return (
     <>
-      <CategoryList categories={categories} />
+      <CategoryList />
       {isLoading && (
         <div 
           className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-dark bg-opacity-50"
@@ -83,6 +111,11 @@ export default function Home() {
           resource={selectedResource}
           show={showLightbox}
           onHide={handleLightboxClose}
+          onEdit={handleEdit}
+          isFavorite={selectedResource.favoritedBy?.some(u => u.id === session?.user?.id)}
+          isCompleted={selectedResource.completedBy?.some(u => u.id === session?.user?.id)}
+          onToggleFavorite={handleToggleFavorite}
+          onToggleComplete={handleToggleComplete}
         />
       )}
     </>

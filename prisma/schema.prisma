@@ -1,64 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 model Category {
-  id          String     @id @default(cuid())
-  name        String     @unique
-  description String?
+  id           String          @id @default(cuid())
+  name         String          @unique
+  description  String?
   defaultImage String?
-  order       Int        @default(0)
-  resources   Resource[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  orders      ResourceOrder[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  order        Int             @default(0)
+  resources    Resource[]
+  orders       ResourceOrder[]
 }
 
 model Resource {
-  id          String       @id @default(cuid())
-  title       String
-  description String
-  url         String
+  id             String              @id @default(cuid())
+  title          String
+  description    String
+  url            String
   additionalUrls String[]
-  contentType  ContentType @default(Training)
-  previewImage String?
-  category    Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId  String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  favoritedBy User[]       @relation("UserFavorites")
-  completedBy User[]       @relation("UserCompleted")
-  orders      ResourceOrder[] @relation("ResourceOrders")
-  completions CompletedResource[]
-}
-
-enum ContentType {
-  Resource
-  Training
-  Shortcut
+  previewImage   String?
+  categoryId     String
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  contentType    ContentType         @default(Training)
+  completions    CompletedResource[]
+  category       Category            @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  orders         ResourceOrder[]     @relation("ResourceOrders")
+  completedBy    User[]              @relation("UserCompleted")
+  favoritedBy    User[]              @relation("UserFavorites")
 }
 
 model User {
-  id            String     @id @default(cuid())
-  email         String     @unique
-  name          String?
-  image         String?
-  emailVerified DateTime?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  isAdmin       Boolean    @default(false)
-  favorites     Resource[] @relation("UserFavorites")
-  completed     Resource[] @relation("UserCompleted")
-  accounts      Account[]
-  sessions      Session[]
-  resourceOrders ResourceOrder[]
-  lastLogin     DateTime?
+  id                 String              @id @default(cuid())
+  email              String              @unique
+  name               String?
+  image              String?
+  emailVerified      DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  isAdmin            Boolean             @default(false)
+  lastLogin          DateTime?
+  accounts           Account[]
   completedResources CompletedResource[]
+  resourceOrders     ResourceOrder[]
+  sessions           Session[]
+  completed          Resource[]          @relation("UserCompleted")
+  favorites          Resource[]          @relation("UserFavorites")
 }
 
 model Account {
@@ -67,15 +61,14 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -102,9 +95,9 @@ model ResourceOrder {
   resourceId String
   categoryId String
   order      Int
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  resource   Resource @relation("ResourceOrders", fields: [resourceId], references: [id], onDelete: Cascade)
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  resource   Resource @relation("ResourceOrders", fields: [resourceId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, resourceId])
   @@index([userId, categoryId])
@@ -115,8 +108,8 @@ model CompletedResource {
   userId      String
   resourceId  String
   completedAt DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   resource    Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, resourceId])
 }
@@ -129,4 +122,10 @@ model Settings {
   emailEnabled      Boolean  @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+}
+
+enum ContentType {
+  Resource
+  Training
+  Shortcut
 }

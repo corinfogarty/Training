@@ -21,6 +21,7 @@ interface ResourceCardProps {
   onToggleFavorite?: () => void
   onToggleComplete?: () => void
   standalone?: boolean
+  viewType?: 'grid' | 'list' | 'columns'
 }
 
 export default function ResourceCard({
@@ -32,7 +33,8 @@ export default function ResourceCard({
   onDelete = () => {},
   onToggleFavorite = () => {},
   onToggleComplete = () => {},
-  standalone = false
+  standalone = false,
+  viewType = 'grid'
 }: ResourceCardProps) {
   const { data: session } = useSession()
   const router = useRouter()
@@ -144,6 +146,88 @@ export default function ResourceCard({
     </Card>
   )
 
+  const listView = (
+    <div 
+      className="resource-list-item"
+      onClick={handleCardClick}
+      style={{ cursor: 'pointer' }}
+    >
+      <div className="d-flex justify-content-between align-items-center">
+        <div>
+          <h6 className="mb-1">{resource.title}</h6>
+          {completedAt && (
+            <div className="small text-muted d-flex align-items-center">
+              <Calendar size={12} className="me-1" />
+              {new Date(completedAt).toLocaleDateString()}
+            </div>
+          )}
+        </div>
+        <div className="d-flex align-items-center gap-2">
+          <Button
+            variant="link"
+            size="sm"
+            className={`text-muted p-0 ${isFavorite ? 'text-warning' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavorite();
+            }}
+          >
+            <Star 
+              size={16} 
+              fill={isFavorite ? 'currentColor' : 'none'} 
+              className={isFavorite ? 'text-warning' : ''}
+            />
+          </Button>
+          <Button
+            variant="link"
+            size="sm"
+            className={`text-muted p-0 ${isCompleted ? 'text-success' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleComplete();
+            }}
+          >
+            <CheckCircle 
+              size={16} 
+              fill={isCompleted ? 'currentColor' : 'none'} 
+              className={isCompleted ? 'text-success' : ''}
+            />
+          </Button>
+          <Button
+            variant="link"
+            size="sm"
+            className="text-muted p-0"
+            href={resource.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ExternalLink size={16} />
+          </Button>
+          <Dropdown onClick={e => e.stopPropagation()}>
+            <Dropdown.Toggle variant="link" className="p-0 text-muted">
+              <MoreVertical size={16} />
+            </Dropdown.Toggle>
+            <Dropdown.Menu align="end">
+              <Dropdown.Item onClick={() => setShowEdit(true)}>
+                <Edit size={16} className="me-2" />
+                Edit
+              </Dropdown.Item>
+              <Dropdown.Divider />
+              <Dropdown.Item 
+                onClick={() => setShowDeleteConfirm(true)}
+                className="text-danger"
+              >
+                <Trash2 size={16} className="me-2" />
+                Delete
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
+        </div>
+      </div>
+    </div>
+  )
+
   const modals = (
     <>
       <EditResourceModal
@@ -182,7 +266,7 @@ export default function ResourceCard({
   if (standalone) {
     return (
       <>
-        {card}
+        {viewType === 'list' ? listView : card}
         {modals}
       </>
     )
@@ -198,7 +282,7 @@ export default function ResourceCard({
             {...provided.dragHandleProps}
             className="mb-3"
           >
-            {card}
+            {viewType === 'list' ? listView : card}
           </div>
         )}
       </Draggable>
