@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -9,19 +9,17 @@ interface ResourceWithRelations extends Resource {
   completedBy: { id: string }[];
 }
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
-      return new NextResponse('Unauthorized', { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const categoryId = request.nextUrl.pathname.split('/')[3] // /api/categories/[id]/resources
     const resources = await prisma.resource.findMany({
       where: {
-        categoryId: params.id
+        categoryId
       },
       include: {
         favoritedBy: {

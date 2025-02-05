@@ -1,12 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
@@ -14,6 +11,7 @@ export async function PATCH(
     }
 
     const { categoryId, order } = await request.json()
+    const resourceId = request.nextUrl.pathname.split('/')[3] // /api/resources/[id]/position
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email }
@@ -28,7 +26,7 @@ export async function PATCH(
       where: {
         userId_resourceId: {
           userId: user.id,
-          resourceId: params.id
+          resourceId
         }
       },
       update: {
@@ -37,7 +35,7 @@ export async function PATCH(
       },
       create: {
         userId: user.id,
-        resourceId: params.id,
+        resourceId,
         categoryId,
         order
       }

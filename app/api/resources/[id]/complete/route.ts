@@ -1,12 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
@@ -22,8 +19,9 @@ export async function POST(
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
+    const resourceId = request.nextUrl.pathname.split('/')[3] // /api/resources/[id]/complete
     const resource = await prisma.resource.findUnique({
-      where: { id: params.id },
+      where: { id: resourceId },
       include: { completedBy: true }
     })
 
@@ -35,7 +33,7 @@ export async function POST(
 
     if (isCompleted) {
       await prisma.resource.update({
-        where: { id: params.id },
+        where: { id: resourceId },
         data: {
           completedBy: {
             disconnect: { id: user.id }
@@ -44,7 +42,7 @@ export async function POST(
       })
     } else {
       await prisma.resource.update({
-        where: { id: params.id },
+        where: { id: resourceId },
         data: {
           completedBy: {
             connect: { id: user.id }

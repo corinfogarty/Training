@@ -3,10 +3,7 @@ import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
-): Promise<Response> {
+export async function PATCH(request: NextRequest) {
   const session = await getServerSession(authOptions)
   
   if (!session?.user?.isAdmin) {
@@ -15,9 +12,10 @@ export async function PATCH(
 
   try {
     const { isAdmin } = await request.json()
+    const id = request.nextUrl.pathname.split('/').pop()
     
     const user = await prisma.user.update({
-      where: { id: params.id },
+      where: { id },
       data: { isAdmin }
     })
     
@@ -28,10 +26,7 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-): Promise<Response> {
+export async function DELETE(request: NextRequest) {
   const session = await getServerSession(authOptions)
   
   if (!session?.user?.isAdmin) {
@@ -39,11 +34,12 @@ export async function DELETE(
   }
 
   try {
+    const id = request.nextUrl.pathname.split('/').pop()
     await prisma.user.delete({
-      where: { id: params.id }
+      where: { id }
     })
     
-    return new NextResponse(null, { status: 204 })
+    return NextResponse.json(null, { status: 204 })
   } catch (error) {
     console.error('Error deleting user:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

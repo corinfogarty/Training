@@ -1,15 +1,16 @@
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const resourceId = params.id
+    const resourceId = request.nextUrl.pathname.split('/')[3] // /api/resources/[id]
     const resource = await prisma.resource.findUnique({
       where: { id: resourceId },
       include: {
@@ -26,10 +27,10 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     })
 
     if (!resource) {
-      return Response.json({ error: 'Resource not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Resource not found' }, { status: 404 })
     }
 
-    return Response.json({
+    return NextResponse.json({
       ...resource,
       isFavorite: resource.favoritedBy.length > 0,
       isCompleted: resource.completedBy.length > 0,
@@ -38,19 +39,19 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     })
   } catch (error) {
     console.error('Error fetching resource:', error)
-    return Response.json({ error: 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.isAdmin) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const resourceId = params.id
-    const data = await req.json()
+    const resourceId = request.nextUrl.pathname.split('/')[3] // /api/resources/[id]
+    const data = await request.json()
 
     const resource = await prisma.resource.update({
       where: { id: resourceId },
@@ -60,28 +61,28 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       }
     })
 
-    return Response.json(resource)
+    return NextResponse.json(resource)
   } catch (error) {
     console.error('Error updating resource:', error)
-    return Response.json({ error: 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.isAdmin) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const resourceId = params.id
+    const resourceId = request.nextUrl.pathname.split('/')[3] // /api/resources/[id]
     await prisma.resource.delete({
       where: { id: resourceId }
     })
 
-    return Response.json({ success: true })
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting resource:', error)
-    return Response.json({ error: 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 } 
