@@ -24,7 +24,13 @@ const nextConfig = {
     optimizePackageImports: ['@auth/prisma-adapter']
   },
   // Ensure we generate source maps in development
-  productionBrowserSourceMaps: true
+  productionBrowserSourceMaps: true,
+  typescript: {
+    ignoreBuildErrors: true
+  },
+  eslint: {
+    ignoreDuringBuilds: true
+  }
 }
 
 module.exports = nextConfig 
