@@ -6,10 +6,17 @@ import { Modal, Button, Badge } from 'react-bootstrap'
 import { ExternalLink, Calendar, Link as LinkIcon, Edit, Star, CheckCircle, List, Link2 } from 'lucide-react'
 import { useState } from 'react'
 import EditResourceModal from './EditResourceModal'
+import { StarFill, CheckCircleFill, Pencil, Trash } from 'react-bootstrap-icons'
 
 interface Props {
   resource: Resource & {
     category?: Category | null
+    submittedBy?: {
+      id: string
+      name?: string | null
+      email: string
+      image?: string | null
+    } | null
   }
   show: boolean
   onHide: () => void
@@ -39,10 +46,9 @@ export default function ResourceLightbox({
   onToggleFavorite,
   onToggleComplete
 }: Props) {
+  const [favoriteLoading, setFavoriteLoading] = useState(false)
+  const [completeLoading, setCompleteLoading] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
-  const [deleting, setDeleting] = useState(false)
-  const [loadingFavorite, setLoadingFavorite] = useState(false)
-  const [loadingComplete, setLoadingComplete] = useState(false)
   const previewImage = resource.previewImage
 
   const getFormattedContent = (): FormattedContent => {
@@ -59,15 +65,39 @@ export default function ResourceLightbox({
   const content = getFormattedContent()
 
   const handleEdit = () => {
+    if (!onEdit) return
     setShowEditModal(true)
+  }
+
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    if (!onToggleFavorite) return
+    setFavoriteLoading(true)
+    try {
+      await onToggleFavorite(e)
+    } finally {
+      setFavoriteLoading(false)
+    }
+  }
+
+  const handleCompleteClick = async (e: React.MouseEvent) => {
+    if (!onToggleComplete) return
+    setCompleteLoading(true)
+    try {
+      await onToggleComplete(e)
+    } finally {
+      setCompleteLoading(false)
+    }
   }
 
   return (
     <>
       <Modal show={show} onHide={onHide} size="lg" centered>
         <Modal.Header closeButton>
-          <Modal.Title className="d-flex align-items-center gap-2">
-            {resource.title}
+          <Modal.Title>
+            <div className="d-flex align-items-center gap-2">
+              <span className="badge bg-primary">{resource.contentType}</span>
+              <span className="badge bg-secondary">{resource.category?.name}</span>
+            </div>
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -85,140 +115,86 @@ export default function ResourceLightbox({
               />
             </div>
           )}
-
-          <div className="d-flex align-items-center flex-wrap gap-3 mb-4">
-            <Badge bg="primary" className="text-uppercase">
-              {resource.contentType}
-            </Badge>
-            {resource.category && (
-              <Badge bg="secondary">
-                {resource.category.name}
-              </Badge>
-            )}
-            <div className="d-flex align-items-center gap-2">
-              {onToggleFavorite && (
-                <Button
-                  variant="link"
-                  className="d-flex align-items-center p-1"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onToggleFavorite(e)
-                  }}
-                  disabled={loadingFavorite}
-                  title={isFavorite ? "Remove from favorites" : "Add to favorites"}
-                  style={{ marginLeft: '4px' }}
+          <h4 className="mb-3">{content.title}</h4>
+          <div className="d-flex align-items-center gap-3 mb-4">
+            <div className="d-flex align-items-center gap-2 text-muted">
+              {resource.submittedBy?.image ? (
+                <img
+                  src={resource.submittedBy.image}
+                  alt={resource.submittedBy.name || 'User'}
+                  className="rounded-circle"
+                  width={24}
+                  height={24}
+                  style={{ objectFit: 'cover' }}
+                />
+              ) : (
+                <div 
+                  className="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white"
+                  style={{ width: '24px', height: '24px', fontSize: '12px' }}
                 >
-                  <Star 
-                    size={22} 
-                    className={`${isFavorite ? 'text-danger' : 'text-muted'} ${loadingFavorite ? 'opacity-50' : ''}`}
-                    fill={isFavorite ? 'currentColor' : 'none'}
-                    strokeWidth={1.5}
-                  />
-                </Button>
+                  {resource.submittedBy?.name?.[0] || resource.submittedBy?.email[0]}
+                </div>
               )}
-              {onToggleComplete && (
-                <Button
-                  variant="link"
-                  className="d-flex align-items-center p-1"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onToggleComplete(e)
-                  }}
-                  disabled={loadingComplete}
-                  title={isCompleted ? "Mark as incomplete" : "Mark as complete"}
-                >
-                  <CheckCircle 
-                    size={22} 
-                    className={`${isCompleted ? 'text-success' : 'text-muted'} ${loadingComplete ? 'opacity-50' : ''}`}
-                    fill={isCompleted ? 'currentColor' : 'none'}
-                    strokeWidth={1.5}
-                  />
-                </Button>
-              )}
+              Added {new Date(resource.createdAt).toLocaleDateString()}
             </div>
-            <div className="ms-auto d-flex align-items-center gap-2 text-muted">
-              <Calendar size={14} />
-              <small>Added {new Date(resource.createdAt).toLocaleDateString()}</small>
+            <div className="ms-auto">
+              <Button
+                variant="link"
+                className={`p-0 me-2 ${favoriteLoading ? 'disabled' : ''}`}
+                onClick={handleFavoriteClick}
+                disabled={favoriteLoading}
+              >
+                {isFavorite ? <StarFill className="text-warning" size={20} /> : <Star size={20} />}
+              </Button>
+              <Button
+                variant="link"
+                className={`p-0 ${completeLoading ? 'disabled' : ''}`}
+                onClick={handleCompleteClick}
+                disabled={completeLoading}
+              >
+                {isCompleted ? <CheckCircleFill className="text-success" size={20} /> : <CheckCircle size={20} />}
+              </Button>
             </div>
           </div>
-
           <div className="mb-4">
-            <div 
-              className="formatted-content bg-light rounded p-3"
-              dangerouslySetInnerHTML={{ __html: content.description }}
-            />
+            {content.description && (
+              <div dangerouslySetInnerHTML={{ __html: content.description }} />
+            )}
           </div>
-
           {content.courseContent && content.courseContent.length > 0 && (
             <div className="mb-4">
-              <h6 className="text-uppercase text-muted mb-3 d-flex align-items-center gap-2">
-                <div className="bg-primary rounded-circle p-1">
-                  <List size={12} className="text-white" />
-                </div>
-                Course Content
-              </h6>
-              <div className="bg-light rounded p-3">
-                <ul className="list-unstyled mb-0">
-                  {content.courseContent.map((item, index) => (
-                    <li key={index} className="mb-2 d-flex align-items-start">
-                      <span className="text-primary me-2 mt-1">•</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <h5>Course Content</h5>
+              <ul className="list-unstyled">
+                {content.courseContent.map((item, index) => (
+                  <li key={index} className="mb-2">
+                    <div className="d-flex align-items-center">
+                      <span className="me-2">•</span>
+                      {item}
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
-
-          {resource.additionalUrls && resource.additionalUrls.length > 0 && (
-            <div className="mb-4">
-              <h6 className="text-uppercase text-muted mb-3 d-flex align-items-center gap-2">
-                <div className="bg-primary rounded-circle p-1">
-                  <Link2 size={12} className="text-white" />
-                </div>
-                Additional Resources
-              </h6>
-              <div className="bg-light rounded p-3">
-                <ul className="list-unstyled mb-0">
-                  {resource.additionalUrls.map((url, index) => (
-                    <li key={index} className="mb-2 last:mb-0">
-                      <a 
-                        href={url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="d-flex align-items-center text-decoration-none p-2 bg-white rounded"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <LinkIcon size={14} className="me-2 text-primary" />
-                        <span className="text-break flex-grow-1">{url}</span>
-                        <ExternalLink size={14} className="ms-2 text-muted" />
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
-
-          <div className="d-flex gap-2 mt-4 border-top pt-4">
+          <div className="d-flex gap-2">
             <Button 
               variant="primary" 
-              href={resource.url} 
+              size="lg"
+              className="flex-grow-1"
+              href={resource.url}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="d-flex align-items-center"
             >
-              <ExternalLink size={16} className="me-2" />
               Open Resource
             </Button>
             {onEdit && (
               <Button 
                 variant="outline-secondary" 
+                size="lg"
                 onClick={handleEdit}
-                className="d-flex align-items-center"
+                className="d-flex align-items-center gap-2"
               >
-                <Edit size={16} className="me-2" />
+                <Pencil size={16} />
                 Edit
               </Button>
             )}

@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server'
+import { writeFile } from 'fs/promises'
+import { join } from 'path'
+import { nanoid } from 'nanoid'
 
 function isValidUrl(urlString: string) {
   try {
@@ -67,10 +70,15 @@ function getDefaultImage(hostname: string): string | null {
     'youtu.be': 'https://www.youtube.com/img/desktop/yt_1200.png',
     'github.com': 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
     'linkedin.com': 'https://static.licdn.com/aero-v1/sc/h/3usjoqvsfrr7z3ovwvk8r6mz0',
-    'figma.com': 'https://cdn.sanity.io/images/599r6htc/localized/46a76c802176eb17b04e12108de7e7e0f3736dc6-1108x1108.png',
+    'figma.com': '/defaults/figma.png',
     'twitter.com': 'https://abs.twimg.com/responsive-web/client-web/icon-ios.b1fc727a.png',
     'medium.com': 'https://miro.medium.com/v2/1*m-R_BkNf1Qjr1YbyOIJY2w.png',
-    'codepen.io': 'https://assets.codepen.io/t-1/codepen-logo.svg'
+    'codepen.io': 'https://assets.codepen.io/t-1/codepen-logo.svg',
+    'skillshare.com': '/defaults/skillshare.png',
+    'cgfasttrack.com': '/defaults/cgfasttrack.png',
+    'adobe.com': '/defaults/adobe.png',
+    'photoshop.com': '/defaults/photoshop.png',
+    'blender.org': '/defaults/blender.png'
   }
 
   for (const [domain, image] of Object.entries(defaultImages)) {
@@ -81,43 +89,110 @@ function getDefaultImage(hostname: string): string | null {
   return null
 }
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url)
-  const urlString = searchParams.get('url')
+function getCategoryDefaultImage(title: string = '', categoryName: string = ''): string {
+  const lowerTitle = title.toLowerCase()
+  const lowerCategory = categoryName.toLowerCase()
 
-  if (!urlString || !isValidUrl(urlString)) {
-    return NextResponse.json({ 
-      error: 'Invalid URL',
-      title: 'Invalid URL',
-      siteName: 'Error'
-    }, { 
-      status: 400 
-    })
+  if (lowerCategory.includes('blender') || lowerTitle.includes('blender')) {
+    return '/defaults/blender.png'
+  }
+  if (lowerTitle.includes('figma') || lowerCategory.includes('figma')) {
+    return '/defaults/figma.png'
+  }
+  if (lowerTitle.includes('photoshop') || lowerCategory.includes('photoshop')) {
+    return '/defaults/photoshop.png'
+  }
+  if (lowerTitle.includes('illustrator') || lowerCategory.includes('illustrator')) {
+    return '/defaults/illustrator.png'
+  }
+  if (lowerTitle.includes('indesign') || lowerCategory.includes('indesign')) {
+    return '/defaults/indesign.png'
+  }
+  if (lowerTitle.includes('after effects') || lowerCategory.includes('after effects') || lowerTitle.includes('aftereffects')) {
+    return '/defaults/aftereffects.png'
   }
 
-  try {
-    const url = new URL(urlString)
-    console.log('Fetching preview for:', urlString)
+  return '/defaults/default.png'
+}
 
-    // Handle YouTube URLs
-    const youtubeId = getYouTubeId(urlString)
-    if (youtubeId) {
-      console.log('YouTube video detected, ID:', youtubeId)
-      return NextResponse.json({
-        title: 'YouTube Video',
-        image: `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`,
-        siteName: 'YouTube',
-        type: 'video'
+async function downloadImage(imageUrl: string): Promise<string | null> {
+  try {
+    const response = await fetch(imageUrl)
+    if (!response.ok) return null
+    
+    const buffer = await response.arrayBuffer()
+    const fileExt = imageUrl.split('.').pop()?.split('?')[0] || 'jpg'
+    const fileName = `resource-${nanoid()}-preview.${fileExt}`
+    const path = `/assets/previews/${fileName}`
+    const fullPath = join(process.cwd(), 'public', 'assets', 'previews', fileName)
+
+    await writeFile(fullPath, Buffer.from(buffer))
+    return path
+  } catch (error) {
+    console.error('Error downloading image:', error)
+    return null
+  }
+}
+
+function getFigmaFileId(url: string): string | null {
+  try {
+    const urlObj = new URL(url)
+    if (!urlObj.hostname.includes('figma.com')) return null
+    
+    // Handle thumbnail URLs
+    if (url.includes('thumbnails/')) {
+      const matches = url.match(/thumbnails\/([^/&?]+)/)
+      return matches?.[1] || null
+    }
+    
+    // Handle community URLs
+    if (url.includes('community/file/')) {
+      const matches = url.match(/community\/file\/([^/]+)/)
+      return matches?.[1] || null
+    }
+    
+    // Handle direct file URLs
+    if (url.includes('file/')) {
+      const matches = url.match(/file\/([^/]+)/)
+      return matches?.[1] || null
+    }
+    
+    return null
+  } catch {
+    return null
+  }
+}
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const title = searchParams.get('title') || ''
+  const category = searchParams.get('category') || ''
+
+  try {
+    let imageUrl: string | null = null
+    let description = ''
+    let siteName = ''
+    const urlString = searchParams.get('url')
+
+    if (!urlString || !isValidUrl(urlString)) {
+      return NextResponse.json({ 
+        error: 'Invalid URL',
+        title: 'Invalid URL',
+        siteName: 'Error',
+        image: getCategoryDefaultImage(title, category)
+      }, { 
+        status: 400 
       })
     }
 
-    // Try default image first
-    const defaultImage = getDefaultImage(url.hostname)
-    if (defaultImage) {
-      console.log('Using default image for:', url.hostname)
-    }
+    const url = new URL(urlString)
+    console.log('Fetching preview for:', urlString)
 
-    // Fetch page content
+    // Get category default image for fallback
+    const categoryDefaultImage = getCategoryDefaultImage(title, category)
+    console.log('Category default image available:', categoryDefaultImage)
+
+    // Try to fetch the page content
     const response = await fetch(urlString, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
@@ -128,17 +203,56 @@ export async function GET(request: Request) {
       return null
     })
 
+    // If fetch fails, use category default
     if (!response?.ok) {
-      console.log('Failed to fetch URL, using default image')
+      console.log('Failed to fetch URL, using category default')
       return NextResponse.json({
-        title: url.hostname,
+        title: title || url.hostname,
         siteName: url.hostname,
         type: 'link',
-        image: defaultImage,
-        error: 'Failed to fetch URL'
+        image: categoryDefaultImage
       })
     }
 
+    // Handle Figma URLs first
+    const figmaFileId = getFigmaFileId(urlString)
+    if (figmaFileId) {
+      console.log('Figma file detected, ID:', figmaFileId)
+      const figmaImageUrl = `https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/${figmaFileId}`
+      const storedPath = await downloadImage(figmaImageUrl)
+      if (storedPath) {
+        return NextResponse.json({
+          title: title || 'Figma File',
+          image: storedPath,
+          siteName: 'Figma',
+          type: 'link'
+        })
+      }
+      // If Figma image fails, use category default
+      return NextResponse.json({
+        title: title || 'Figma File',
+        image: categoryDefaultImage,
+        siteName: 'Figma',
+        type: 'link'
+      })
+    }
+
+    // Handle YouTube URLs
+    const youtubeId = getYouTubeId(urlString)
+    if (youtubeId) {
+      console.log('YouTube video detected, ID:', youtubeId)
+      const youtubeImageUrl = `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`
+      // Try to download YouTube thumbnail
+      const storedPath = await downloadImage(youtubeImageUrl)
+      return NextResponse.json({
+        title: title || 'YouTube Video',
+        image: storedPath || categoryDefaultImage,
+        siteName: 'YouTube',
+        type: 'video'
+      })
+    }
+
+    // Fetch page content
     const text = await response.text()
     
     // Try multiple meta tag patterns for images
@@ -151,7 +265,7 @@ export async function GET(request: Request) {
       /<link[^>]*href="([^"]*)"[^>]*rel="image_src"[^>]*>/i
     ]
 
-    let imageUrl = findMetaContent(text, imagePatterns)
+    imageUrl = findMetaContent(text, imagePatterns)
     console.log('Found meta image:', imageUrl)
 
     // If no meta image found, try to find a large image in the HTML
@@ -178,19 +292,25 @@ export async function GET(request: Request) {
       }
     }
 
-    // Convert relative URLs to absolute
+    // Convert relative URLs to absolute and download
     if (imageUrl) {
       const absoluteUrl = getAbsoluteUrl(imageUrl, url.origin)
       if (absoluteUrl) {
         imageUrl = absoluteUrl
         console.log('Converted to absolute URL:', imageUrl)
+        // Download and store the image
+        const storedPath = await downloadImage(imageUrl)
+        if (storedPath) {
+          imageUrl = storedPath
+          console.log('Stored image locally:', storedPath)
+        }
       }
     }
 
-    // Fallback to default image if no image found
-    if (!imageUrl && defaultImage) {
-      imageUrl = defaultImage
-      console.log('Using default image fallback')
+    // Only use category default if no other image was found or stored
+    if (!imageUrl) {
+      imageUrl = categoryDefaultImage
+      console.log('No image found, using category default:', imageUrl)
     }
 
     // Get other metadata
@@ -211,12 +331,12 @@ export async function GET(request: Request) {
       /<meta[^>]*content="([^"]*)"[^>]*property="og:site_name"[^>]*>/i
     ]
 
-    const title = findMetaContent(text, titlePatterns) || url.hostname
-    const description = findMetaContent(text, descriptionPatterns) || ''
-    const siteName = findMetaContent(text, siteNamePatterns) || url.hostname
+    const metaTitle = findMetaContent(text, titlePatterns)
+    description = findMetaContent(text, descriptionPatterns) || ''
+    siteName = findMetaContent(text, siteNamePatterns) || url.hostname
 
     const result = {
-      title,
+      title: title || metaTitle || url.hostname,
       description,
       image: imageUrl,
       siteName,
@@ -232,7 +352,8 @@ export async function GET(request: Request) {
       title: 'Invalid URL',
       siteName: 'Error',
       type: 'link',
-      error: 'Failed to process URL'
+      error: 'Failed to process URL',
+      image: getCategoryDefaultImage(title, category)
     })
   }
 } 

@@ -31,27 +31,25 @@ export async function POST(request: NextRequest) {
 
     const isFavorited = resource.favoritedBy.some(u => u.id === user.id)
 
-    if (isFavorited) {
-      await prisma.resource.update({
-        where: { id: resourceId },
-        data: {
-          favoritedBy: {
-            disconnect: { id: user.id }
-          }
+    const updatedResource = await prisma.resource.update({
+      where: { id: resourceId },
+      data: {
+        favoritedBy: {
+          [isFavorited ? 'disconnect' : 'connect']: { id: user.id }
         }
-      })
-    } else {
-      await prisma.resource.update({
-        where: { id: resourceId },
-        data: {
-          favoritedBy: {
-            connect: { id: user.id }
-          }
+      },
+      include: {
+        favoritedBy: {
+          select: { id: true }
         }
-      })
-    }
+      }
+    })
 
-    return NextResponse.json({ success: true })
+    // Return the new state
+    return NextResponse.json({ 
+      isFavorite: !isFavorited,
+      favoritedBy: updatedResource.favoritedBy
+    })
   } catch (err) {
     console.error('Error toggling favorite:', err)
     return NextResponse.json(

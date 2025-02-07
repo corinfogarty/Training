@@ -9,6 +9,8 @@ import type { Resource, Category } from '@prisma/client'
 
 interface ResourceWithRelations extends Resource {
   category: Category | null
+  favoritedBy: { id: string }[]
+  completedBy: { id: string }[]
   isFavorite: boolean
   isCompleted: boolean
   submittedBy?: {
@@ -59,6 +61,46 @@ const ResourceView = ({ resourceId }: ResourceViewProps) => {
     }
   }
 
+  const handleToggleFavorite = async () => {
+    if (!session?.user || !resource) return
+    try {
+      const response = await fetch(`/api/resources/${resource.id}/favorite`, {
+        method: 'POST'
+      })
+      if (!response.ok) throw new Error('Failed to toggle favorite')
+      const data = await response.json()
+      setResource(prev => prev ? {
+        ...prev,
+        isFavorite: data.isFavorite,
+        favoritedBy: data.isFavorite
+          ? [...prev.favoritedBy, { id: session.user.id }]
+          : prev.favoritedBy.filter((u: { id: string }) => u.id !== session.user.id)
+      } : null)
+    } catch (error) {
+      console.error('Error toggling favorite:', error)
+    }
+  }
+
+  const handleToggleComplete = async () => {
+    if (!session?.user || !resource) return
+    try {
+      const response = await fetch(`/api/resources/${resource.id}/complete`, {
+        method: 'POST'
+      })
+      if (!response.ok) throw new Error('Failed to toggle complete')
+      const data = await response.json()
+      setResource(prev => prev ? {
+        ...prev,
+        isCompleted: data.isCompleted,
+        completedBy: data.isCompleted
+          ? [...prev.completedBy, { id: session.user.id }]
+          : prev.completedBy.filter((u: { id: string }) => u.id !== session.user.id)
+      } : null)
+    } catch (error) {
+      console.error('Error toggling complete:', error)
+    }
+  }
+
   if (loading || !resource) {
     return (
       <div className="bg-dark text-white min-vh-100">
@@ -81,18 +123,8 @@ const ResourceView = ({ resourceId }: ResourceViewProps) => {
           standalone={true}
           isFavorite={resource.isFavorite}
           isCompleted={resource.isCompleted}
-          onToggleFavorite={async () => {
-            await fetch(`/api/resources/${resource.id}/favorite`, {
-              method: 'POST'
-            })
-            fetchResource()
-          }}
-          onToggleComplete={async () => {
-            await fetch(`/api/resources/${resource.id}/complete`, {
-              method: 'POST'
-            })
-            fetchResource()
-          }}
+          onToggleFavorite={handleToggleFavorite}
+          onToggleComplete={handleToggleComplete}
           onDelete={async () => {
             await fetch(`/api/resources/${resource.id}`, {
               method: 'DELETE'

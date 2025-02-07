@@ -124,29 +124,31 @@ export default function ResourceCard({
               className={isCompleted ? 'text-success' : ''}
             />
           </Button>
-          <Button
-            variant="link"
-            size="sm"
-            className="text-muted p-0"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowEdit(true);
-            }}
-          >
-            <Edit size={16} />
-          </Button>
           {(session?.user?.isAdmin || session?.user?.id === resource.submittedBy?.id) && (
-            <Button
-              variant="link"
-              size="sm"
-              className="text-danger p-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowDeleteConfirm(true);
-              }}
-            >
-              <Trash2 size={16} />
-            </Button>
+            <>
+              <Button
+                variant="link"
+                size="sm"
+                className="text-muted p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowEdit(true);
+                }}
+              >
+                <Edit size={16} />
+              </Button>
+              <Button
+                variant="link"
+                size="sm"
+                className="text-danger p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDeleteConfirm(true);
+                }}
+              >
+                <Trash2 size={16} />
+              </Button>
+            </>
           )}
           {resource.submittedBy?.image && (
             <img 
@@ -220,29 +222,31 @@ export default function ResourceCard({
                 className={isCompleted ? 'text-success' : ''}
               />
             </Button>
-            <Button
-              variant="link"
-              size="sm"
-              className="text-muted p-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowEdit(true);
-              }}
-            >
-              <Edit size={16} />
-            </Button>
             {(session?.user?.isAdmin || session?.user?.id === resource.submittedBy?.id) && (
-              <Button
-                variant="link"
-                size="sm"
-                className="text-danger p-0"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowDeleteConfirm(true);
-                }}
-              >
-                <Trash2 size={16} />
-              </Button>
+              <>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="text-muted p-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowEdit(true);
+                  }}
+                >
+                  <Edit size={16} />
+                </Button>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="text-danger p-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDeleteConfirm(true);
+                  }}
+                >
+                  <Trash2 size={16} />
+                </Button>
+              </>
             )}
           </div>
           <div className="d-flex align-items-center gap-2">

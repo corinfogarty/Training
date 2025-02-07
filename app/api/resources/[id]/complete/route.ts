@@ -31,27 +31,25 @@ export async function POST(request: NextRequest) {
 
     const isCompleted = resource.completedBy.some(u => u.id === user.id)
 
-    if (isCompleted) {
-      await prisma.resource.update({
-        where: { id: resourceId },
-        data: {
-          completedBy: {
-            disconnect: { id: user.id }
-          }
+    const updatedResource = await prisma.resource.update({
+      where: { id: resourceId },
+      data: {
+        completedBy: {
+          [isCompleted ? 'disconnect' : 'connect']: { id: user.id }
         }
-      })
-    } else {
-      await prisma.resource.update({
-        where: { id: resourceId },
-        data: {
-          completedBy: {
-            connect: { id: user.id }
-          }
+      },
+      include: {
+        completedBy: {
+          select: { id: true }
         }
-      })
-    }
+      }
+    })
 
-    return NextResponse.json({ success: true })
+    // Return the new state
+    return NextResponse.json({ 
+      isCompleted: !isCompleted,
+      completedBy: updatedResource.completedBy
+    })
   } catch (err) {
     console.error('Error toggling complete:', err)
     return NextResponse.json(

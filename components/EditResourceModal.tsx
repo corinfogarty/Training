@@ -25,6 +25,7 @@ export default function EditResourceModal({ resource, show, onHide, onSave }: Ed
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
 
   useEffect(() => {
     if (show) {
@@ -117,6 +118,27 @@ export default function EditResourceModal({ resource, show, onHide, onSave }: Ed
       setPreviewImage(previewUrl)
     }
   }
+
+  const handleFetchPreview = async () => {
+    if (!url) return;
+    
+    try {
+      setPreviewLoading(true);
+      const response = await fetch(`/api/preview?url=${encodeURIComponent(url)}`);
+      if (!response.ok) throw new Error('Failed to fetch preview');
+      const data = await response.json();
+      
+      // Decode the image URL if it exists
+      const decodedImageUrl = data.image ? decodeURIComponent(data.image.replace(/&amp;/g, '&')) : '';
+      
+      setPreviewImage(decodedImageUrl);
+      setDescription(data.description || description);
+    } catch (error) {
+      console.error('Error fetching preview:', error);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
 
   return (
     <Modal show={show} onHide={onHide} size="lg">
@@ -225,7 +247,14 @@ export default function EditResourceModal({ resource, show, onHide, onSave }: Ed
                   Enter a URL or use the file selector to upload an image
                 </Form.Text>
               </div>
-              <div>
+              <div className="d-flex gap-2">
+                <Button
+                  variant="outline-secondary"
+                  onClick={handleFetchPreview}
+                  disabled={!url || previewLoading}
+                >
+                  Fetch from URL
+                </Button>
                 <Form.Control
                   type="file"
                   accept="image/*"

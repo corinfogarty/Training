@@ -249,8 +249,9 @@ export const authOptions: NextAuthOptions = {
       if (session?.user) {
         session.user.isAdmin = token.isAdmin as boolean
         session.user.id = token.userId as string
-        session.user.image = token.picture as string | null // Pass image to session
+        session.user.image = token.picture as string || session.user.image
       }
+      
       return session
     }
   },

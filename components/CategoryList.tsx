@@ -36,9 +36,30 @@ export default function CategoryList() {
   const [resources, setResources] = useState<ResourceWithRelations[]>([])
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeFilters, setActiveFilters] = useState<ActiveFilters>(new Set())
-  const [contentTypeFilter, setContentTypeFilter] = useState<ContentTypeFilter>(new Set())
-  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>(new Set())
+  const [activeFilters, setActiveFilters] = useState<ActiveFilters>(() => {
+    try {
+      const savedFilters = Cookies.get('activeFilters')
+      return savedFilters ? new Set(JSON.parse(savedFilters)) : new Set()
+    } catch {
+      return new Set()
+    }
+  })
+  const [contentTypeFilter, setContentTypeFilter] = useState<ContentTypeFilter>(() => {
+    try {
+      const savedContentTypes = Cookies.get('contentTypeFilter')
+      return savedContentTypes ? new Set(JSON.parse(savedContentTypes)) : new Set()
+    } catch {
+      return new Set()
+    }
+  })
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>(() => {
+    try {
+      const savedCategories = Cookies.get('categoryFilter')
+      return savedCategories ? new Set(JSON.parse(savedCategories)) : new Set()
+    } catch {
+      return new Set()
+    }
+  })
   const [searchTerm, setSearchTerm] = useState('')
   const [viewType, setViewType] = useState<ViewType>(() => {
     const savedView = Cookies.get('preferredView')
@@ -52,6 +73,19 @@ export default function CategoryList() {
   useEffect(() => {
     Cookies.set('preferredView', viewType, { expires: 365 })
   }, [viewType])
+
+  // Save filters when they change
+  useEffect(() => {
+    Cookies.set('activeFilters', JSON.stringify(Array.from(activeFilters)), { expires: 365 })
+  }, [activeFilters])
+
+  useEffect(() => {
+    Cookies.set('contentTypeFilter', JSON.stringify(Array.from(contentTypeFilter)), { expires: 365 })
+  }, [contentTypeFilter])
+
+  useEffect(() => {
+    Cookies.set('categoryFilter', JSON.stringify(Array.from(categoryFilter)), { expires: 365 })
+  }, [categoryFilter])
 
   useEffect(() => {
     fetchData()
@@ -137,17 +171,17 @@ export default function CategoryList() {
         method: 'POST'
       })
       if (!response.ok) throw new Error('Failed to toggle favorite')
+      const data = await response.json()
       
-      // Update state locally
       setResources(prevResources => 
         prevResources.map(resource => {
           if (resource.id === resourceId) {
-            const isFavorited = resource.favoritedBy.some(u => u.id === session.user?.id)
+            const newFavoritedBy = data.isFavorite
+              ? [...resource.favoritedBy, { id: session.user.id } as User]
+              : resource.favoritedBy.filter(u => u.id !== session.user.id)
             return {
               ...resource,
-              favoritedBy: isFavorited
-                ? resource.favoritedBy.filter(u => u.id !== session.user?.id)
-                : [...resource.favoritedBy, { id: session.user?.id } as User]
+              favoritedBy: newFavoritedBy
             }
           }
           return resource
@@ -167,16 +201,15 @@ export default function CategoryList() {
       if (!response.ok) throw new Error('Failed to toggle complete')
       const data = await response.json()
       
-      // Update state locally
       setResources(prevResources => 
         prevResources.map(resource => {
           if (resource.id === resourceId) {
-            const isCompleted = resource.completedBy.some(u => u.id === session.user?.id)
+            const newCompletedBy = data.isCompleted
+              ? [...resource.completedBy, { id: session.user.id } as User]
+              : resource.completedBy.filter(u => u.id !== session.user.id)
             return {
               ...resource,
-              completedBy: isCompleted
-                ? resource.completedBy.filter(u => u.id !== session.user?.id)
-                : [...resource.completedBy, { id: session.user?.id } as User]
+              completedBy: newCompletedBy
             }
           }
           return resource
@@ -317,6 +350,34 @@ export default function CategoryList() {
         </Container>
       </div>
 
+      {/* Active Filter Badges */}
+      {(activeFilters.size > 0 || contentTypeFilter.size > 0 || categoryFilter.size > 0) && (
+        <div className="bg-white shadow-sm border-bottom">
+          <Container>
+            <div className="d-flex align-items-center justify-content-center gap-2 flex-wrap" style={{ paddingTop: '4px', paddingBottom: '4px' }}>
+              {Array.from(categoryFilter).map(categoryId => {
+                const category = categories.find(c => c.id === categoryId)
+                return category ? (
+                  <span key={categoryId} className="badge" style={{ backgroundColor: '#675a95', color: 'white' }}>{category.name}</span>
+                ) : null
+              })}
+              {Array.from(contentTypeFilter).map(type => (
+                <span key={type} className="badge" style={{ backgroundColor: '#006ba5', color: 'white' }}>{type}</span>
+              ))}
+              {activeFilters.has('favorites') && (
+                <span className="badge" style={{ backgroundColor: '#f0e0a4', color: '#333' }}>Favorites</span>
+              )}
+              {activeFilters.has('completed') && (
+                <span className="badge" style={{ backgroundColor: '#9bc7a3', color: 'white' }}>Completed</span>
+              )}
+              {activeFilters.has('incomplete') && (
+                <span className="badge" style={{ backgroundColor: '#e63478', color: 'white' }}>Incomplete</span>
+              )}
+            </div>
+          </Container>
+        </div>
+      )}
+
       <Container className="py-4">
         <DragDropContext onDragEnd={handleDragEnd}>
           <div className="mt-4">
@@ -324,7 +385,7 @@ export default function CategoryList() {
               <div 
                 className="position-fixed start-0 end-0 bottom-0"
                 style={{ 
-                  top: '88px', // Height of the header + padding
+                  top: '128px', // Increased to account for badges
                   backgroundColor: '#f8f9fa',
                   padding: '1.5rem'
                 }}
@@ -399,7 +460,7 @@ export default function CategoryList() {
               <div 
                 className="position-fixed start-0 end-0 bottom-0"
                 style={{ 
-                  top: '88px',
+                  top: '128px', // Increased to account for badges
                   backgroundColor: '#f8f9fa',
                   padding: '2rem',
                   overflowY: 'auto'

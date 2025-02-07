@@ -179,26 +179,6 @@ export default function FilterFlyout({
           </Popover.Body>
         </Popover>
       </Overlay>
-
-      {/* Active Filter Badges */}
-      {Array.from(categoryFilter).map(categoryId => {
-        const category = categories.find(c => c.id === categoryId)
-        return category ? (
-          <span key={categoryId} className="badge bg-secondary me-1">{category.name}</span>
-        ) : null
-      })}
-      {Array.from(contentTypeFilter).map(type => (
-        <span key={type} className="badge bg-primary me-1">{type}</span>
-      ))}
-      {activeFilters.has('favorites') && (
-        <span className="badge bg-warning text-dark me-1">Favorites</span>
-      )}
-      {activeFilters.has('completed') && (
-        <span className="badge bg-success me-1">Completed</span>
-      )}
-      {activeFilters.has('incomplete') && (
-        <span className="badge bg-info me-1">Incomplete</span>
-      )}
     </>
   )
 } 

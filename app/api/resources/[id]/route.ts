@@ -10,6 +10,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Get the user from the database to ensure we have the correct ID
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email }
+    })
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
     const resourceId = request.nextUrl.pathname.split('/')[3] // /api/resources/[id]
     const resource = await prisma.resource.findUnique({
       where: { id: resourceId },
@@ -24,11 +33,9 @@ export async function GET(request: NextRequest) {
           }
         },
         favoritedBy: {
-          where: { id: session.user.id },
           select: { id: true }
         },
         completedBy: {
-          where: { id: session.user.id },
           select: { id: true }
         }
       }
@@ -40,10 +47,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       ...resource,
-      isFavorite: resource.favoritedBy.length > 0,
-      isCompleted: resource.completedBy.length > 0,
-      favoritedBy: undefined,
-      completedBy: undefined
+      isFavorite: resource.favoritedBy.some(u => u.id === user.id),
+      isCompleted: resource.completedBy.some(u => u.id === user.id)
     })
   } catch (error) {
     console.error('Error fetching resource:', error)
@@ -54,16 +59,39 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.isAdmin) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const resourceId = request.nextUrl.pathname.split('/')[3] // /api/resources/[id]
+    const resourceId = request.nextUrl.pathname.split('/')[3]
+    
+    // Check if user is the submitter of this resource
+    const existingResource = await prisma.resource.findUnique({
+      where: { id: resourceId },
+      select: { submittedById: true }
+    })
+
+    if (!existingResource) {
+      return NextResponse.json({ error: 'Resource not found' }, { status: 404 })
+    }
+
+    // Only allow admins or the original submitter to edit
+    if (!session.user.isAdmin && existingResource.submittedById !== session.user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const data = await request.json()
 
     const resource = await prisma.resource.update({
       where: { id: resourceId },
-      data,
+      data: {
+        title: data.title,
+        description: data.description,
+        url: data.url,
+        categoryId: data.categoryId,
+        previewImage: data.previewImage,
+        contentType: data.contentType
+      },
       include: {
         category: true
       }
