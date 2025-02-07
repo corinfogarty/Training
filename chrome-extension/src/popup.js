@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const urlInput = document.getElementById('url');
   const descriptionInput = document.getElementById('description');
   const categorySelect = document.getElementById('category');
+  const contentTypeSelect = document.getElementById('contentType');
   const submitButton = document.getElementById('submit');
   const messageDiv = document.getElementById('message');
   const previewImageEl = document.getElementById('preview-image');
@@ -87,7 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Handle form submission
   submitButton.addEventListener('click', async () => {
-    if (!titleInput.value || !urlInput.value || !categorySelect.value) {
+    if (!titleInput.value || !urlInput.value || !categorySelect.value || !contentTypeSelect.value) {
       messageDiv.textContent = 'Please fill in all required fields';
       messageDiv.className = 'error';
       return;
@@ -99,9 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         title: titleInput.value,
         description: descriptionInput.value || titleInput.value,
         credentials: {},
-        courseContent: [],
-        previewImage: previewImage,
-        url: urlInput.value
+        courseContent: []
       };
 
       const data = {
@@ -109,8 +108,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         url: urlInput.value,
         description: JSON.stringify(content),
         categoryId: categorySelect.value,
-        type: 'LINK',
-        previewImage: previewImage
+        contentType: contentTypeSelect.value,
+        previewImage: previewImage,
+        additionalUrls: []
       };
       console.log('Sending data:', data);
 
@@ -138,6 +138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       urlInput.value = '';
       descriptionInput.value = '';
       categorySelect.value = '';
+      contentTypeSelect.value = 'Resource';
       updatePreviewImage(null);
       
     } catch (error) {

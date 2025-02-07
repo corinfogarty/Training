@@ -7,7 +7,7 @@ import ResourceCard from './ResourceCard'
 import Debug from './Debug'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
 import { Container, Alert, Row, Col, Image, ButtonGroup, Button, Modal } from 'react-bootstrap'
-import { Grid, List, Columns } from 'lucide-react'
+import { Grid, List, Columns, BarChart, Settings, Users, LayoutGrid, Sliders } from 'lucide-react'
 import { Chrome } from 'lucide-react'
 import CategoryFilter from './CategoryFilter'
 import { useSession } from 'next-auth/react'
@@ -17,6 +17,7 @@ import AuthButton from './AuthButton'
 import Cookies from 'js-cookie'
 import FilterFlyout from './FilterFlyout'
 import AdminModal from './AdminModal'
+import Link from 'next/link'
 
 type ViewType = 'grid' | 'list' | 'columns'
 type FilterType = 'all' | 'favorites' | 'completed' | 'incomplete'
@@ -309,14 +310,7 @@ export default function CategoryList() {
 
               <div className="d-flex gap-2">
                 <AddResourceButton />
-                <Button
-                  variant="outline-secondary"
-                  onClick={() => setShowInstallHelp(true)}
-                  title="Extension Installation Help"
-                >
-                  <Chrome size={16} />
-                </Button>
-                <AuthButton onAdminClick={() => setShowAdminModal(true)} />
+                <AuthButton />
               </div>
             </div>
           </div>
@@ -468,32 +462,6 @@ export default function CategoryList() {
           </div>
         </DragDropContext>
       </Container>
-
-      <Modal show={showInstallHelp} onHide={() => setShowInstallHelp(false)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>Install Chrome Extension (Developer Mode)</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <ol className="mb-4">
-            <li className="mb-2">Download the extension ZIP file from <a href="/extension.zip" className="text-primary">here</a></li>
-            <li className="mb-2">Unzip the file to a location on your computer</li>
-            <li className="mb-2">Open Chrome and go to <code>chrome://extensions</code></li>
-            <li className="mb-2">Enable "Developer mode" using the toggle in the top right</li>
-            <li className="mb-2">Click "Load unpacked" button in the top left</li>
-            <li className="mb-2">Select the unzipped extension folder</li>
-            <li>The extension should now appear in your Chrome toolbar</li>
-          </ol>
-          <Alert variant="info">
-            <Alert.Heading>Note</Alert.Heading>
-            <p className="mb-0">This is a temporary installation method while we await approval from the Chrome Web Store. Once approved, you'll be able to install directly from the store.</p>
-          </Alert>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowInstallHelp(false)}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
 
       <AdminModal 
         show={showAdminModal} 

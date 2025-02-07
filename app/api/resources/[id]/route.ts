@@ -15,6 +15,14 @@ export async function GET(request: NextRequest) {
       where: { id: resourceId },
       include: {
         category: true,
+        submittedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true
+          }
+        },
         favoritedBy: {
           where: { id: session.user.id },
           select: { id: true }

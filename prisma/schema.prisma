@@ -27,11 +27,13 @@ model Resource {
   additionalUrls String[]
   previewImage   String?
   categoryId     String
+  submittedById  String?
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
   contentType    ContentType         @default(Training)
   completions    CompletedResource[]
   category       Category            @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  submittedBy    User?              @relation("UserSubmitted", fields: [submittedById], references: [id])
   orders         ResourceOrder[]     @relation("ResourceOrders")
   completedBy    User[]              @relation("UserCompleted")
   favoritedBy    User[]              @relation("UserFavorites")
@@ -53,6 +55,7 @@ model User {
   sessions           Session[]
   completed          Resource[]          @relation("UserCompleted")
   favorites          Resource[]          @relation("UserFavorites")
+  submittedResources Resource[]          @relation("UserSubmitted")
 }
 
 model Account {

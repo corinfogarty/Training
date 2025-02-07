@@ -12,6 +12,12 @@ import { useRouter } from 'next/navigation'
 interface ResourceCardProps {
   resource: Resource & {
     category?: Category | null
+    submittedBy?: {
+      id: string
+      name?: string | null
+      email: string
+      image?: string | null
+    } | null
   }
   index?: number
   isFavorite?: boolean
@@ -71,81 +77,6 @@ export default function ResourceCard({
     }
   }
 
-  const card = (
-    <Card 
-      className="h-100 shadow-sm" 
-      onClick={handleCardClick}
-      style={{ 
-        cursor: 'pointer',
-        position: 'relative',
-        zIndex: dropdownOpen ? 1000 : 'auto'
-      }}
-    >
-      <div 
-        className="card-img-top"
-        style={{
-          height: '120px',
-          backgroundImage: previewImage ? `url(${previewImage})` : 'none',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundColor: '#f8f9fa'
-        }}
-      />
-      <Card.Body className="p-3">
-        <div className="d-flex justify-content-between align-items-start">
-          <h6 className="mb-0 fw-semibold">{resource.title}</h6>
-          <Dropdown 
-            onClick={e => e.stopPropagation()}
-            onToggle={(isOpen) => setDropdownOpen(isOpen)}
-          >
-            <Dropdown.Toggle variant="link" className="p-0 text-muted">
-              <MoreVertical size={16} />
-            </Dropdown.Toggle>
-            <Dropdown.Menu align="end" style={{ zIndex: 1000 }}>
-              <Dropdown.Item onClick={onToggleFavorite}>
-                <Star size={16} className="me-2" />
-                {isFavorite ? 'Remove Favorite' : 'Add Favorite'}
-              </Dropdown.Item>
-              <Dropdown.Item onClick={onToggleComplete}>
-                <CheckCircle size={16} className="me-2" />
-                {isCompleted ? 'Mark Incomplete' : 'Mark Complete'}
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => setShowEdit(true)}>
-                <Edit size={16} className="me-2" />
-                Edit
-              </Dropdown.Item>
-              <Dropdown.Divider />
-              <Dropdown.Item 
-                onClick={() => setShowDeleteConfirm(true)}
-                className="text-danger"
-              >
-                <Trash2 size={16} className="me-2" />
-                Delete
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-        </div>
-
-        <div className="d-flex align-items-center gap-2 mt-2">
-          {isFavorite && (
-            <Star size={16} className="text-warning" fill="currentColor" />
-          )}
-          {isCompleted && (
-            <>
-              <CheckCircle size={16} className="text-success" fill="currentColor" />
-              {completedAt && (
-                <div className="small text-muted d-flex align-items-center">
-                  <Calendar size={12} className="me-1" />
-                  {new Date(completedAt).toLocaleDateString()}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </Card.Body>
-    </Card>
-  )
-
   const listView = (
     <div 
       className="resource-list-item"
@@ -197,35 +128,144 @@ export default function ResourceCard({
             variant="link"
             size="sm"
             className="text-muted p-0"
-            href={resource.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowEdit(true);
+            }}
           >
-            <ExternalLink size={16} />
+            <Edit size={16} />
           </Button>
-          <Dropdown onClick={e => e.stopPropagation()}>
-            <Dropdown.Toggle variant="link" className="p-0 text-muted">
-              <MoreVertical size={16} />
-            </Dropdown.Toggle>
-            <Dropdown.Menu align="end">
-              <Dropdown.Item onClick={() => setShowEdit(true)}>
-                <Edit size={16} className="me-2" />
-                Edit
-              </Dropdown.Item>
-              <Dropdown.Divider />
-              <Dropdown.Item 
-                onClick={() => setShowDeleteConfirm(true)}
-                className="text-danger"
-              >
-                <Trash2 size={16} className="me-2" />
-                Delete
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
+          {(session?.user?.isAdmin || session?.user?.id === resource.submittedBy?.id) && (
+            <Button
+              variant="link"
+              size="sm"
+              className="text-danger p-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDeleteConfirm(true);
+              }}
+            >
+              <Trash2 size={16} />
+            </Button>
+          )}
+          {resource.submittedBy?.image && (
+            <img 
+              src={resource.submittedBy.image} 
+              alt={resource.submittedBy.name || resource.submittedBy.email}
+              className="rounded-circle"
+              width={20}
+              height={20}
+              style={{ objectFit: 'cover' }}
+            />
+          )}
         </div>
       </div>
     </div>
+  )
+
+  const card = (
+    <Card 
+      className="h-100 shadow-sm" 
+      onClick={handleCardClick}
+      style={{ 
+        cursor: 'pointer',
+        position: 'relative',
+        zIndex: dropdownOpen ? 1000 : 'auto'
+      }}
+    >
+      <div 
+        className="card-img-top"
+        style={{
+          height: '120px',
+          backgroundImage: previewImage ? `url(${previewImage})` : 'none',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundColor: '#f8f9fa'
+        }}
+      />
+      <Card.Body className="p-3 d-flex flex-column">
+        <div className="mb-auto">
+          <h6 className="mb-0 fw-semibold">{resource.title}</h6>
+        </div>
+
+        <div className="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
+          <div className="d-flex align-items-center gap-2">
+            <Button
+              variant="link"
+              size="sm"
+              className={`text-muted p-0 ${isFavorite ? 'text-warning' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite();
+              }}
+            >
+              <Star 
+                size={16} 
+                fill={isFavorite ? 'currentColor' : 'none'} 
+                className={isFavorite ? 'text-warning' : ''}
+              />
+            </Button>
+            <Button
+              variant="link"
+              size="sm"
+              className={`text-muted p-0 ${isCompleted ? 'text-success' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleComplete();
+              }}
+            >
+              <CheckCircle 
+                size={16} 
+                fill={isCompleted ? 'currentColor' : 'none'} 
+                className={isCompleted ? 'text-success' : ''}
+              />
+            </Button>
+            <Button
+              variant="link"
+              size="sm"
+              className="text-muted p-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowEdit(true);
+              }}
+            >
+              <Edit size={16} />
+            </Button>
+            {(session?.user?.isAdmin || session?.user?.id === resource.submittedBy?.id) && (
+              <Button
+                variant="link"
+                size="sm"
+                className="text-danger p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDeleteConfirm(true);
+                }}
+              >
+                <Trash2 size={16} />
+              </Button>
+            )}
+          </div>
+          <div className="d-flex align-items-center gap-2">
+            {completedAt && (
+              <div className="small text-muted d-flex align-items-center">
+                <Calendar size={12} className="me-1" />
+                {new Date(completedAt).toLocaleDateString()}
+              </div>
+            )}
+            {resource.submittedBy?.image && (
+              <img 
+                src={resource.submittedBy.image} 
+                alt={resource.submittedBy.name || resource.submittedBy.email}
+                className="rounded-circle ms-2"
+                width={20}
+                height={20}
+                style={{ objectFit: 'cover' }}
+              />
+            )}
+          </div>
+        </div>
+      </Card.Body>
+    </Card>
   )
 
   const modals = (

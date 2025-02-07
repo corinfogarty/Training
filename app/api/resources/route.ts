@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '../../../lib/prisma'
 import { ContentType } from '@prisma/client'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,6 +21,14 @@ export async function GET() {
         categoryId: true,
         createdAt: true,
         updatedAt: true,
+        submittedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true
+          }
+        },
         favoritedBy: {
           select: {
             id: true
@@ -45,7 +55,26 @@ export async function GET() {
         }
       }
     })
-    return NextResponse.json(resources || [])
+
+    // Transform resources to handle description
+    const transformedResources = resources.map(resource => {
+      let description = resource.description
+      try {
+        // If it's a JSON string, parse it and get the description field
+        const parsed = JSON.parse(description)
+        if (parsed && typeof parsed === 'object' && 'description' in parsed) {
+          description = parsed.description
+        }
+      } catch {
+        // If it's not valid JSON, use it as is
+      }
+      return {
+        ...resource,
+        description
+      }
+    })
+
+    return NextResponse.json(transformedResources || [])
   } catch (err) {
     const error = err instanceof Error ? err.message : 'Failed to fetch resources'
     return NextResponse.json({ error }, { status: 500 })
@@ -54,6 +83,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const session = await getServerSession(authOptions)
     const data = await request.json()
 
     // Validate required fields
@@ -87,18 +117,10 @@ export async function POST(request: Request) {
     // If no preview image is provided, try to use category's default image
     const previewImage = data.previewImage || category.defaultImage || null
 
-    // Parse description if it's already a JSON string
+    // Handle description - ensure it's a string
     let description = data.description
-    try {
-      JSON.parse(data.description)
-    } catch {
-      // If it's not valid JSON, stringify it
-      description = JSON.stringify({
-        title: data.title,
-        description: data.description,
-        credentials: {},
-        courseContent: []
-      })
+    if (typeof description === 'object') {
+      description = JSON.stringify(description)
     }
 
     const resource = await prisma.resource.create({ 
@@ -109,8 +131,19 @@ export async function POST(request: Request) {
         categoryId: data.categoryId,
         previewImage,
         contentType: data.contentType,
-        additionalUrls: data.additionalUrls || [] // Add default empty array
-      } 
+        additionalUrls: data.additionalUrls || [],
+        submittedById: session?.user?.id || null
+      },
+      include: {
+        submittedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true
+          }
+        }
+      }
     })
 
     return NextResponse.json(resource)

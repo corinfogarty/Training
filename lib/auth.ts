@@ -45,6 +45,8 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile, email }) {
+      logEvent('signIn callback', { user, account, profile }) // Add logging to see what we get
+      
       if (!user.email) return false
       
       // Check if this Google account already exists
@@ -54,6 +56,15 @@ export const authOptions: NextAuthOptions = {
       })
 
       if (userExists) {
+        // Update user's profile info from Google
+        await prisma.user.update({
+          where: { id: userExists.id },
+          data: { 
+            name: user.name,
+            image: (profile as any)?.picture || user.image
+          }
+        })
+
         // If the user exists and doesn't have a Google account linked, link it
         if (!userExists.accounts.some(acc => acc.provider === 'google')) {
           await prisma.account.create({
@@ -69,7 +80,15 @@ export const authOptions: NextAuthOptions = {
             },
           })
         }
-        return true
+      } else {
+        // For new users, create them with the Google profile image
+        await prisma.user.create({
+          data: {
+            email: user.email,
+            name: user.name,
+            image: (profile as any)?.picture || user.image
+          }
+        })
       }
 
       return true
@@ -126,13 +145,48 @@ export const authOptions: NextAuthOptions = {
         }
       })
       
-      // Always check admin status on token refresh
+      // If this is the initial sign in
+      if (account && user) {
+        token.picture = user.image
+      }
+      
+      // Always check admin status and get latest user data on token refresh
       try {
         const dbUser = await prisma.user.findUnique({
-          where: { email: token.email! }
+          where: { email: token.email! },
+          include: {
+            accounts: {
+              where: { provider: 'google' },
+              select: { access_token: true }
+            }
+          }
         })
+        
         token.isAdmin = dbUser?.isAdmin || false
         token.userId = dbUser?.id
+        token.picture = dbUser?.image
+        
+        // If we have a Google account, update the user's image
+        if (dbUser?.accounts[0]?.access_token) {
+          try {
+            const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+              headers: {
+                Authorization: `Bearer ${dbUser.accounts[0].access_token}`
+              }
+            })
+            const googleProfile = await response.json()
+            if (googleProfile.picture && googleProfile.picture !== dbUser.image) {
+              await prisma.user.update({
+                where: { id: dbUser.id },
+                data: { image: googleProfile.picture }
+              })
+              token.picture = googleProfile.picture
+            }
+          } catch (e) {
+            console.error('Failed to fetch Google profile:', e)
+          }
+        }
+        
         logEvent('user lookup success', { dbUser })
       } catch (e) {
         logEvent('user lookup error', { error: e })
@@ -155,6 +209,7 @@ export const authOptions: NextAuthOptions = {
       if (session?.user) {
         session.user.isAdmin = token.isAdmin as boolean
         session.user.id = token.userId as string
+        session.user.image = token.picture as string | null // Pass image to session
       }
       return session
     }

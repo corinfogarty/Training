@@ -1,54 +1,73 @@
 'use client'
 
-import { useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { Dropdown, Modal, Button } from 'react-bootstrap'
-import { Settings, Users, LogOut, User, BarChart, FolderOpen, UsersRound, FileText, FolderTree, Chrome } from 'lucide-react'
+import { RefreshCw, LogOut, User, Settings, Users, Chrome, BookOpen, BarChart, LayoutGrid, Sliders, FileText, FolderTree } from 'lucide-react'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import UserProgress from './admin/UserProgress'
 import TeamProgress from './admin/TeamProgress'
 import AdminUsers from './admin/AdminUsers'
 import AdminResources from './admin/AdminResources'
 import AdminCategories from './admin/AdminCategories'
 import AdminSettings from './admin/AdminSettings'
-import Link from 'next/link'
 
-interface AuthButtonProps {
-  onAdminClick?: () => void
-}
-
-export default function AuthButton({ onAdminClick }: AuthButtonProps) {
-  const { data: session } = useSession()
+export default function UserMenu() {
+  const { data: session, update: updateSession } = useSession()
+  const [updating, setUpdating] = useState(false)
+  const [showExtensionModal, setShowExtensionModal] = useState(false)
   const [showMyProgressModal, setShowMyProgressModal] = useState(false)
   const [showTeamProgressModal, setShowTeamProgressModal] = useState(false)
   const [showUsersModal, setShowUsersModal] = useState(false)
   const [showResourcesModal, setShowResourcesModal] = useState(false)
   const [showCategoriesModal, setShowCategoriesModal] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
-  const [showExtensionModal, setShowExtensionModal] = useState(false)
+  const router = useRouter()
+
+  const refreshProfileImage = async () => {
+    try {
+      setUpdating(true)
+      const response = await fetch('/api/auth/update-image', {
+        method: 'POST'
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to update image')
+      }
+
+      await updateSession()
+      router.refresh()
+    } catch (error) {
+      console.error('Error updating profile image:', error)
+    } finally {
+      setUpdating(false)
+    }
+  }
 
   if (!session?.user) return null
 
   return (
     <>
       <Dropdown align="end">
-        <Dropdown.Toggle variant="outline-secondary" className="d-flex align-items-center gap-2">
+        <Dropdown.Toggle variant="link" className="nav-link p-0 d-flex align-items-center text-white text-decoration-none">
           {session.user.image ? (
             <img
               src={session.user.image}
               alt={session.user.name || session.user.email}
-              className="rounded-circle"
-              width={24}
-              height={24}
+              className="rounded-circle me-2"
+              width={32}
+              height={32}
               style={{ objectFit: 'cover' }}
             />
           ) : (
-            <User size={16} />
+            <User size={32} className="me-2" />
           )}
-          {session.user.name || 'User'}
+          <span>{session.user.name || session.user.email}</span>
         </Dropdown.Toggle>
 
-        <Dropdown.Menu align="end">
-          {/* Progress section */}
+        <Dropdown.Menu>
+          {/* Progress Section */}
           <Dropdown.Item onClick={() => setShowMyProgressModal(true)}>
             <User size={16} className="me-2" />
             My Progress
@@ -58,7 +77,7 @@ export default function AuthButton({ onAdminClick }: AuthButtonProps) {
             Team Progress
           </Dropdown.Item>
 
-          {/* Admin section */}
+          {/* Admin Section */}
           {session?.user?.isAdmin && (
             <>
               <Dropdown.Divider />
@@ -82,6 +101,7 @@ export default function AuthButton({ onAdminClick }: AuthButtonProps) {
             </>
           )}
 
+          {/* Tools Section */}
           <Dropdown.Divider />
           <Dropdown.Header>Tools</Dropdown.Header>
           <Dropdown.Item onClick={() => setShowExtensionModal(true)}>
@@ -89,9 +109,8 @@ export default function AuthButton({ onAdminClick }: AuthButtonProps) {
             Browser Extension
           </Dropdown.Item>
 
+          {/* Sign Out */}
           <Dropdown.Divider />
-
-          {/* Sign out */}
           <Dropdown.Item onClick={() => signOut()}>
             <LogOut size={16} className="me-2" />
             Sign Out

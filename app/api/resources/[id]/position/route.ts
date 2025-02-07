@@ -3,7 +3,10 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
-export async function PATCH(request: NextRequest) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
@@ -11,7 +14,6 @@ export async function PATCH(request: NextRequest) {
     }
 
     const { categoryId, order } = await request.json()
-    const resourceId = request.nextUrl.pathname.split('/')[3] // /api/resources/[id]/position
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email }
@@ -26,7 +28,7 @@ export async function PATCH(request: NextRequest) {
       where: {
         userId_resourceId: {
           userId: user.id,
-          resourceId
+          resourceId: params.id
         }
       },
       update: {
@@ -35,7 +37,7 @@ export async function PATCH(request: NextRequest) {
       },
       create: {
         userId: user.id,
-        resourceId,
+        resourceId: params.id,
         categoryId,
         order
       }

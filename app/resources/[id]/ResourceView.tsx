@@ -11,6 +11,12 @@ interface ResourceWithRelations extends Resource {
   category: Category | null
   isFavorite: boolean
   isCompleted: boolean
+  submittedBy?: {
+    id: string
+    name?: string | null
+    email: string
+    image?: string | null
+  } | null
 }
 
 interface ResourceViewProps {
