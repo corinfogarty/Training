@@ -212,14 +212,14 @@ export default function AddResourceButton({ categoryId, onResourceAdded }: AddRe
 
             {!categoryId && (
               <Form.Group className="mb-3">
-                <Form.Label htmlFor="categoryId">Category</Form.Label>
+                <Form.Label htmlFor="categoryId" id="category-label">Category</Form.Label>
                 <Form.Select
                   id="categoryId"
                   value={formData.categoryId}
                   onChange={(e) => handleCategoryChange(e.target.value)}
                   required
-                  aria-label="Category"
-                  title="Select category"
+                  aria-labelledby="category-label"
+                  title="Select a category"
                 >
                   <option value="">Select a category</option>
                   {categories.map((category) => (
@@ -232,19 +232,20 @@ export default function AddResourceButton({ categoryId, onResourceAdded }: AddRe
             )}
 
             <Form.Group className="mb-3">
-              <Form.Label htmlFor="contentType">Content Type</Form.Label>
+              <Form.Label htmlFor="contentType" id="content-type-label">Content Type</Form.Label>
               <Form.Select
                 id="contentType"
                 value={formData.contentType}
                 onChange={(e) => setFormData(prev => ({ ...prev, contentType: e.target.value as ContentType }))}
                 required
-                aria-label="Content type"
-                title="Select content type"
+                aria-labelledby="content-type-label"
+                title="Select a content type"
               >
                 <option value="">Select a type...</option>
                 <option value="Resource">Resource</option>
                 <option value="Training">Training</option>
                 <option value="Shortcut">Shortcut</option>
+                <option value="Plugin">Plugin</option>
               </Form.Select>
             </Form.Group>
 

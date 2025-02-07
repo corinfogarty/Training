@@ -18,6 +18,7 @@ import Cookies from 'js-cookie'
 import FilterFlyout from './FilterFlyout'
 import AdminModal from './AdminModal'
 import Link from 'next/link'
+import { Book, Mortarboard, Command, Puzzle, Star, CheckCircle, XCircle } from 'react-bootstrap-icons'
 
 type ViewType = 'grid' | 'list' | 'columns'
 type FilterType = 'all' | 'favorites' | 'completed' | 'incomplete'
@@ -254,6 +255,26 @@ export default function CategoryList() {
       })
   }
 
+  const getCategoryIcon = (categoryName: string) => {
+    const letters = categoryName.slice(0, 2).toUpperCase()
+    return (
+      <span 
+        className="d-inline-flex align-items-center justify-content-center border" 
+        style={{ 
+          width: '12px', 
+          height: '12px', 
+          fontSize: '8px',
+          fontWeight: 500,
+          borderWidth: '1px',
+          borderRadius: '2px',
+          marginRight: '6px'
+        }}
+      >
+        {letters}
+      </span>
+    )
+  }
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
@@ -358,20 +379,38 @@ export default function CategoryList() {
               {Array.from(categoryFilter).map(categoryId => {
                 const category = categories.find(c => c.id === categoryId)
                 return category ? (
-                  <span key={categoryId} className="badge" style={{ backgroundColor: '#675a95', color: 'white' }}>{category.name}</span>
+                  <span key={categoryId} className="badge d-flex align-items-center" style={{ backgroundColor: '#675a95', color: 'white' }}>
+                    {getCategoryIcon(category.name)}
+                    {category.name}
+                  </span>
                 ) : null
               })}
               {Array.from(contentTypeFilter).map(type => (
-                <span key={type} className="badge" style={{ backgroundColor: '#006ba5', color: 'white' }}>{type}</span>
+                <span key={type} className="badge d-flex align-items-center gap-2" style={{ backgroundColor: '#006ba5', color: 'white' }}>
+                  {type === 'Resource' && <Book size={12} />}
+                  {type === 'Training' && <Mortarboard size={12} />}
+                  {type === 'Shortcut' && <Command size={12} />}
+                  {type === 'Plugin' && <Puzzle size={12} />}
+                  {type}
+                </span>
               ))}
               {activeFilters.has('favorites') && (
-                <span className="badge" style={{ backgroundColor: '#f0e0a4', color: '#333' }}>Favorites</span>
+                <span className="badge d-flex align-items-center gap-2" style={{ backgroundColor: '#f0e0a4', color: '#333' }}>
+                  <Star size={12} />
+                  Favorites
+                </span>
               )}
               {activeFilters.has('completed') && (
-                <span className="badge" style={{ backgroundColor: '#9bc7a3', color: 'white' }}>Completed</span>
+                <span className="badge d-flex align-items-center gap-2" style={{ backgroundColor: '#9bc7a3', color: 'white' }}>
+                  <CheckCircle size={12} />
+                  Completed
+                </span>
               )}
               {activeFilters.has('incomplete') && (
-                <span className="badge" style={{ backgroundColor: '#e63478', color: 'white' }}>Incomplete</span>
+                <span className="badge d-flex align-items-center gap-2" style={{ backgroundColor: '#e63478', color: 'white' }}>
+                  <XCircle size={12} />
+                  Incomplete
+                </span>
               )}
             </div>
           </Container>

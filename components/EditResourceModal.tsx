@@ -212,6 +212,7 @@ export default function EditResourceModal({ resource, show, onHide, onSave }: Ed
               <option value="Resource">Resource</option>
               <option value="Training">Training</option>
               <option value="Shortcut">Shortcut</option>
+              <option value="Plugin">Plugin</option>
             </Form.Select>
           </Form.Group>
 

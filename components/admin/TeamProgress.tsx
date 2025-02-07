@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Table, Form, Alert, Spinner, Button, Nav, Tab, Tabs } from 'react-bootstrap'
+import { Table, Form, Alert, Spinner, Button, Nav, Tab, Tabs, Badge } from 'react-bootstrap'
 import type { User } from '@prisma/client'
-import { Search, ArrowLeft } from 'lucide-react'
+import { Search, ArrowLeft, Trophy, Star, BookOpen, Award, Crown, Medal } from 'lucide-react'
 import UserProgress from '../UserProgress'
 import { useSession } from 'next-auth/react'
 
@@ -42,6 +42,8 @@ interface UserWithCounts extends Partial<User> {
     favorites: number
     completed: number
   }
+  rank?: number
+  score?: number
 }
 
 interface TeamProgressProps {
@@ -155,6 +157,78 @@ export default function TeamProgress({ onUserStatsOpen, onUserStatsClose }: Team
     )
   })
 
+  const calculateUserScore = (user: UserWithCounts) => {
+    // Weight different actions
+    const submittedWeight = 5
+    const completedWeight = 3
+    const favoritedWeight = 1
+
+    return (
+      user._count.submittedResources * submittedWeight +
+      user._count.completed * completedWeight +
+      user._count.favorites * favoritedWeight
+    )
+  }
+
+  const getRankBadge = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return <Crown size={20} className="text-warning" />
+      case 2:
+        return <Medal size={20} className="text-secondary" />
+      case 3:
+        return <Medal size={20} className="text-orange" />
+      default:
+        return null
+    }
+  }
+
+  const getAchievementBadges = (user: UserWithCounts) => {
+    const badges = []
+    
+    // Content Creator badge
+    if (user._count.submittedResources >= 5) {
+      badges.push(
+        <Badge bg="primary" className="me-1" key="creator" title="Content Creator: Submitted 5+ resources">
+          <Star size={12} className="me-1" />
+          Creator
+        </Badge>
+      )
+    }
+    
+    // Learning Champion badge
+    if (user._count.completed >= 10) {
+      badges.push(
+        <Badge bg="success" className="me-1" key="champion" title="Learning Champion: Completed 10+ resources">
+          <Trophy size={12} className="me-1" />
+          Champion
+        </Badge>
+      )
+    }
+    
+    // Curator badge
+    if (user._count.favorites >= 15) {
+      badges.push(
+        <Badge bg="warning" className="text-dark me-1" key="curator" title="Curator: Favorited 15+ resources">
+          <BookOpen size={12} className="me-1" />
+          Curator
+        </Badge>
+      )
+    }
+
+    // Active Learner badge
+    if (user.lastLogin && new Date().getTime() - new Date(user.lastLogin).getTime() < 7 * 24 * 60 * 60 * 1000) {
+      badges.push(
+        <Badge bg="info" className="me-1" key="active" title="Active Learner: Active in the last 7 days">
+          <Award size={12} className="me-1" />
+          Active
+        </Badge>
+      )
+    }
+
+    return badges
+  }
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center p-4">
@@ -178,31 +252,45 @@ export default function TeamProgress({ onUserStatsOpen, onUserStatsClose }: Team
   if (selectedUser) {
     return (
       <div className="p-4">
-        <div className="d-flex align-items-center mb-4">
-          <Button variant="link" className="p-0 me-3" onClick={handleBackClick}>
-            <ArrowLeft size={24} />
-          </Button>
-          <div className="d-flex align-items-center">
-            {selectedUser.image ? (
-              <img 
-                src={selectedUser.image} 
-                alt={selectedUser.name || ''} 
-                className="rounded-circle me-2"
-                width="32" 
-                height="32"
-                style={{ objectFit: 'cover' }}
-              />
-            ) : (
-              <div 
-                className="rounded-circle me-2 bg-secondary d-flex align-items-center justify-content-center text-white"
-                style={{ width: '32px', height: '32px' }}
-              >
-                {selectedUser.name?.[0] || selectedUser.email[0]}
+        <div className="mb-4">
+          <div className="d-flex align-items-center mb-3">
+            <Button variant="link" className="p-0 me-3" onClick={handleBackClick}>
+              <ArrowLeft size={24} />
+            </Button>
+            <div className="d-flex align-items-center">
+              {selectedUser.image ? (
+                <img 
+                  src={selectedUser.image} 
+                  alt={selectedUser.name || ''} 
+                  className="rounded-circle me-2"
+                  width="32" 
+                  height="32"
+                  style={{ objectFit: 'cover' }}
+                />
+              ) : (
+                <div 
+                  className="rounded-circle me-2 bg-secondary d-flex align-items-center justify-content-center text-white"
+                  style={{ width: '32px', height: '32px' }}
+                >
+                  {selectedUser.name?.[0] || selectedUser.email[0]}
+                </div>
+              )}
+              <div>
+                <div className="h3 mb-0">{selectedUser.name || 'Anonymous'}</div>
+                <div className="small text-muted">{selectedUser.email}</div>
               </div>
-            )}
-            <div>
-              <div className="h3 mb-0">{selectedUser.name || 'Anonymous'}</div>
-              <div className="small text-muted">{selectedUser.email}</div>
+            </div>
+          </div>
+
+          <div className="d-flex align-items-center gap-3 mb-3">
+            <div className="d-flex align-items-center">
+              <span className="badge bg-dark me-2">
+                Score: {calculateUserScore(selectedUser)}
+              </span>
+              {selectedUser.rank && selectedUser.rank <= 3 && getRankBadge(selectedUser.rank)}
+            </div>
+            <div className="d-flex flex-wrap gap-1">
+              {getAchievementBadges(selectedUser)}
             </div>
           </div>
         </div>
@@ -270,6 +358,118 @@ export default function TeamProgress({ onUserStatsOpen, onUserStatsClose }: Team
             )}
           </Tab>
         </Tabs>
+      </div>
+    )
+  }
+
+  if (!selectedUser) {
+    return (
+      <div className="p-4">
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h1 className="h3 mb-0">Leaderboard</h1>
+          <div className="d-flex align-items-center" style={{ width: '300px' }}>
+            <div className="input-group">
+              <span className="input-group-text bg-white border-end-0">
+                <Search size={16} />
+              </span>
+              <Form.Control
+                type="text"
+                placeholder="Search team members..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="border-start-0"
+              />
+            </div>
+          </div>
+        </div>
+
+        {filteredUsers.length === 0 ? (
+          <Alert variant="info">
+            {searchTerm ? 'No team members match your search.' : 'No team members found.'}
+          </Alert>
+        ) : (
+          <Table hover responsive className="align-middle">
+            <thead>
+              <tr>
+                <th style={{ width: '50px' }}>Rank</th>
+                <th>Team Member</th>
+                <th>Achievements</th>
+                <th className="text-center">Score</th>
+                <th className="text-center">Submitted</th>
+                <th className="text-center">Completed</th>
+                <th className="text-center">Favorited</th>
+                <th>Last Active</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers
+                .map(user => ({
+                  ...user,
+                  score: calculateUserScore(user)
+                }))
+                .sort((a, b) => (b.score || 0) - (a.score || 0))
+                .map((user, index) => ({
+                  ...user,
+                  rank: index + 1
+                }))
+                .map((user) => (
+                  <tr 
+                    key={user.id} 
+                    onClick={() => handleUserClick(user)} 
+                    style={{ cursor: 'pointer' }}
+                    className={user.rank && user.rank <= 3 ? 'table-warning' : undefined}
+                  >
+                    <td className="text-center">
+                      {getRankBadge(user.rank || 0) || user.rank}
+                    </td>
+                    <td>
+                      <div className="d-flex align-items-center">
+                        {user.image ? (
+                          <img 
+                            src={user.image} 
+                            alt={user.name || ''} 
+                            className="rounded-circle me-2"
+                            width="32" 
+                            height="32"
+                            style={{ objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <div 
+                            className="rounded-circle me-2 bg-secondary d-flex align-items-center justify-content-center text-white"
+                            style={{ width: '32px', height: '32px' }}
+                          >
+                            {user.name?.[0] || user.email[0]}
+                          </div>
+                        )}
+                        <div>
+                          <div className="text-primary">{user.name || 'Anonymous'}</div>
+                          <small className="text-muted">{user.email}</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="d-flex flex-wrap gap-1">
+                        {getAchievementBadges(user)}
+                      </div>
+                    </td>
+                    <td className="text-center">
+                      <span className="badge bg-dark">{user.score}</span>
+                    </td>
+                    <td className="text-center">
+                      <span className="badge bg-primary">{user._count.submittedResources}</span>
+                    </td>
+                    <td className="text-center">
+                      <span className="badge bg-success">{user._count.completed}</span>
+                    </td>
+                    <td className="text-center">
+                      <span className="badge bg-warning text-dark">{user._count.favorites}</span>
+                    </td>
+                    <td>{user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}</td>
+                  </tr>
+              ))}
+            </tbody>
+          </Table>
+        )}
       </div>
     )
   }

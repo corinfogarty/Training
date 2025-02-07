@@ -1,5 +1,5 @@
 import { Button, Popover, Overlay, ButtonGroup } from 'react-bootstrap'
-import { Filter, Star, CheckCircle, XCircle } from 'react-bootstrap-icons'
+import { Filter, Star, CheckCircle, XCircle, Command, Puzzle, Book, Mortarboard, Brush, Pen, Layers, Robot, Pencil, Image, Palette, Boxes, Braces, Cpu, Laptop } from 'react-bootstrap-icons'
 import { useRef, useState } from 'react'
 import type { ContentType, Category } from '@prisma/client'
 import type { Dispatch, SetStateAction } from 'react'
@@ -70,6 +70,25 @@ export default function FilterFlyout({
     })
   }
 
+  const getCategoryIcon = (categoryName: string) => {
+    const letters = categoryName.slice(0, 2).toUpperCase()
+    return (
+      <span 
+        className="d-inline-flex align-items-center justify-content-center border" 
+        style={{ 
+          width: '12px', 
+          height: '12px', 
+          fontSize: '8px',
+          fontWeight: 500,
+          borderWidth: '1px',
+          borderRadius: '2px'
+        }}
+      >
+        {letters}
+      </span>
+    )
+  }
+
   return (
     <>
       <Button
@@ -117,6 +136,7 @@ export default function FilterFlyout({
                     onClick={() => handleCategoryChange(category.id)}
                     className="d-flex align-items-center gap-2 justify-content-start px-3"
                   >
+                    {getCategoryIcon(category.name)}
                     {category.name}
                   </Button>
                 ))}
@@ -131,6 +151,7 @@ export default function FilterFlyout({
                   onClick={() => handleContentTypeChange('Resource')}
                   className="d-flex align-items-center gap-2 justify-content-start px-3"
                 >
+                  <Book size={16} className="me-1" />
                   Resource
                 </Button>
                 <Button
@@ -138,6 +159,7 @@ export default function FilterFlyout({
                   onClick={() => handleContentTypeChange('Training')}
                   className="d-flex align-items-center gap-2 justify-content-start px-3"
                 >
+                  <Mortarboard size={16} className="me-1" />
                   Training
                 </Button>
                 <Button
@@ -145,7 +167,16 @@ export default function FilterFlyout({
                   onClick={() => handleContentTypeChange('Shortcut')}
                   className="d-flex align-items-center gap-2 justify-content-start px-3"
                 >
+                  <Command size={16} className="me-1" />
                   Shortcuts
+                </Button>
+                <Button
+                  variant={contentTypeFilter.has('Plugin') ? 'primary' : 'outline-primary'}
+                  onClick={() => handleContentTypeChange('Plugin')}
+                  className="d-flex align-items-center gap-2 justify-content-start px-3"
+                >
+                  <Puzzle size={16} className="me-1" />
+                  Plugins
                 </Button>
               </ButtonGroup>
             </div>

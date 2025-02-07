@@ -13,6 +13,10 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Training Hub',
   description: 'A hub for all your training resources',
+  icons: {
+    icon: '/favicon.png',
+    apple: '/logo-ols-2023.png',
+  },
 }
 
 export default async function RootLayout({
