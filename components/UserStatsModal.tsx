@@ -46,9 +46,10 @@ interface UserStatsModalProps {
   user: UserWithCounts
   show: boolean
   onHide: () => void
+  onShow?: () => void
 }
 
-export default function UserStatsModal({ user, show, onHide }: UserStatsModalProps) {
+export default function UserStatsModal({ user, show, onHide, onShow }: UserStatsModalProps) {
   const { data: session } = useSession()
   const [stats, setStats] = useState<UserStatsData | null>(null)
   const [loading, setLoading] = useState(false)
@@ -58,11 +59,12 @@ export default function UserStatsModal({ user, show, onHide }: UserStatsModalPro
   useEffect(() => {
     if (show) {
       fetchStats()
+      onShow?.()
     } else {
       setStats(null)
       setActiveTab('submitted')
     }
-  }, [show, user.id])
+  }, [show, user.id, onShow])
 
   const fetchStats = async () => {
     setLoading(true)

@@ -143,7 +143,10 @@ export default function UserMenu() {
           <Modal.Title>Team Progress</Modal.Title>
         </Modal.Header>
         <Modal.Body className="p-0">
-          <TeamProgress />
+          <TeamProgress 
+            onUserStatsOpen={() => setShowTeamProgressModal(false)}
+            onUserStatsClose={() => setShowTeamProgressModal(true)}
+          />
         </Modal.Body>
       </Modal>
 
