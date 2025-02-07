@@ -1,12 +1,17 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Table, Form, Alert, Spinner, Button } from 'react-bootstrap'
+import { Table, Form, Alert, Spinner } from 'react-bootstrap'
 import type { User } from '@prisma/client'
 import UserStatsModal from '../UserStatsModal'
 import { Search } from 'lucide-react'
 
-interface UserWithCounts extends User {
+interface UserWithCounts extends Partial<User> {
+  id: string
+  name: string | null
+  email: string
+  image: string | null
+  lastLogin: Date | null
   _count: {
     submittedResources: number
     favorites: number
@@ -65,9 +70,6 @@ export default function TeamProgress() {
       <div className="p-4">
         <Alert variant="danger">
           {error}
-          <Button variant="link" className="p-0 ms-2" onClick={fetchUsers}>
-            Retry
-          </Button>
         </Alert>
       </div>
     )
@@ -84,7 +86,7 @@ export default function TeamProgress() {
             </span>
             <Form.Control
               type="text"
-              placeholder="Search users..."
+              placeholder="Search team members..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="border-start-0"
@@ -95,18 +97,17 @@ export default function TeamProgress() {
 
       {filteredUsers.length === 0 ? (
         <Alert variant="info">
-          {searchTerm ? 'No users match your search.' : 'No users found.'}
+          {searchTerm ? 'No team members match your search.' : 'No team members found.'}
         </Alert>
       ) : (
         <Table hover responsive>
           <thead>
             <tr>
-              <th>User</th>
-              <th>Email</th>
-              <th>Submitted</th>
-              <th>Favorited</th>
-              <th>Completed</th>
-              <th>Last Login</th>
+              <th>Team Member</th>
+              <th className="text-center">Submitted</th>
+              <th className="text-center">Favorited</th>
+              <th className="text-center">Completed</th>
+              <th>Last Active</th>
             </tr>
           </thead>
           <tbody>
@@ -135,14 +136,20 @@ export default function TeamProgress() {
                       </div>
                     )}
                     <div>
-                      <div className="text-primary">{user.name || 'No name'}</div>
+                      <div className="text-primary">{user.name || 'Anonymous'}</div>
+                      <small className="text-muted">{user.email}</small>
                     </div>
                   </div>
                 </td>
-                <td>{user.email}</td>
-                <td>{user._count.submittedResources}</td>
-                <td>{user._count.favorites}</td>
-                <td>{user._count.completed}</td>
+                <td className="text-center">
+                  <span className="badge bg-primary">{user._count.submittedResources}</span>
+                </td>
+                <td className="text-center">
+                  <span className="badge bg-warning text-dark">{user._count.favorites}</span>
+                </td>
+                <td className="text-center">
+                  <span className="badge bg-success">{user._count.completed}</span>
+                </td>
                 <td>{user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}</td>
               </tr>
             ))}
@@ -152,7 +159,7 @@ export default function TeamProgress() {
 
       {selectedUser && (
         <UserStatsModal
-          user={selectedUser}
+          user={selectedUser as User}
           show={showStatsModal}
           onHide={() => {
             setShowStatsModal(false)

@@ -9,7 +9,12 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.isAdmin) {
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Allow users to view their own stats or admins to view anyone's stats
+    if (!session.user.isAdmin && session.user.id !== params.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

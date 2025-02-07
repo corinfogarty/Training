@@ -1,0 +1,1 @@
+ssh root@178.18.248.49 "sudo -u postgres psql -c \"ALTER USER corinfogarty WITH PASSWORD 'postgres';\" && sudo -u postgres psql -c 'GRANT ALL PRIVILEGES ON DATABASE training_hub TO corinfogarty;'"

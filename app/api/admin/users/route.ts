@@ -6,7 +6,7 @@ import { authOptions } from '@/lib/auth'
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.isAdmin) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -14,7 +14,13 @@ export async function GET() {
       orderBy: {
         createdAt: 'desc'
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        lastLogin: true,
+        isAdmin: session.user.isAdmin, // Only include isAdmin field if user is admin
         _count: {
           select: {
             submittedResources: true,
@@ -24,6 +30,14 @@ export async function GET() {
         }
       }
     })
+
+    // If user is not admin, filter out sensitive information
+    if (!session.user.isAdmin) {
+      return NextResponse.json(users.map(user => ({
+        ...user,
+        email: user.email.split('@')[0] + '@...' // Mask email addresses for non-admins
+      })))
+    }
 
     return NextResponse.json(users)
   } catch (error) {

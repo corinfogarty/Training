@@ -44,8 +44,8 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60,
   },
   callbacks: {
-    async signIn({ user, account, profile, email }) {
-      logEvent('signIn callback', { user, account, profile }) // Add logging to see what we get
+    async signIn({ user, account, profile }) {
+      logEvent('signIn callback', { user, account, profile })
       
       if (!user.email) return false
       
@@ -61,34 +61,74 @@ export const authOptions: NextAuthOptions = {
           where: { id: userExists.id },
           data: { 
             name: user.name,
-            image: (profile as any)?.picture || user.image
+            image: (profile as any)?.picture || user.image,
+            lastLogin: new Date()
           }
         })
 
         // If the user exists and doesn't have a Google account linked, link it
-        if (!userExists.accounts.some(acc => acc.provider === 'google')) {
+        if (!userExists.accounts.some(acc => acc.provider === 'google') && account) {
           await prisma.account.create({
             data: {
               userId: userExists.id,
-              type: account?.type!,
-              provider: account?.provider!,
-              providerAccountId: account?.providerAccountId!,
-              access_token: account?.access_token,
-              token_type: account?.token_type,
-              scope: account?.scope,
-              id_token: account?.id_token,
+              type: account.type,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+              access_token: account.access_token,
+              expires_at: account.expires_at,
+              token_type: account.token_type,
+              scope: account.scope,
+              id_token: account.id_token,
+              refresh_token: account.refresh_token
             },
+          })
+        } else if (account?.access_token) {
+          // Update the existing Google account with new tokens
+          await prisma.account.update({
+            where: {
+              provider_providerAccountId: {
+                provider: 'google',
+                providerAccountId: account.providerAccountId
+              }
+            },
+            data: {
+              access_token: account.access_token,
+              expires_at: account.expires_at,
+              refresh_token: account.refresh_token || undefined,
+              token_type: account.token_type,
+              scope: account.scope,
+              id_token: account.id_token
+            }
           })
         }
       } else {
-        // For new users, create them with the Google profile image
-        await prisma.user.create({
+        // For new users, create them with the Google profile image and lastLogin
+        const newUser = await prisma.user.create({
           data: {
             email: user.email,
             name: user.name,
-            image: (profile as any)?.picture || user.image
+            image: (profile as any)?.picture || user.image,
+            lastLogin: new Date()
           }
         })
+
+        // Create the Google account link
+        if (account) {
+          await prisma.account.create({
+            data: {
+              userId: newUser.id,
+              type: account.type,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+              access_token: account.access_token,
+              expires_at: account.expires_at,
+              token_type: account.token_type,
+              scope: account.scope,
+              id_token: account.id_token,
+              refresh_token: account.refresh_token
+            },
+          })
+        }
       }
 
       return true

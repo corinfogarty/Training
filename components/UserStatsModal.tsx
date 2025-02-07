@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Modal, Button, Nav, Spinner } from 'react-bootstrap'
+import { Modal, Button, Nav, Spinner, Alert } from 'react-bootstrap'
 import { Calendar, ArrowLeft } from 'lucide-react'
 import type { User } from '@prisma/client'
+import { useSession } from 'next-auth/react'
 
 interface Resource {
   id: string
@@ -28,7 +29,11 @@ interface UserStatsData {
   }
 }
 
-interface UserWithCounts extends User {
+interface UserWithCounts extends Partial<User> {
+  id: string
+  name: string | null
+  email: string
+  image: string | null
   _count: {
     submittedResources: number
     favorites: number
@@ -43,8 +48,10 @@ interface UserStatsModalProps {
 }
 
 export default function UserStatsModal({ user, show, onHide }: UserStatsModalProps) {
+  const { data: session } = useSession()
   const [stats, setStats] = useState<UserStatsData | null>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'submitted' | 'favorites' | 'completed'>('submitted')
 
   useEffect(() => {
@@ -58,6 +65,7 @@ export default function UserStatsModal({ user, show, onHide }: UserStatsModalPro
 
   const fetchStats = async () => {
     setLoading(true)
+    setError(null)
     try {
       const response = await fetch(`/api/admin/users/${user.id}/stats`)
       if (!response.ok) throw new Error('Failed to fetch stats')
@@ -65,6 +73,7 @@ export default function UserStatsModal({ user, show, onHide }: UserStatsModalPro
       setStats(data)
     } catch (error) {
       console.error('Error fetching stats:', error)
+      setError('Failed to load user stats')
     } finally {
       setLoading(false)
     }
@@ -127,7 +136,7 @@ export default function UserStatsModal({ user, show, onHide }: UserStatsModalPro
             </div>
           )}
           <div>
-            <div>{user.name || 'No name'}</div>
+            <div>{user.name || 'Anonymous'}</div>
             <div className="small text-muted">{user.email}</div>
           </div>
         </Modal.Title>
@@ -160,47 +169,55 @@ export default function UserStatsModal({ user, show, onHide }: UserStatsModalPro
           </div>
         </div>
 
-        <Nav variant="tabs" className="mb-3">
-          <Nav.Item>
-            <Nav.Link 
-              active={activeTab === 'submitted'}
-              onClick={() => setActiveTab('submitted')}
-            >
-              Submitted
-            </Nav.Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Nav.Link 
-              active={activeTab === 'favorites'}
-              onClick={() => setActiveTab('favorites')}
-            >
-              Favorites
-            </Nav.Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Nav.Link 
-              active={activeTab === 'completed'}
-              onClick={() => setActiveTab('completed')}
-            >
-              Completed
-            </Nav.Link>
-          </Nav.Item>
-        </Nav>
-
-        {loading ? (
-          <div className="text-center py-4">
-            <Spinner animation="border" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </Spinner>
-          </div>
-        ) : stats ? (
+        {session?.user?.id === user.id || session?.user?.isAdmin ? (
           <>
-            {activeTab === 'submitted' && renderResourceList(stats.submitted.resources, 'submitted')}
-            {activeTab === 'favorites' && renderResourceList(stats.favorited.resources, 'favorites')}
-            {activeTab === 'completed' && renderResourceList(stats.completed.resources, 'completed')}
+            <Nav variant="tabs" className="mb-3">
+              <Nav.Item>
+                <Nav.Link 
+                  active={activeTab === 'submitted'}
+                  onClick={() => setActiveTab('submitted')}
+                >
+                  Submitted
+                </Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link 
+                  active={activeTab === 'favorites'}
+                  onClick={() => setActiveTab('favorites')}
+                >
+                  Favorites
+                </Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link 
+                  active={activeTab === 'completed'}
+                  onClick={() => setActiveTab('completed')}
+                >
+                  Completed
+                </Nav.Link>
+              </Nav.Item>
+            </Nav>
+
+            {loading ? (
+              <div className="text-center py-4">
+                <Spinner animation="border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </Spinner>
+              </div>
+            ) : error ? (
+              <Alert variant="danger">{error}</Alert>
+            ) : stats ? (
+              <>
+                {activeTab === 'submitted' && renderResourceList(stats.submitted.resources, 'submitted')}
+                {activeTab === 'favorites' && renderResourceList(stats.favorited.resources, 'favorites')}
+                {activeTab === 'completed' && renderResourceList(stats.completed.resources, 'completed')}
+              </>
+            ) : null}
           </>
         ) : (
-          <div className="alert alert-danger">Failed to load user stats</div>
+          <Alert variant="info">
+            Detailed statistics are only visible to the user themselves and administrators.
+          </Alert>
         )}
       </Modal.Body>
     </Modal>
