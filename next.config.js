@@ -7,6 +7,8 @@ const nextConfig = {
       'training.ols.to',
       'localhost',
       'static.skillshare.com',
+      'cdn.skillshare.com',
+      'www.skillshare.com',
       'www.cgfasttrack.com',
       'cdn.sanity.io',
       'ssl.gstatic.com',

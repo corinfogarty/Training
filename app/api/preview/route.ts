@@ -163,6 +163,19 @@ function getFigmaFileId(url: string): string | null {
   }
 }
 
+function getSkillshareId(url: string): string | null {
+  try {
+    const urlObj = new URL(url)
+    if (!urlObj.hostname.includes('skillshare.com')) return null
+    
+    // Handle class URLs
+    const matches = url.match(/classes\/([^/]+)\//)
+    return matches?.[1] || null
+  } catch {
+    return null
+  }
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const title = searchParams.get('title') || ''
@@ -191,6 +204,48 @@ export async function GET(request: Request) {
     // Get category default image for fallback
     const categoryDefaultImage = getCategoryDefaultImage(title, category)
     console.log('Category default image available:', categoryDefaultImage)
+
+    // Handle Skillshare URLs first
+    const skillshareId = getSkillshareId(urlString)
+    if (skillshareId) {
+      console.log('Skillshare class detected, ID:', skillshareId)
+      // Try to fetch the page to get metadata
+      const response = await fetch(urlString, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
+        }
+      })
+      
+      if (response.ok) {
+        const text = await response.text()
+        const imagePatterns = [
+          /<meta[^>]*property="og:image"[^>]*content="([^"]*)"[^>]*>/i,
+          /<meta[^>]*content="([^"]*)"[^>]*property="og:image"[^>]*>/i,
+          /<meta[^>]*name="twitter:image"[^>]*content="([^"]*)"[^>]*>/i,
+          /<meta[^>]*content="([^"]*)"[^>]*name="twitter:image"[^>]*>/i
+        ]
+        const foundImage = findMetaContent(text, imagePatterns)
+        if (foundImage) {
+          const storedPath = await downloadImage(foundImage)
+          if (storedPath) {
+            return NextResponse.json({
+              title: title || 'Skillshare Class',
+              image: storedPath,
+              siteName: 'Skillshare',
+              type: 'link'
+            })
+          }
+        }
+      }
+      
+      // If we couldn't get the image, use the default Skillshare image
+      return NextResponse.json({
+        title: title || 'Skillshare Class',
+        image: '/defaults/skillshare.png',
+        siteName: 'Skillshare',
+        type: 'link'
+      })
+    }
 
     // Try to fetch the page content
     const response = await fetch(urlString, {

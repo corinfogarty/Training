@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Modal, Button, Nav, Spinner, Alert } from 'react-bootstrap'
+import { Modal, Button, Nav, Spinner, Alert, Tab, Tabs } from 'react-bootstrap'
 import { Calendar, ArrowLeft } from 'lucide-react'
 import type { User } from '@prisma/client'
 import { useSession } from 'next-auth/react'
+import UserProgress from '@/components/UserProgress'
 
 interface Resource {
   id: string
@@ -111,6 +112,11 @@ export default function UserStatsModal({ user, show, onHide }: UserStatsModalPro
     </div>
   )
 
+  const formatDate = (date: Date | null | undefined) => {
+    if (!date) return 'Never'
+    return new Date(date).toLocaleDateString()
+  }
+
   return (
     <Modal show={show} onHide={onHide} size="lg">
       <Modal.Header closeButton>
@@ -142,32 +148,18 @@ export default function UserStatsModal({ user, show, onHide }: UserStatsModalPro
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <div className="row g-3 mb-4">
-          <div className="col-md-4">
-            <div className="card bg-light">
-              <div className="card-body text-center">
-                <h6 className="card-subtitle mb-2 text-muted">Submitted</h6>
-                <h3 className="card-title mb-0">{user._count.submittedResources}</h3>
-              </div>
+        <Tabs defaultActiveKey="progress" className="mb-3">
+          <Tab eventKey="progress" title="Progress">
+            <UserProgress userId={user.id} />
+          </Tab>
+          <Tab eventKey="stats" title="Stats">
+            <div className="text-muted">
+              <div>Email: {user.email}</div>
+              <div>Member since: {formatDate(user.createdAt)}</div>
+              <div>Last login: {formatDate(user.lastLogin || user.updatedAt)}</div>
             </div>
-          </div>
-          <div className="col-md-4">
-            <div className="card bg-light">
-              <div className="card-body text-center">
-                <h6 className="card-subtitle mb-2 text-muted">Favorited</h6>
-                <h3 className="card-title mb-0">{user._count.favorites}</h3>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="card bg-light">
-              <div className="card-body text-center">
-                <h6 className="card-subtitle mb-2 text-muted">Completed</h6>
-                <h3 className="card-title mb-0">{user._count.completed}</h3>
-              </div>
-            </div>
-          </div>
-        </div>
+          </Tab>
+        </Tabs>
 
         {session?.user?.id === user.id || session?.user?.isAdmin ? (
           <>
