@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Modal, Form, Button, Alert } from 'react-bootstrap'
-import { Resource, Category, ContentType } from '@prisma/client'
+import { Modal, Form, Button, Alert, Image } from 'react-bootstrap'
+import { ContentType } from '@prisma/client'
 import { Editor } from '@tinymce/tinymce-react'
+import type { Resource, Category } from '@/types/prisma'
 
 interface EditResourceModalProps {
   resource: Resource & {
@@ -91,7 +92,7 @@ export default function EditResourceModal({ resource, show, onHide, onSave }: Ed
           title,
           description,
           url,
-          contentType,
+          contentType: contentType as ContentType,
           categoryId,
           previewImage: finalPreviewImage,
         }),

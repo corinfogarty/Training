@@ -7,8 +7,8 @@ import ResourceCard from './ResourceCard'
 import Debug from './Debug'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
 import { Container, Alert, Row, Col, Image, ButtonGroup, Button, Modal } from 'react-bootstrap'
-import { Grid, List, Columns, BarChart, Settings, Users, LayoutGrid, Sliders } from 'lucide-react'
-import { Chrome } from 'lucide-react'
+import { Grid3x3GapFill as Grid, ListUl as List, Columns, BarChartFill as BarChart, Gear as Settings, People as Users, Grid3x3 as LayoutGrid, Sliders, Book, Star, CheckCircle, XCircle, Command, Puzzle } from 'react-bootstrap-icons'
+import { Chrome, GraduationCap } from 'lucide-react'
 import CategoryFilter from './CategoryFilter'
 import { useSession } from 'next-auth/react'
 import AddResourceButton from './AddResourceButton'
@@ -18,7 +18,8 @@ import Cookies from 'js-cookie'
 import FilterFlyout from './FilterFlyout'
 import AdminModal from './AdminModal'
 import Link from 'next/link'
-import { Book, Mortarboard, Command, Puzzle, Star, CheckCircle, XCircle } from 'react-bootstrap-icons'
+import { usePathway } from './PathwayContext'
+import PathwayModal from './PathwayModal'
 
 type ViewType = 'grid' | 'list' | 'columns'
 type FilterType = 'all' | 'favorites' | 'completed' | 'incomplete'
@@ -69,6 +70,8 @@ export default function CategoryList() {
   const { data: session } = useSession()
   const [showInstallHelp, setShowInstallHelp] = useState(false)
   const [showAdminModal, setShowAdminModal] = useState(false)
+  const { setShowPathwayModal, setSelectedPathway, showPathwayModal } = usePathway()
+  const [pathways, setPathways] = useState([])
 
   // Save view preference when it changes
   useEffect(() => {
@@ -275,6 +278,28 @@ export default function CategoryList() {
     )
   }
 
+  const fetchPathways = async () => {
+    try {
+      const response = await fetch('/api/pathways')
+      if (!response.ok) throw new Error('Failed to fetch pathways')
+      const data = await response.json()
+      setPathways(data)
+      return data
+    } catch (error) {
+      console.error('Error fetching pathways:', error)
+      return []
+    }
+  }
+
+  const handlePathwaysClick = async () => {
+    const pathwaysData = await fetchPathways()
+    if (pathwaysData.length === 0) {
+      // Show some feedback if no pathways are available
+      return
+    }
+    setShowPathwayModal(true)
+  }
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
@@ -316,6 +341,14 @@ export default function CategoryList() {
             </div>
 
             <div className="d-flex align-items-center gap-3">
+              <Button 
+                variant="outline-primary" 
+                className="d-flex align-items-center gap-2"
+                onClick={handlePathwaysClick}
+              >
+                <GraduationCap size={16} />
+                Pathways
+              </Button>
               <ButtonGroup>
                 <Button
                   variant={viewType === 'grid' ? 'primary' : 'outline-primary'}
@@ -388,7 +421,7 @@ export default function CategoryList() {
               {Array.from(contentTypeFilter).map(type => (
                 <span key={type} className="badge d-flex align-items-center gap-2" style={{ backgroundColor: '#006ba5', color: 'white' }}>
                   {type === 'Resource' && <Book size={12} />}
-                  {type === 'Training' && <Mortarboard size={12} />}
+                  {type === 'Training' && <GraduationCap size={12} />}
                   {type === 'Shortcut' && <Command size={12} />}
                   {type === 'Plugin' && <Puzzle size={12} />}
                   {type}
@@ -499,63 +532,50 @@ export default function CategoryList() {
               <div 
                 className="position-fixed start-0 end-0 bottom-0"
                 style={{ 
-                  top: '128px', // Increased to account for badges
+                  top: '128px',
                   backgroundColor: '#f8f9fa',
                   padding: '2rem',
                   overflowY: 'auto'
                 }}
               >
                 <Container fluid>
-                  <div className={viewType === 'grid' ? 'grid-tiles' : ''}>
-                    {categories
-                      .filter(category => categoryFilter.size === 0 || categoryFilter.has(category.id))
-                      .map((category) => (
-                      <div key={category.id} className="mb-5">
-                        <div className="d-flex justify-content-between align-items-center mb-4">
-                          <div>
-                            <h3 className="h5 mb-0 d-flex align-items-center gap-2">
-                              {category.name}
-                              <small className="text-muted">
-                                {filteredResources(category.id).length} resources
+                  {categories
+                    .filter(category => categoryFilter.size === 0 || categoryFilter.has(category.id))
+                    .map(category => {
+                      const categoryResources = filteredResources(category.id);
+                      if (categoryResources.length === 0) return null;
+                      
+                      return (
+                        <div key={category.id} className="resource-section">
+                          <div className="category-header">
+                            <div className="d-flex justify-content-between align-items-center">
+                              <h3>{category.name}</h3>
+                              <small>
+                                {categoryResources.length} resource{categoryResources.length === 1 ? '' : 's'}
                               </small>
-                            </h3>
+                            </div>
                             {category.description && (
-                              <small className="text-muted">{category.description}</small>
+                              <p className="text-muted mb-0 mt-1">{category.description}</p>
                             )}
                           </div>
+                          <div className={viewType === 'grid' ? 'grid-tiles' : 'list-view'}>
+                            {categoryResources.map((resource, index) => (
+                              <ResourceCard
+                                key={resource.id}
+                                resource={resource}
+                                onDelete={fetchData}
+                                index={index}
+                                viewType={viewType}
+                                isFavorite={resource.favoritedBy?.some(u => u.id === session?.user?.id)}
+                                isCompleted={resource.completedBy?.some(u => u.id === session?.user?.id)}
+                                onToggleFavorite={() => handleToggleFavorite(resource.id)}
+                                onToggleComplete={() => handleToggleComplete(resource.id)}
+                              />
+                            ))}
+                          </div>
                         </div>
-                        <Droppable droppableId={category.id}>
-                          {(provided) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.droppableProps}
-                              className={viewType === 'list' ? 'list-view' : 'droppable-container'}
-                              style={viewType === 'grid' ? { 
-                                display: 'grid', 
-                                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                                gap: '2rem'
-                              } : undefined}
-                            >
-                              {filteredResources(category.id).map((resource, index) => (
-                                <ResourceCard
-                                  key={resource.id}
-                                  resource={resource}
-                                  onDelete={fetchData}
-                                  index={index}
-                                  viewType={viewType}
-                                  isFavorite={resource.favoritedBy?.some(u => u.id === session?.user?.id)}
-                                  isCompleted={resource.completedBy?.some(u => u.id === session?.user?.id)}
-                                  onToggleFavorite={() => handleToggleFavorite(resource.id)}
-                                  onToggleComplete={() => handleToggleComplete(resource.id)}
-                                />
-                              ))}
-                              {provided.placeholder}
-                            </div>
-                          )}
-                        </Droppable>
-                      </div>
-                    ))}
-                  </div>
+                      );
+                    })}
                 </Container>
               </div>
             )}
@@ -566,6 +586,15 @@ export default function CategoryList() {
       <AdminModal 
         show={showAdminModal} 
         onHide={() => setShowAdminModal(false)} 
+      />
+
+      <PathwayModal
+        show={showPathwayModal}
+        onHide={() => {
+          setShowPathwayModal(false)
+          setSelectedPathway(null)
+        }}
+        pathways={pathways}
       />
     </div>
   )

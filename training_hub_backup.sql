@@ -23,7 +23,8 @@ SET row_security = off;
 CREATE TYPE public."ContentType" AS ENUM (
     'Resource',
     'Training',
-    'Shortcut'
+    'Shortcut',
+    'Plugin'
 );
 
 
@@ -85,6 +86,40 @@ CREATE TABLE public."CompletedResource" (
 
 
 ALTER TABLE public."CompletedResource" OWNER TO corinfogarty;
+
+--
+-- Name: Pathway; Type: TABLE; Schema: public; Owner: corinfogarty
+--
+
+CREATE TABLE public."Pathway" (
+    id text NOT NULL,
+    title text NOT NULL,
+    description text NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL,
+    "createdById" text NOT NULL,
+    "isPublished" boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE public."Pathway" OWNER TO corinfogarty;
+
+--
+-- Name: PathwayResource; Type: TABLE; Schema: public; Owner: corinfogarty
+--
+
+CREATE TABLE public."PathwayResource" (
+    id text NOT NULL,
+    "pathwayId" text NOT NULL,
+    "resourceId" text NOT NULL,
+    "order" integer NOT NULL,
+    notes text,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL
+);
+
+
+ALTER TABLE public."PathwayResource" OWNER TO corinfogarty;
 
 --
 -- Name: Resource; Type: TABLE; Schema: public; Owner: corinfogarty
@@ -261,6 +296,29 @@ COPY public."CompletedResource" (id, "userId", "resourceId", "completedAt") FROM
 
 
 --
+-- Data for Name: Pathway; Type: TABLE DATA; Schema: public; Owner: corinfogarty
+--
+
+COPY public."Pathway" (id, title, description, "createdAt", "updatedAt", "createdById", "isPublished") FROM stdin;
+cm6xgxvkl000111oby348qi2z	3D effects	Learn how to make things in 3d	2025-02-09 10:15:42.357	2025-02-09 10:15:42.357	cm6qpbpto0000s7tr09q0tf8t	t
+\.
+
+
+--
+-- Data for Name: PathwayResource; Type: TABLE DATA; Schema: public; Owner: corinfogarty
+--
+
+COPY public."PathwayResource" (id, "pathwayId", "resourceId", "order", notes, "createdAt", "updatedAt") FROM stdin;
+cm6xgxvkl000311obed3nd66w	cm6xgxvkl000111oby348qi2z	cm6qp60ye003wmlizyndsdb6o	0		2025-02-09 10:15:42.357	2025-02-09 10:15:42.357
+cm6xgxvkl000411ob1st8z1r8	cm6xgxvkl000111oby348qi2z	cm6qp60yr004pmliz0k0dlnz5	1		2025-02-09 10:15:42.357	2025-02-09 10:15:42.357
+cm6xgxvkl000511obywmddnon	cm6xgxvkl000111oby348qi2z	cm6qp60yl004emlizqj36r1zr	2		2025-02-09 10:15:42.357	2025-02-09 10:15:42.357
+cm6xgxvkl000611obllncpxgk	cm6xgxvkl000111oby348qi2z	cm6qp60yb003omlizryarh70e	3		2025-02-09 10:15:42.357	2025-02-09 10:15:42.357
+cm6xgxvkl000711ob4sl8tq3j	cm6xgxvkl000111oby348qi2z	cm6qp60yd003smliz79b7sd5r	4		2025-02-09 10:15:42.357	2025-02-09 10:15:42.357
+cm6xgxvkl000811ob7hqd9ibm	cm6xgxvkl000111oby348qi2z	cm6qp612n00brmliz5a4rfdwf	5		2025-02-09 10:15:42.357	2025-02-09 10:15:42.357
+\.
+
+
+--
 -- Data for Name: Resource; Type: TABLE DATA; Schema: public; Owner: corinfogarty
 --
 
@@ -342,7 +400,7 @@ COPY public."Settings" (id, "siteName", "defaultCategoryId", "notificationEmail"
 
 COPY public."User" (id, email, name, image, "emailVerified", "createdAt", "updatedAt", "isAdmin", "lastLogin") FROM stdin;
 cm6tlkwrs000014exwn78tggr	studio@theonlinestudio.co	OLS Accounts	https://lh3.googleusercontent.com/a/ACg8ocLvhtoGJsSy6ti1iZeI0Mnja-ttBga4W0NJuGJUuIsdJ0aZ8vs=s96-c	\N	2025-02-06 17:14:30.761	2025-02-06 17:14:36.605	f	2025-02-06 17:14:36.604
-cm6qpbpto0000s7tr09q0tf8t	corin@ols.design	corin	https://lh3.googleusercontent.com/a/ACg8ocJ-b9vysq7JAyc94ZimAPD2ojviacQmCtY9PAfWMEztHP9hO6Hh=s96-c	\N	2025-02-04 16:36:01.789	2025-02-07 09:13:26.929	t	2025-02-07 09:13:26.926
+cm6qpbpto0000s7tr09q0tf8t	corin@ols.design	corin	https://lh3.googleusercontent.com/a/ACg8ocJ-b9vysq7JAyc94ZimAPD2ojviacQmCtY9PAfWMEztHP9hO6Hh=s96-c	\N	2025-02-04 16:36:01.789	2025-02-09 15:11:13.548	t	2025-02-09 15:11:13.547
 \.
 
 
@@ -364,6 +422,7 @@ cm6qp60xm0028mlizi2foexwf	cm6qpbpto0000s7tr09q0tf8t
 cm6qp60xk0024mlizsyrzy279	cm6qpbpto0000s7tr09q0tf8t
 cm6qp60wj0005mlizowjry6xw	cm6qpbpto0000s7tr09q0tf8t
 cm6qp60y50038mlizzbxk24w2	cm6qpbpto0000s7tr09q0tf8t
+cm6qp60ye003wmlizyndsdb6o	cm6qpbpto0000s7tr09q0tf8t
 \.
 
 
@@ -375,6 +434,7 @@ COPY public."_UserFavorites" ("A", "B") FROM stdin;
 cm6qp60xf001wmlizqrnqr0sy	cm6qpbpto0000s7tr09q0tf8t
 cm6qp60xg001ymlizwe6bbmnv	cm6qpbpto0000s7tr09q0tf8t
 cm6qp60xj0022mliz03tp0pvh	cm6qpbpto0000s7tr09q0tf8t
+cm6qp60ye003wmlizyndsdb6o	cm6qpbpto0000s7tr09q0tf8t
 \.
 
 
@@ -391,6 +451,8 @@ COPY public._prisma_migrations (id, checksum, finished_at, migration_name, logs,
 2185a869-acc0-445b-b995-e81682e89594	41dcfe2572095ed5167608c8c779a048bdd0e80b90a7e9fc5681db4d2f00e7b1	2025-02-06 17:05:52.311216+00	20250206170000_add_default_submitter	\N	\N	2025-02-06 17:05:52.30552+00	1
 2aa95e51-50e5-470a-9228-6fa06626c574	f7de352b0509e27e075d48eede48992819c650e911427e41a070dabca3ceed62	2025-02-06 17:06:52.807575+00	20250206170100_add_user_image	\N	\N	2025-02-06 17:06:52.806188+00	1
 890f1ba5-1999-49ad-bfab-2f4fa3dbd9ad	a4e4e608261ba4a389e7bd93bf0450f898da03f9e9efc23985f9af8b0b27200e	2025-02-06 17:08:04.95683+00	20250206170200_fix_user_image	\N	\N	2025-02-06 17:08:04.955476+00	1
+6b042be5-bf91-4a9d-bf13-49791f9450b2	07c24db2ab2472ec74c3e2de6d90c476861ead718f2f2120b2e62506a3ab96b6	2025-02-08 11:39:54.571967+00	20250207182049_add_plugin_content_type	\N	\N	2025-02-08 11:39:54.571142+00	1
+392dcb8c-9c66-4aca-b22b-5d8c4e1b4fb1	0916d526d9f2af71046c7aa30b483ee5751641a8448ee66a442bc91e8f00c899	2025-02-08 11:39:54.769936+00	20250208113954_add_pathways	\N	\N	2025-02-08 11:39:54.764886+00	1
 \.
 
 
@@ -416,6 +478,22 @@ ALTER TABLE ONLY public."Category"
 
 ALTER TABLE ONLY public."CompletedResource"
     ADD CONSTRAINT "CompletedResource_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: PathwayResource PathwayResource_pkey; Type: CONSTRAINT; Schema: public; Owner: corinfogarty
+--
+
+ALTER TABLE ONLY public."PathwayResource"
+    ADD CONSTRAINT "PathwayResource_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Pathway Pathway_pkey; Type: CONSTRAINT; Schema: public; Owner: corinfogarty
+--
+
+ALTER TABLE ONLY public."Pathway"
+    ADD CONSTRAINT "Pathway_pkey" PRIMARY KEY (id);
 
 
 --
@@ -485,6 +563,13 @@ CREATE UNIQUE INDEX "Category_name_key" ON public."Category" USING btree (name);
 --
 
 CREATE UNIQUE INDEX "CompletedResource_userId_resourceId_key" ON public."CompletedResource" USING btree ("userId", "resourceId");
+
+
+--
+-- Name: PathwayResource_pathwayId_order_key; Type: INDEX; Schema: public; Owner: corinfogarty
+--
+
+CREATE UNIQUE INDEX "PathwayResource_pathwayId_order_key" ON public."PathwayResource" USING btree ("pathwayId", "order");
 
 
 --
@@ -579,6 +664,30 @@ ALTER TABLE ONLY public."CompletedResource"
 
 ALTER TABLE ONLY public."CompletedResource"
     ADD CONSTRAINT "CompletedResource_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: PathwayResource PathwayResource_pathwayId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: corinfogarty
+--
+
+ALTER TABLE ONLY public."PathwayResource"
+    ADD CONSTRAINT "PathwayResource_pathwayId_fkey" FOREIGN KEY ("pathwayId") REFERENCES public."Pathway"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: PathwayResource PathwayResource_resourceId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: corinfogarty
+--
+
+ALTER TABLE ONLY public."PathwayResource"
+    ADD CONSTRAINT "PathwayResource_resourceId_fkey" FOREIGN KEY ("resourceId") REFERENCES public."Resource"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: Pathway Pathway_createdById_fkey; Type: FK CONSTRAINT; Schema: public; Owner: corinfogarty
+--
+
+ALTER TABLE ONLY public."Pathway"
+    ADD CONSTRAINT "Pathway_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --

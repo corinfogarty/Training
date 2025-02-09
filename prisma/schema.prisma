@@ -37,6 +37,7 @@ model Resource {
   orders         ResourceOrder[]     @relation("ResourceOrders")
   completedBy    User[]              @relation("UserCompleted")
   favoritedBy    User[]              @relation("UserFavorites")
+  pathwayResources PathwayResource[]
 }
 
 model User {
@@ -56,6 +57,7 @@ model User {
   sessions           Session[]
   completed          Resource[]          @relation("UserCompleted")
   favorites          Resource[]          @relation("UserFavorites")
+  pathways           Pathway[]
 }
 
 model Account {
@@ -132,4 +134,30 @@ enum ContentType {
   Training
   Shortcut
   Plugin
+}
+
+model Pathway {
+  id          String            @id @default(cuid())
+  title       String
+  description String
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  createdBy   User              @relation(fields: [createdById], references: [id])
+  createdById String
+  isPublished Boolean           @default(false)
+  resources   PathwayResource[]
+}
+
+model PathwayResource {
+  id         String   @id @default(cuid())
+  pathway    Pathway  @relation(fields: [pathwayId], references: [id], onDelete: Cascade)
+  pathwayId  String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  resourceId String
+  order      Int
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([pathwayId, order])
 }

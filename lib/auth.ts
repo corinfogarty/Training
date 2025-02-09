@@ -49,89 +49,95 @@ export const authOptions: NextAuthOptions = {
       
       if (!user.email) return false
       
-      // Check if this Google account already exists
-      const userExists = await prisma.user.findUnique({
-        where: { email: user.email },
-        include: { accounts: true },
-      })
-
-      if (userExists) {
-        // Update user's profile info from Google
-        await prisma.user.update({
-          where: { id: userExists.id },
-          data: { 
-            name: user.name,
-            image: (profile as any)?.picture || user.image,
-            lastLogin: new Date()
-          }
+      try {
+        // Check if this Google account already exists
+        const userExists = await prisma.user.findUnique({
+          where: { email: user.email },
+          include: { accounts: true },
         })
 
-        // If the user exists and doesn't have a Google account linked, link it
-        if (!userExists.accounts.some(acc => acc.provider === 'google') && account) {
-          await prisma.account.create({
-            data: {
-              userId: userExists.id,
-              type: account.type,
-              provider: account.provider,
-              providerAccountId: account.providerAccountId,
-              access_token: account.access_token,
-              expires_at: account.expires_at,
-              token_type: account.token_type,
-              scope: account.scope,
-              id_token: account.id_token,
-              refresh_token: account.refresh_token
-            },
-          })
-        } else if (account?.access_token) {
-          // Update the existing Google account with new tokens
-          await prisma.account.update({
-            where: {
-              provider_providerAccountId: {
-                provider: 'google',
-                providerAccountId: account.providerAccountId
-              }
-            },
-            data: {
-              access_token: account.access_token,
-              expires_at: account.expires_at,
-              refresh_token: account.refresh_token || undefined,
-              token_type: account.token_type,
-              scope: account.scope,
-              id_token: account.id_token
+        if (userExists) {
+          // Update user's profile info from Google
+          await prisma.user.update({
+            where: { id: userExists.id },
+            data: { 
+              name: user.name,
+              image: (profile as any)?.picture || user.image,
+              lastLogin: new Date()
             }
           })
-        }
-      } else {
-        // For new users, create them with the Google profile image and lastLogin
-        const newUser = await prisma.user.create({
-          data: {
-            email: user.email,
-            name: user.name,
-            image: (profile as any)?.picture || user.image,
-            lastLogin: new Date()
+
+          // If the user exists and doesn't have a Google account linked, link it
+          if (!userExists.accounts.some(acc => acc.provider === 'google') && account) {
+            await prisma.account.create({
+              data: {
+                userId: userExists.id,
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+                access_token: account.access_token,
+                expires_at: account.expires_at,
+                token_type: account.token_type,
+                scope: account.scope,
+                id_token: account.id_token,
+                refresh_token: account.refresh_token
+              },
+            })
+          } else if (account?.access_token) {
+            // Update the existing Google account with new tokens
+            await prisma.account.update({
+              where: {
+                provider_providerAccountId: {
+                  provider: 'google',
+                  providerAccountId: account.providerAccountId
+                }
+              },
+              data: {
+                access_token: account.access_token,
+                expires_at: account.expires_at,
+                refresh_token: account.refresh_token || undefined,
+                token_type: account.token_type,
+                scope: account.scope,
+                id_token: account.id_token
+              }
+            })
           }
-        })
-
-        // Create the Google account link
-        if (account) {
-          await prisma.account.create({
+        } else {
+          // For new users, create them with the Google profile image and lastLogin
+          const newUser = await prisma.user.create({
             data: {
-              userId: newUser.id,
-              type: account.type,
-              provider: account.provider,
-              providerAccountId: account.providerAccountId,
-              access_token: account.access_token,
-              expires_at: account.expires_at,
-              token_type: account.token_type,
-              scope: account.scope,
-              id_token: account.id_token,
-              refresh_token: account.refresh_token
-            },
+              email: user.email,
+              name: user.name,
+              image: (profile as any)?.picture || user.image,
+              lastLogin: new Date(),
+              isAdmin: user.email === 'corin@ols.design' // Auto-set admin for this email
+            }
           })
-        }
-      }
 
-      return true
+          // Create the Google account link
+          if (account) {
+            await prisma.account.create({
+              data: {
+                userId: newUser.id,
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+                access_token: account.access_token,
+                expires_at: account.expires_at,
+                token_type: account.token_type,
+                scope: account.scope,
+                id_token: account.id_token,
+                refresh_token: account.refresh_token
+              },
+            })
+          }
+        }
+
+        return true
+      } catch (error) {
+        console.error('Error in signIn callback:', error)
+        return false
+      }
     },
     async redirect({ url, baseUrl }) {
       const envBaseUrl = getBaseUrl()
@@ -249,7 +255,9 @@ export const authOptions: NextAuthOptions = {
       if (session?.user) {
         session.user.isAdmin = token.isAdmin as boolean
         session.user.id = token.userId as string
-        session.user.image = token.picture as string || session.user.image
+        if (token.picture) {
+          session.user.image = token.picture as string
+        }
       }
       
       return session

@@ -14,7 +14,8 @@ const nextConfig = {
       'ssl.gstatic.com',
       'download.blender.org',
       'cdn.motiondesign.school',
-      'i.ytimg.com'
+      'i.ytimg.com',
+      'lh3.googleusercontent.com'
     ],
   },
   webpack: (config, { dev, isServer }) => {

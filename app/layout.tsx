@@ -7,6 +7,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { LoginUpdater } from "@/components/auth/LoginUpdater"
+import { Toaster } from "@/components/ui/toaster"
+import { PathwayProvider } from '@/components/PathwayContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -33,8 +35,11 @@ export default async function RootLayout({
       </head>
       <body className={inter.className}>
         <Providers session={session}>
-          <LoginUpdater />
-          {children}
+          <PathwayProvider>
+            <LoginUpdater />
+            {children}
+            <Toaster />
+          </PathwayProvider>
         </Providers>
       </body>
     </html>

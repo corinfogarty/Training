@@ -307,10 +307,27 @@ export default function ResourceCard({
     </>
   )
 
-  if (standalone) {
+  if (viewType === 'columns') {
     return (
       <>
-        {viewType === 'list' ? listView : card}
+        {standalone ? (
+          <div className="mb-3">
+            {card}
+          </div>
+        ) : (
+          <Draggable draggableId={resource.id} index={index}>
+            {(provided) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.draggableProps}
+                {...provided.dragHandleProps}
+                className="mb-3"
+              >
+                {card}
+              </div>
+            )}
+          </Draggable>
+        )}
         {modals}
       </>
     )
@@ -318,18 +335,7 @@ export default function ResourceCard({
 
   return (
     <>
-      <Draggable draggableId={resource.id} index={index}>
-        {(provided) => (
-          <div
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-            className="mb-3"
-          >
-            {viewType === 'list' ? listView : card}
-          </div>
-        )}
-      </Draggable>
+      {viewType === 'list' ? listView : card}
       {modals}
     </>
   )
