@@ -186,13 +186,34 @@ export default function AuthButton({ onAdminClick }: AuthButtonProps) {
       <Modal
         show={showExtensionModal}
         onHide={() => setShowExtensionModal(false)}
+        className="resource-modal"
       >
         <Modal.Header closeButton>
           <Modal.Title>Browser Extension</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Coming soon...</p>
+          <h5 className="mb-3">Installation Instructions</h5>
+          <ol className="mb-4">
+            <li>Download the extension using the button below</li>
+            <li>Unzip the downloaded file</li>
+            <li>Open Chrome and go to <code>chrome://extensions</code></li>
+            <li>Enable "Developer Mode" in the top right</li>
+            <li>Click "Load unpacked" and select the unzipped directory</li>
+          </ol>
+          <h5 className="mb-3">Features</h5>
+          <ul className="mb-4">
+            <li>Add resources directly from any webpage</li>
+            <li>Automatic title and description extraction</li>
+            <li>Preview image detection</li>
+            <li>Quick category selection</li>
+          </ul>
         </Modal.Body>
+        <Modal.Footer className="border-top">
+          <Button variant="primary" size="lg" as="a" href="/chrome-extension.zip" download className="w-100">
+            <Chrome size={16} className="me-2" />
+            Download Extension
+          </Button>
+        </Modal.Footer>
       </Modal>
     </>
   )

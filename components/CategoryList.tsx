@@ -367,7 +367,7 @@ export default function CategoryList() {
               style={{ objectFit: 'contain' }}
             />
 
-            <div style={{ maxWidth: '400px', width: '100%' }}>
+            <div style={{ maxWidth: '320px', width: '100%' }}>
               <SearchBar 
                 searchTerm={searchTerm} 
                 onSearchChange={setSearchTerm}
@@ -388,18 +388,24 @@ export default function CategoryList() {
                 <Button
                   variant={viewType === 'grid' ? 'primary' : 'outline-primary'}
                   onClick={() => setViewType('grid')}
+                  className="d-flex align-items-center justify-content-center"
+                  style={{ width: '40px', height: '38px' }}
                 >
                   <Grid size={18} />
                 </Button>
                 <Button
                   variant={viewType === 'list' ? 'primary' : 'outline-primary'}
                   onClick={() => setViewType('list')}
+                  className="d-flex align-items-center justify-content-center"
+                  style={{ width: '40px', height: '38px' }}
                 >
                   <List size={18} />
                 </Button>
                 <Button
                   variant={viewType === 'columns' ? 'primary' : 'outline-primary'}
                   onClick={() => setViewType('columns')}
+                  className="d-flex align-items-center justify-content-center"
+                  style={{ width: '40px', height: '38px' }}
                 >
                   <Columns size={18} />
                 </Button>
@@ -407,7 +413,7 @@ export default function CategoryList() {
 
               <div className="d-flex align-items-center gap-2">
                 <Dropdown>
-                  <Dropdown.Toggle variant="outline-secondary" size="sm">
+                  <Dropdown.Toggle variant="outline-secondary" style={{ height: '38px' }}>
                     Sort: {sortType} {sortDirection === 'asc' ? '↑' : '↓'}
                   </Dropdown.Toggle>
                   <Dropdown.Menu>

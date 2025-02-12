@@ -113,10 +113,6 @@ export default function UserMenu() {
             <Chrome size={16} className="me-2" />
             Browser Extension
           </Dropdown.Item>
-          <Dropdown.Item as="a" href="/chrome-extension.zip" download>
-            <Chrome size={16} className="me-2" />
-            Download Extension
-          </Dropdown.Item>
 
           {/* Sign Out */}
           <Dropdown.Divider />
@@ -212,33 +208,34 @@ export default function UserMenu() {
       <Modal
         show={showExtensionModal}
         onHide={() => setShowExtensionModal(false)}
+        className="resource-modal"
       >
         <Modal.Header closeButton>
           <Modal.Title>Browser Extension</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div className="d-grid gap-2 mb-4">
-            <Button variant="primary" as="a" href="/chrome-extension.zip" download>
-              <Chrome size={16} className="me-2" />
-              Download Extension
-            </Button>
-          </div>
-          <h5>Installation Instructions</h5>
+          <h5 className="mb-3">Installation Instructions</h5>
           <ol className="mb-4">
-            <li>Download the extension using the button above</li>
+            <li>Download the extension using the button below</li>
             <li>Unzip the downloaded file</li>
             <li>Open Chrome and go to <code>chrome://extensions</code></li>
             <li>Enable "Developer Mode" in the top right</li>
             <li>Click "Load unpacked" and select the unzipped directory</li>
           </ol>
-          <h5>Features</h5>
-          <ul>
+          <h5 className="mb-3">Features</h5>
+          <ul className="mb-4">
             <li>Add resources directly from any webpage</li>
             <li>Automatic title and description extraction</li>
             <li>Preview image detection</li>
             <li>Quick category selection</li>
           </ul>
         </Modal.Body>
+        <Modal.Footer className="border-top">
+          <Button variant="primary" size="lg" as="a" href="/chrome-extension.zip" download className="w-100">
+            <Chrome size={16} className="me-2" />
+            Download Extension
+          </Button>
+        </Modal.Footer>
       </Modal>
     </>
   )
