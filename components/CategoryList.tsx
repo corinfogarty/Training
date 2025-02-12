@@ -6,7 +6,7 @@ import type { Category, Resource, User, ResourceOrder, ContentType } from '@pris
 import ResourceCard from './ResourceCard'
 import Debug from './Debug'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
-import { Container, Alert, Row, Col, Image, ButtonGroup, Button, Modal } from 'react-bootstrap'
+import { Container, Alert, Row, Col, Image, ButtonGroup, Button, Modal, Dropdown } from 'react-bootstrap'
 import { Grid3x3GapFill as Grid, ListUl as List, Columns, BarChartFill as BarChart, Gear as Settings, People as Users, Grid3x3 as LayoutGrid, Sliders, Book, Star, CheckCircle, XCircle, Command, Puzzle } from 'react-bootstrap-icons'
 import { Chrome, GraduationCap } from 'lucide-react'
 import CategoryFilter from './CategoryFilter'
@@ -20,12 +20,15 @@ import AdminModal from './AdminModal'
 import Link from 'next/link'
 import { usePathway } from './PathwayContext'
 import PathwayModal from './PathwayModal'
+import ResourceLightbox from './ResourceLightbox'
+import { useRouter } from 'next/navigation'
 
 type ViewType = 'grid' | 'list' | 'columns'
 type FilterType = 'all' | 'favorites' | 'completed' | 'incomplete'
 type ActiveFilters = Set<Exclude<FilterType, 'all'>>
 type ContentTypeFilter = Set<ContentType>
 type CategoryFilter = Set<string> // category IDs
+type SortType = 'title' | 'date' | 'progress' | 'custom'
 
 interface ResourceWithRelations extends Resource {
   favoritedBy: User[]
@@ -36,6 +39,8 @@ interface ResourceWithRelations extends Resource {
 export default function CategoryList() {
   const [categories, setCategories] = useState<Category[]>([])
   const [resources, setResources] = useState<ResourceWithRelations[]>([])
+  const [selectedResource, setSelectedResource] = useState<ResourceWithRelations | null>(null)
+  const [showResourceModal, setShowResourceModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>(() => {
@@ -72,6 +77,9 @@ export default function CategoryList() {
   const [showAdminModal, setShowAdminModal] = useState(false)
   const { setShowPathwayModal, setSelectedPathway, showPathwayModal } = usePathway()
   const [pathways, setPathways] = useState([])
+  const router = useRouter()
+  const [sortType, setSortType] = useState<SortType>('custom')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
   // Save view preference when it changes
   useEffect(() => {
@@ -224,9 +232,37 @@ export default function CategoryList() {
     }
   }
 
+  const sortResources = (resources: ResourceWithRelations[]) => {
+    if (sortType === 'custom') {
+      return resources.sort((a, b) => {
+        const aOrder = a.orders?.find(o => o.userId === session?.user?.id)?.order ?? 0
+        const bOrder = b.orders?.find(o => o.userId === session?.user?.id)?.order ?? 0
+        return aOrder - bOrder
+      })
+    }
+
+    return [...resources].sort((a, b) => {
+      let comparison = 0
+      switch (sortType) {
+        case 'title':
+          comparison = a.title.localeCompare(b.title)
+          break
+        case 'date':
+          comparison = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          break
+        case 'progress':
+          const aProgress = a.completedBy.length
+          const bProgress = b.completedBy.length
+          comparison = aProgress - bProgress
+          break
+      }
+      return sortDirection === 'asc' ? comparison : -comparison
+    })
+  }
+
   const filteredResources = (categoryId: string) => {
-    return resources
-      .filter(resource => {
+    return sortResources(
+      resources.filter(resource => {
         const matchesSearch = searchTerm === '' || 
           resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (resource.description?.toLowerCase() ?? '').includes(searchTerm.toLowerCase())
@@ -236,10 +272,8 @@ export default function CategoryList() {
         
         const matchesContentType = contentTypeFilter.size === 0 || contentTypeFilter.has(resource.contentType)
 
-        // If no status filters are active, show all resources that match search and content type
         if (activeFilters.size === 0) return matchesSearch && matchesCategoryFilter && matchesCategoryView && matchesContentType
 
-        // Check if resource matches any active filters
         const isFavorite = resource.favoritedBy.some(u => u.id === session?.user?.id)
         const isCompleted = resource.completedBy.some(u => u.id === session?.user?.id)
 
@@ -251,11 +285,7 @@ export default function CategoryList() {
 
         return matchesSearch && matchesCategoryFilter && matchesCategoryView && matchesFilters && matchesContentType
       })
-      .sort((a, b) => {
-        const aOrder = a.orders?.find(o => o.userId === session?.user?.id)?.order ?? 0
-        const bOrder = b.orders?.find(o => o.userId === session?.user?.id)?.order ?? 0
-        return aOrder - bOrder
-      })
+    )
   }
 
   const getCategoryIcon = (categoryName: string) => {
@@ -298,6 +328,11 @@ export default function CategoryList() {
       return
     }
     setShowPathwayModal(true)
+  }
+
+  const handleResourceClick = (resource: ResourceWithRelations) => {
+    setSelectedResource(resource)
+    setShowResourceModal(true)
   }
 
   if (loading) {
@@ -353,27 +388,65 @@ export default function CategoryList() {
                 <Button
                   variant={viewType === 'grid' ? 'primary' : 'outline-primary'}
                   onClick={() => setViewType('grid')}
-                  title="Grid view"
                 >
-                  <Grid size={16} />
+                  <Grid size={18} />
                 </Button>
                 <Button
                   variant={viewType === 'list' ? 'primary' : 'outline-primary'}
                   onClick={() => setViewType('list')}
-                  title="List view"
                 >
-                  <List size={16} />
+                  <List size={18} />
                 </Button>
                 <Button
                   variant={viewType === 'columns' ? 'primary' : 'outline-primary'}
                   onClick={() => setViewType('columns')}
-                  title="Column view"
                 >
-                  <Columns size={16} />
+                  <Columns size={18} />
                 </Button>
               </ButtonGroup>
 
               <div className="d-flex align-items-center gap-2">
+                <Dropdown>
+                  <Dropdown.Toggle variant="outline-secondary" size="sm">
+                    Sort: {sortType} {sortDirection === 'asc' ? '↑' : '↓'}
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    <Dropdown.Item 
+                      active={sortType === 'custom'} 
+                      onClick={() => setSortType('custom')}
+                    >
+                      Custom Order
+                    </Dropdown.Item>
+                    <Dropdown.Item 
+                      active={sortType === 'title'} 
+                      onClick={() => {
+                        setSortType('title')
+                        setSortDirection(prev => sortType === 'title' ? (prev === 'asc' ? 'desc' : 'asc') : 'asc')
+                      }}
+                    >
+                      Title {sortType === 'title' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </Dropdown.Item>
+                    <Dropdown.Item 
+                      active={sortType === 'date'} 
+                      onClick={() => {
+                        setSortType('date')
+                        setSortDirection(prev => sortType === 'date' ? (prev === 'asc' ? 'desc' : 'asc') : 'desc')
+                      }}
+                    >
+                      Date Added {sortType === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </Dropdown.Item>
+                    <Dropdown.Item 
+                      active={sortType === 'progress'} 
+                      onClick={() => {
+                        setSortType('progress')
+                        setSortDirection(prev => sortType === 'progress' ? (prev === 'asc' ? 'desc' : 'asc') : 'desc')
+                      }}
+                    >
+                      Progress {sortType === 'progress' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+
                 <FilterFlyout
                   contentTypeFilter={contentTypeFilter}
                   setContentTypeFilter={setContentTypeFilter}
@@ -516,6 +589,8 @@ export default function CategoryList() {
                                     isCompleted={resource.completedBy?.some(u => u.id === session?.user?.id)}
                                     onToggleFavorite={() => handleToggleFavorite(resource.id)}
                                     onToggleComplete={() => handleToggleComplete(resource.id)}
+                                    onClick={() => handleResourceClick(resource)}
+                                    standalone={true}
                                   />
                                 ))}
                                 {provided.placeholder}
@@ -570,6 +645,8 @@ export default function CategoryList() {
                                 isCompleted={resource.completedBy?.some(u => u.id === session?.user?.id)}
                                 onToggleFavorite={() => handleToggleFavorite(resource.id)}
                                 onToggleComplete={() => handleToggleComplete(resource.id)}
+                                onClick={() => handleResourceClick(resource)}
+                                standalone={true}
                               />
                             ))}
                           </div>
@@ -595,6 +672,24 @@ export default function CategoryList() {
           setSelectedPathway(null)
         }}
         pathways={pathways}
+      />
+
+      <ResourceLightbox
+        resource={selectedResource!}
+        show={showResourceModal}
+        onHide={() => setShowResourceModal(false)}
+        isFavorite={selectedResource?.favoritedBy?.some(u => u.id === session?.user?.id)}
+        isCompleted={selectedResource?.completedBy?.some(u => u.id === session?.user?.id)}
+        onToggleFavorite={async (e) => {
+          if (selectedResource) await handleToggleFavorite(selectedResource.id)
+        }}
+        onToggleComplete={async (e) => {
+          if (selectedResource) await handleToggleComplete(selectedResource.id)
+        }}
+        onEdit={() => {
+          setShowResourceModal(false)
+          router.refresh()
+        }}
       />
     </div>
   )

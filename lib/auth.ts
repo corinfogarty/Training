@@ -251,15 +251,13 @@ export const authOptions: NextAuthOptions = {
           baseUrl: getBaseUrl()
         }
       })
-      
-      if (session?.user) {
-        session.user.isAdmin = token.isAdmin as boolean
+
+      if (session.user) {
         session.user.id = token.userId as string
-        if (token.picture) {
-          session.user.image = token.picture as string
-        }
+        session.user.isAdmin = token.isAdmin as boolean
+        session.user.image = token.picture as string || session.user.image
       }
-      
+
       return session
     }
   },

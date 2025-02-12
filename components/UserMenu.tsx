@@ -12,17 +12,18 @@ import AdminUsers from './admin/AdminUsers'
 import AdminResources from './admin/AdminResources'
 import AdminCategories from './admin/AdminCategories'
 import AdminSettings from './admin/AdminSettings'
+import AccountModal from './AccountModal'
 
 export default function UserMenu() {
   const { data: session, update: updateSession } = useSession()
   const [updating, setUpdating] = useState(false)
   const [showExtensionModal, setShowExtensionModal] = useState(false)
-  const [showMyProgressModal, setShowMyProgressModal] = useState(false)
   const [showTeamProgressModal, setShowTeamProgressModal] = useState(false)
   const [showUsersModal, setShowUsersModal] = useState(false)
   const [showResourcesModal, setShowResourcesModal] = useState(false)
   const [showCategoriesModal, setShowCategoriesModal] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [showAccountModal, setShowAccountModal] = useState(false)
   const router = useRouter()
 
   const refreshProfileImage = async () => {
@@ -68,13 +69,17 @@ export default function UserMenu() {
 
         <Dropdown.Menu>
           {/* Progress Section */}
-          <Dropdown.Item onClick={() => setShowMyProgressModal(true)}>
-            <User size={16} className="me-2" />
-            My Progress
-          </Dropdown.Item>
           <Dropdown.Item onClick={() => setShowTeamProgressModal(true)}>
             <BarChart size={16} className="me-2" />
             Team Progress
+          </Dropdown.Item>
+
+          <Dropdown.Divider />
+
+          {/* Account Section */}
+          <Dropdown.Item onClick={() => setShowAccountModal(true)}>
+            <User size={16} className="me-2" />
+            My Account
           </Dropdown.Item>
 
           {/* Admin Section */}
@@ -118,21 +123,13 @@ export default function UserMenu() {
         </Dropdown.Menu>
       </Dropdown>
 
-      {/* Progress Modals */}
-      <Modal
-        show={showMyProgressModal}
-        onHide={() => setShowMyProgressModal(false)}
-        size="xl"
-        fullscreen="lg-down"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>My Progress</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="p-0">
-          <UserProgress />
-        </Modal.Body>
-      </Modal>
+      {/* Account Modal */}
+      <AccountModal 
+        show={showAccountModal}
+        onHide={() => setShowAccountModal(false)}
+      />
 
+      {/* Team Progress Modal */}
       <Modal
         show={showTeamProgressModal}
         onHide={() => setShowTeamProgressModal(false)}
@@ -208,30 +205,16 @@ export default function UserMenu() {
       </Modal>
 
       {/* Extension Modal */}
-      <Modal show={showExtensionModal} onHide={() => setShowExtensionModal(false)}>
+      <Modal
+        show={showExtensionModal}
+        onHide={() => setShowExtensionModal(false)}
+      >
         <Modal.Header closeButton>
-          <Modal.Title>Install Chrome Extension (Developer Mode)</Modal.Title>
+          <Modal.Title>Browser Extension</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <ol className="mb-4">
-            <li className="mb-2">Download the extension ZIP file from <a href="/extension.zip" className="text-primary">here</a></li>
-            <li className="mb-2">Unzip the file to a location on your computer</li>
-            <li className="mb-2">Open Chrome and go to <code>chrome://extensions</code></li>
-            <li className="mb-2">Enable "Developer mode" using the toggle in the top right</li>
-            <li className="mb-2">Click "Load unpacked" button in the top left</li>
-            <li className="mb-2">Select the unzipped extension folder</li>
-            <li>The extension should now appear in your Chrome toolbar</li>
-          </ol>
-          <div className="alert alert-info">
-            <h6 className="alert-heading mb-1">Note</h6>
-            <p className="mb-0">This is a temporary installation method while we await approval from the Chrome Web Store. Once approved, you'll be able to install directly from the store.</p>
-          </div>
+          <p>Coming soon...</p>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowExtensionModal(false)}>
-            Close
-          </Button>
-        </Modal.Footer>
       </Modal>
     </>
   )

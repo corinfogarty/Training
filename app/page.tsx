@@ -69,13 +69,7 @@ export default function Home() {
         method: 'POST'
       })
       if (!response.ok) throw new Error('Failed to toggle favorite')
-      const data = await response.json()
-      setSelectedResource(prev => prev ? {
-        ...prev,
-        favoritedBy: data.isFavorite 
-          ? [...(prev.favoritedBy || []), { id: session.user.id }]
-          : (prev.favoritedBy || []).filter(u => u.id !== session.user.id)
-      } : null)
+      await fetchResource(selectedResource.id)
     } catch (error) {
       console.error('Error toggling favorite:', error)
     }
@@ -88,13 +82,7 @@ export default function Home() {
         method: 'POST'
       })
       if (!response.ok) throw new Error('Failed to toggle complete')
-      const data = await response.json()
-      setSelectedResource(prev => prev ? {
-        ...prev,
-        completedBy: data.isCompleted
-          ? [...(prev.completedBy || []), { id: session.user.id }]
-          : (prev.completedBy || []).filter(u => u.id !== session.user.id)
-      } : null)
+      await fetchResource(selectedResource.id)
     } catch (error) {
       console.error('Error toggling complete:', error)
     }

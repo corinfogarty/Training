@@ -1,20 +1,16 @@
 'use client'
 
 import { createContext, useContext, useState, ReactNode } from 'react'
+import { Resource, Category } from '@prisma/client'
 
-type Resource = {
-  id: string
-  title: string
-  description: string
-  url: string
-  additionalUrls: string[]
-  previewImage: string | null
-  categoryId: string
-  createdAt: Date
-  updatedAt: Date
-  contentType: 'Resource' | 'Training' | 'Shortcut' | 'Plugin'
-  submittedById: string | null
-  notes?: string
+type ResourceWithRelations = Resource & {
+  category?: Category | null
+  submittedBy?: {
+    id: string
+    name?: string | null
+    email: string
+    image?: string | null
+  } | null
 }
 
 type PathwayResource = {
@@ -22,7 +18,7 @@ type PathwayResource = {
   resourceId: string
   order: number
   notes?: string
-  resource: Resource
+  resource: ResourceWithRelations
 }
 
 type Pathway = {

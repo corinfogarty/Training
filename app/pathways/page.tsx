@@ -6,6 +6,7 @@ import PathwaysClient from './PathwaysClient'
 
 type PathwayWithRelations = Pathway & {
   createdBy: {
+    id: string
     name: string | null
     image: string | null
   }
@@ -26,6 +27,7 @@ async function getPathways() {
     include: {
       createdBy: {
         select: {
+          id: true,
           name: true,
           image: true
         }
@@ -48,12 +50,13 @@ async function getPathways() {
   return pathways.map(pathway => ({
     ...pathway,
     createdBy: {
+      id: pathway.createdBy.id,
       name: pathway.createdBy.name || 'Anonymous',
       image: pathway.createdBy.image || '/default-avatar.png'
     },
     resources: pathway.resources.map(resource => ({
       ...resource,
-      notes: resource.notes || undefined // Convert null to undefined to match the component type
+      notes: resource.notes
     }))
   }))
 }

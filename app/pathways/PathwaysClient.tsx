@@ -1,54 +1,47 @@
 'use client'
 
-import { useEffect } from 'react'
 import { usePathway } from '@/components/PathwayContext'
 import PathwayList from '@/components/PathwayList'
-import type { Pathway, Resource } from '@prisma/client'
+import { Resource, Category } from '@prisma/client'
+
+type ResourceWithRelations = Resource & {
+  category?: Category | null
+  submittedBy?: {
+    id: string
+    name?: string | null
+    email: string
+    image?: string | null
+  } | null
+}
 
 type PathwayResource = {
   id: string
   resourceId: string
   order: number
-  notes?: string
-  resource: Resource
+  notes: string | null
+  resource: ResourceWithRelations
 }
 
-type PathwayData = {
+type Pathway = {
   id: string
   title: string
   description: string
   createdBy: {
+    id: string
     name: string
     image: string
   }
   resources: PathwayResource[]
 }
 
-type PathwayWithRelations = {
-  id: string
-  title: string
-  description: string
-  createdBy: {
-    name: string | null
-    image: string | null
-  }
-  resources: {
-    id: string
-    resourceId: string
-    order: number
-    notes: string | null
-    resource: Resource
-  }[]
-}
-
 interface PathwaysClientProps {
-  pathways: PathwayWithRelations[]
+  pathways: Pathway[]
 }
 
 export default function PathwaysClient({ pathways }: PathwaysClientProps) {
   const { setShowPathwayModal, setSelectedPathway } = usePathway()
 
-  const transformedPathways: PathwayData[] = pathways.map(pathway => ({
+  const transformedPathways: Pathway[] = pathways.map(pathway => ({
     ...pathway,
     createdBy: {
       name: pathway.createdBy.name || 'Anonymous',
@@ -56,7 +49,7 @@ export default function PathwaysClient({ pathways }: PathwaysClientProps) {
     },
     resources: pathway.resources.map(resource => ({
       ...resource,
-      notes: resource.notes || undefined
+      notes: resource.notes
     }))
   }))
 

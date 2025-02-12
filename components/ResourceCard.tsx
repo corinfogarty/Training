@@ -26,6 +26,7 @@ interface ResourceCardProps {
   onDelete?: () => void
   onToggleFavorite?: () => void
   onToggleComplete?: () => void
+  onClick?: () => void
   standalone?: boolean
   viewType?: 'grid' | 'list' | 'columns'
 }
@@ -39,6 +40,7 @@ export default function ResourceCard({
   onDelete = () => {},
   onToggleFavorite = () => {},
   onToggleComplete = () => {},
+  onClick,
   standalone = false,
   viewType = 'grid'
 }: ResourceCardProps) {
@@ -53,8 +55,12 @@ export default function ResourceCard({
 
   const handleCardClick = (e: React.MouseEvent) => {
     e.preventDefault()
-    e.stopPropagation()
-    router.push(`/?resource=${resource.id}`, { scroll: false })
+    
+    if (onClick) {
+      onClick()
+    } else if (standalone) {
+      window.open(resource.url, '_blank')
+    }
   }
 
   const handleDelete = async () => {

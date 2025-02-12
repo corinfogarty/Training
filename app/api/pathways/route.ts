@@ -18,7 +18,19 @@ export async function GET() {
         },
         resources: {
           include: {
-            resource: true
+            resource: {
+              include: {
+                category: true,
+                submittedBy: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    image: true
+                  }
+                }
+              }
+            }
           },
           orderBy: {
             order: 'asc'
@@ -47,23 +59,35 @@ export async function POST(request: Request) {
     const json = await request.json()
     const { title, description, resources } = json
 
-    if (!title || !description || !Array.isArray(resources)) {
-      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    if (!title || !description) {
+      return NextResponse.json({ error: 'Title and description are required' }, { status: 400 })
     }
 
+    // Create pathway without resources first
     const pathway = await prisma.pathway.create({
       data: {
         title,
         description,
         createdById: session.user.id,
-        resources: {
-          create: resources.map((resource: any, index: number) => ({
-            resourceId: resource.id,
-            order: index,
-            notes: resource.notes
-          }))
-        }
-      },
+        isPublished: true
+      }
+    })
+
+    // If resources exist, add them
+    if (resources && resources.length > 0) {
+      await prisma.pathwayResource.createMany({
+        data: resources.map((resource: any, index: number) => ({
+          pathwayId: pathway.id,
+          resourceId: resource.resourceId,
+          order: index,
+          notes: resource.notes || ''
+        }))
+      })
+    }
+
+    // Fetch the complete pathway with all relations
+    const completePathway = await prisma.pathway.findUnique({
+      where: { id: pathway.id },
       include: {
         createdBy: {
           select: {
@@ -73,13 +97,25 @@ export async function POST(request: Request) {
         },
         resources: {
           include: {
-            resource: true
+            resource: {
+              include: {
+                category: true,
+                submittedBy: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    image: true
+                  }
+                }
+              }
+            }
           }
         }
       }
     })
 
-    return NextResponse.json(pathway)
+    return NextResponse.json(completePathway)
   } catch (error) {
     console.error('Error creating pathway:', error)
     return NextResponse.json({ error: 'Failed to create pathway' }, { status: 500 })

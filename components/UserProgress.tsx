@@ -14,9 +14,10 @@ interface CategoryProgress {
 interface UserProgressProps {
   userId: string
   className?: string
+  showSubmitted?: boolean
 }
 
-export default function UserProgress({ userId, className = '' }: UserProgressProps) {
+export default function UserProgress({ userId, className = '', showSubmitted = false }: UserProgressProps) {
   const [progress, setProgress] = useState<CategoryProgress[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -27,7 +28,7 @@ export default function UserProgress({ userId, className = '' }: UserProgressPro
   const fetchProgress = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/user/progress?userId=${userId}`)
+      const response = await fetch(`/api/user/progress?userId=${userId}${showSubmitted ? '&showSubmitted=true' : ''}`)
       if (!response.ok) throw new Error('Failed to fetch progress')
       const data = await response.json()
       setProgress(data)

@@ -6,6 +6,8 @@ import type { User } from '@prisma/client'
 import { Search, ArrowLeft, Trophy, Star, BookOpen, Award, Crown, Medal } from 'lucide-react'
 import UserProgress from '../UserProgress'
 import { useSession } from 'next-auth/react'
+import Link from 'next/link'
+import PathwayProgress from '../PathwayProgress'
 
 interface Resource {
   id: string
@@ -296,8 +298,11 @@ export default function TeamProgress({ onUserStatsOpen, onUserStatsClose }: Team
         </div>
 
         <Tabs defaultActiveKey="progress" className="mb-3">
-          <Tab eventKey="progress" title="Progress">
+          <Tab eventKey="progress" title="Resources">
             <UserProgress userId={selectedUser.id} />
+          </Tab>
+          <Tab eventKey="pathways" title="Pathways">
+            <PathwayProgress userId={selectedUser.id} />
           </Tab>
           <Tab eventKey="stats" title="Stats">
             <div className="text-muted">
@@ -510,42 +515,25 @@ export default function TeamProgress({ onUserStatsOpen, onUserStatsClose }: Team
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map((user) => (
-              <tr key={user.id} onClick={() => handleUserClick(user)} style={{ cursor: 'pointer' }}>
+            {filteredUsers.map((user, index) => (
+              <tr 
+                key={user.id}
+                onClick={() => handleUserClick(user)}
+                style={{ cursor: 'pointer' }}
+              >
                 <td>
                   <div className="d-flex align-items-center">
-                    {user.image ? (
-                      <img 
-                        src={user.image} 
-                        alt={user.name || ''} 
-                        className="rounded-circle me-2"
-                        width="32" 
-                        height="32"
-                        style={{ objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <div 
-                        className="rounded-circle me-2 bg-secondary d-flex align-items-center justify-content-center text-white"
-                        style={{ width: '32px', height: '32px' }}
-                      >
-                        {user.name?.[0] || user.email[0]}
-                      </div>
-                    )}
-                    <div>
-                      <div className="text-primary">{user.name || 'Anonymous'}</div>
-                      <small className="text-muted">{user.email}</small>
+                    {getRankBadge(index + 1)}
+                    <div className="ms-2">
+                      <div>{user.name || user.email}</div>
+                      <div className="small text-muted">{user.email}</div>
+                      <div>{getAchievementBadges(user)}</div>
                     </div>
                   </div>
                 </td>
-                <td className="text-center">
-                  <span className="badge bg-primary">{user._count.submittedResources}</span>
-                </td>
-                <td className="text-center">
-                  <span className="badge bg-warning text-dark">{user._count.favorites}</span>
-                </td>
-                <td className="text-center">
-                  <span className="badge bg-success">{user._count.completed}</span>
-                </td>
+                <td>{user._count.submittedResources}</td>
+                <td>{user._count.favorites}</td>
+                <td>{user._count.completed}</td>
                 <td>{user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}</td>
               </tr>
             ))}
