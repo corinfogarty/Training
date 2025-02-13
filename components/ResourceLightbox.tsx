@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Resource, Category, ContentType } from '@prisma/client'
 import { Modal, Button, Badge, Form } from 'react-bootstrap'
-import { ExternalLink, Calendar, Link as LinkIcon, Edit, Star, CheckCircle, List, Link2 } from 'lucide-react'
+import { ExternalLink, Calendar, Link as LinkIcon, Edit, Star, CheckCircle, List, Link2, FileIcon } from 'lucide-react'
 import { StarFill, CheckCircleFill, Pencil, Trash } from 'react-bootstrap-icons'
 import { useSession } from 'next-auth/react'
 import { Editor } from '@tinymce/tinymce-react'
@@ -28,6 +28,7 @@ interface Props {
   isCompleted?: boolean
   onToggleFavorite?: (e?: React.MouseEvent) => void | Promise<void>
   onToggleComplete?: (e?: React.MouseEvent) => void | Promise<void>
+  startInEditMode?: boolean
 }
 
 interface FormattedContent {
@@ -46,16 +47,19 @@ export default function ResourceLightbox({
   isFavorite = false,
   isCompleted = false,
   onToggleFavorite,
-  onToggleComplete
+  onToggleComplete,
+  startInEditMode = false
 }: Props) {
   const { data: session } = useSession()
   const [favoriteLoading, setFavoriteLoading] = useState(false)
   const [completeLoading, setCompleteLoading] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(startInEditMode)
   const [currentResource, setCurrentResource] = useState<ResourceWithRelations>(resource)
   const [categories, setCategories] = useState<Category[]>([])
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
 
   useEffect(() => {
     setCurrentResource(resource)
@@ -93,7 +97,7 @@ export default function ResourceLightbox({
     }
   }
 
-  const handleFavoriteClick = async (e: React.MouseEvent) => {
+  const handleFavoriteClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!onToggleFavorite) return
     setFavoriteLoading(true)
     try {
@@ -103,7 +107,7 @@ export default function ResourceLightbox({
     }
   }
 
-  const handleCompleteClick = async (e: React.MouseEvent) => {
+  const handleCompleteClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!onToggleComplete) return
     setCompleteLoading(true)
     try {
@@ -113,7 +117,39 @@ export default function ResourceLightbox({
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      const previewUrl = URL.createObjectURL(file)
+      setCurrentResource(prev => ({ ...prev, previewImage: previewUrl }))
+    }
+  }
+
+  const handleFetchPreview = async () => {
+    if (!currentResource?.url) return;
+    
+    try {
+      setPreviewLoading(true);
+      const response = await fetch(`/api/preview?url=${encodeURIComponent(currentResource.url)}`);
+      if (!response.ok) throw new Error('Failed to fetch preview');
+      const data = await response.json();
+      
+      const decodedImageUrl = data.image ? decodeURIComponent(data.image.replace(/&amp;/g, '&')) : '';
+      
+      setCurrentResource(prev => ({
+        ...prev,
+        previewImage: decodedImageUrl,
+        description: data.description || prev.description
+      }));
+    } catch (error) {
+      console.error('Error fetching preview:', error);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     e.stopPropagation()
     setLoading(true)
@@ -124,6 +160,26 @@ export default function ResourceLightbox({
     }
 
     try {
+      let finalPreviewImage = currentResource.previewImage
+
+      // If a file is selected, upload it first
+      if (selectedFile) {
+        const formData = new FormData()
+        formData.append('file', selectedFile)
+        
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        })
+
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload preview image')
+        }
+
+        const { path } = await uploadResponse.json()
+        finalPreviewImage = path
+      }
+
       const response = await fetch(`/api/resources/${currentResource.id}`, {
         method: 'PUT',
         headers: {
@@ -135,7 +191,7 @@ export default function ResourceLightbox({
           url: currentResource.url,
           contentType: currentResource.contentType,
           categoryId: currentResource.categoryId,
-          previewImage: currentResource.previewImage,
+          previewImage: finalPreviewImage,
         }),
       })
 
@@ -164,109 +220,92 @@ export default function ResourceLightbox({
           </div>
         )}
         
-        {currentResource?.previewImage && (
+        {!isEditing && currentResource?.previewImage && (
           <div className="text-center mb-4">
-            {isEditing ? (
-              <Form.Group className="mb-3">
-                <Form.Control
-                  type="text"
-                  value={currentResource.previewImage}
-                  onChange={(e) => setCurrentResource(prev => ({ ...prev, previewImage: e.target.value }))}
-                  placeholder="Enter image URL"
-                />
-                <img
-                  src={currentResource.previewImage}
-                  alt="Preview"
-                  className="img-fluid rounded shadow-sm mt-2"
-                  style={{
-                    maxHeight: '400px',
-                    width: 'auto',
-                    objectFit: 'contain'
-                  }}
-                />
-              </Form.Group>
-            ) : (
-              <img
-                src={currentResource.previewImage}
-                alt={currentResource.title}
-                className="img-fluid rounded shadow-sm"
-                style={{
-                  maxHeight: '400px',
-                  width: 'auto',
-                  objectFit: 'contain'
-                }}
-              />
-            )}
+            <img
+              src={currentResource.previewImage}
+              alt={currentResource.title}
+              className="img-fluid rounded shadow-sm"
+              style={{
+                maxHeight: '400px',
+                width: 'auto',
+                objectFit: 'contain'
+              }}
+            />
           </div>
         )}
 
         {isEditing ? (
           <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-3">
-              <Form.Control
-                type="text"
-                value={currentResource?.title || ''}
-                onChange={(e) => setCurrentResource(prev => ({ ...prev, title: e.target.value }))}
-                required
-                className="h4 border-0 p-0 mb-3"
-                style={{ fontSize: '1.5rem', fontWeight: 600 }}
-              />
-            </Form.Group>
-
-            <div className="d-flex align-items-center gap-3 mb-4">
-              <Form.Group className="flex-grow-1">
-                <Form.Select
-                  value={currentResource?.contentType || 'Resource'}
-                  onChange={(e) => setCurrentResource(prev => ({ ...prev, contentType: e.target.value as ContentType }))}
-                  required
-                  className="mb-2"
-                >
-                  <option value="Resource">Resource</option>
-                  <option value="Training">Training</option>
-                  <option value="Shortcut">Shortcut</option>
-                  <option value="Plugin">Plugin</option>
-                </Form.Select>
-
-                <Form.Select
-                  value={currentResource?.categoryId || ''}
-                  onChange={(e) => setCurrentResource(prev => ({ ...prev, categoryId: e.target.value }))}
-                  required
-                >
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-
-              <div className="ms-auto">
-                <Button
-                  variant="link"
-                  className={`p-0 me-2 ${favoriteLoading ? 'disabled' : ''}`}
-                  onClick={handleFavoriteClick}
-                  disabled={favoriteLoading}
-                >
-                  {isFavorite ? <StarFill className="text-warning" size={20} /> : <Star size={20} />}
-                </Button>
-                <Button
-                  variant="link"
-                  className={`p-0 ${completeLoading ? 'disabled' : ''}`}
-                  onClick={handleCompleteClick}
-                  disabled={completeLoading}
-                >
-                  {isCompleted ? <CheckCircleFill className="text-success" size={20} /> : <CheckCircle size={20} />}
-                </Button>
-              </div>
-            </div>
-
             <Form.Group className="mb-4">
               <Form.Control
                 type="url"
                 value={currentResource?.url || ''}
-                onChange={(e) => setCurrentResource(prev => ({ ...prev, url: e.target.value }))}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentResource(prev => ({ ...prev, url: e.target.value }))}
                 required
                 placeholder="Enter URL"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-4">
+              <div className="position-relative">
+                <img 
+                  src={currentResource?.previewImage || ''}
+                  alt="Preview"
+                  className="img-fluid rounded shadow-sm w-100"
+                  style={{ 
+                    height: '200px',
+                    objectFit: 'cover',
+                    backgroundColor: '#f8f9fa'
+                  }}
+                  onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                    const img = e.currentTarget
+                    img.style.display = 'none'
+                  }}
+                />
+                <div className="position-absolute top-0 end-0 p-2 d-flex gap-2">
+                  <Button
+                    variant="light"
+                    size="sm"
+                    onClick={handleFetchPreview}
+                    disabled={!currentResource?.url || previewLoading}
+                    title="Fetch image from URL"
+                    className="d-flex align-items-center justify-content-center"
+                    style={{ width: '32px', height: '32px', padding: 0 }}
+                  >
+                    <LinkIcon size={16} />
+                  </Button>
+                  <Form.Control
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="d-none"
+                    id="preview-image-upload"
+                    aria-label="Choose preview image file"
+                  />
+                  <Button
+                    variant="light"
+                    size="sm"
+                    onClick={() => document.getElementById('preview-image-upload')?.click()}
+                    title="Upload image file"
+                    className="d-flex align-items-center justify-content-center"
+                    style={{ width: '32px', height: '32px', padding: 0 }}
+                  >
+                    <FileIcon size={16} />
+                  </Button>
+                </div>
+              </div>
+            </Form.Group>
+
+            <Form.Group className="mb-4">
+              <Form.Control
+                type="text"
+                value={currentResource?.title || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentResource(prev => ({ ...prev, title: e.target.value }))}
+                required
+                placeholder="Enter title"
+                className="h4 border-0 p-0"
+                style={{ fontSize: '1.5rem', fontWeight: 600 }}
               />
             </Form.Group>
 
@@ -274,7 +313,7 @@ export default function ResourceLightbox({
               <Editor
                 apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
                 value={currentResource?.description || ''}
-                onEditorChange={(content) => {
+                onEditorChange={(content: string) => {
                   setCurrentResource(prev => ({ ...prev, description: content }))
                 }}
                 init={{
@@ -293,6 +332,55 @@ export default function ResourceLightbox({
                 }}
               />
             </Form.Group>
+
+            <Form.Group className="mb-4">
+              <Form.Select
+                value={currentResource?.categoryId || ''}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCurrentResource(prev => ({ ...prev, categoryId: e.target.value }))}
+                required
+              >
+                <option value="">Select Category</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-4">
+              <Form.Select
+                value={currentResource?.contentType || 'Resource'}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCurrentResource(prev => ({ ...prev, contentType: e.target.value as ContentType }))}
+                required
+              >
+                <option value="Resource">Resource</option>
+                <option value="Training">Training</option>
+                <option value="Shortcut">Shortcut</option>
+                <option value="Plugin">Plugin</option>
+              </Form.Select>
+            </Form.Group>
+
+            <div className="d-flex justify-content-end">
+              <div className="d-flex gap-2">
+                <Button
+                  variant="link"
+                  className={`p-0 me-2 ${favoriteLoading ? 'disabled' : ''}`}
+                  onClick={handleFavoriteClick}
+                  disabled={favoriteLoading}
+                >
+                  {isFavorite ? <StarFill className="text-warning" size={20} /> : <Star size={20} />}
+                </Button>
+                <Button
+                  variant="link"
+                  className={`p-0 ${completeLoading ? 'disabled' : ''}`}
+                  onClick={handleCompleteClick}
+                  disabled={completeLoading}
+                >
+                  {isCompleted ? <CheckCircleFill className="text-success" size={20} /> : <CheckCircle size={20} />}
+                </Button>
+              </div>
+            </div>
           </Form>
         ) : (
           <>
@@ -360,10 +448,11 @@ export default function ResourceLightbox({
               </Button>
               <Button 
                 variant="primary" 
-                onClick={handleSubmit}
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>)}
                 disabled={loading}
                 size="lg"
                 className="flex-grow-1"
+                type="submit"
               >
                 {loading ? 'Saving...' : 'Save Changes'}
               </Button>

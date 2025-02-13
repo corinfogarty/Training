@@ -8,6 +8,7 @@ import { Draggable } from '@hello-pangea/dnd'
 import EditResourceModal from './EditResourceModal'
 import { signIn, useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import ResourceLightbox from './ResourceLightbox'
 
 interface ResourceCardProps {
   resource: Resource & {
@@ -280,11 +281,16 @@ export default function ResourceCard({
 
   const modals = (
     <>
-      <EditResourceModal
+      <ResourceLightbox
         resource={resource}
         show={showEdit}
         onHide={() => setShowEdit(false)}
-        onSave={onDelete}
+        onEdit={onDelete}
+        isFavorite={isFavorite}
+        isCompleted={isCompleted}
+        onToggleFavorite={onToggleFavorite}
+        onToggleComplete={onToggleComplete}
+        startInEditMode={true}
       />
       <Modal show={showDeleteConfirm} onHide={() => setShowDeleteConfirm(false)}>
         <Modal.Header closeButton>
