@@ -1,11 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Resource, Category } from '@prisma/client'
 import { Card, Button, Dropdown, Modal } from 'react-bootstrap'
 import { MoreVertical, Star, CheckCircle, Trash2, Edit, ExternalLink, Calendar } from 'lucide-react'
 import { Draggable } from '@hello-pangea/dnd'
-import EditResourceModal from './EditResourceModal'
 import { signIn, useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import ResourceLightbox from './ResourceLightbox'
@@ -33,7 +32,7 @@ interface ResourceCardProps {
 }
 
 export default function ResourceCard({
-  resource,
+  resource: initialResource,
   index = 0,
   isFavorite,
   isCompleted,
@@ -51,6 +50,11 @@ export default function ResourceCard({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [resource, setResource] = useState(initialResource)
+
+  useEffect(() => {
+    setResource(initialResource)
+  }, [initialResource])
 
   const previewImage = resource.previewImage
 
@@ -81,6 +85,26 @@ export default function ResourceCard({
       console.error('Error deleting resource:', error)
     } finally {
       setDeleting(false)
+    }
+  }
+
+  const handleResourceUpdate = async (updatedResource: typeof resource) => {
+    try {
+      // Fetch the fresh data from the API to ensure we have all relations
+      const response = await fetch(`/api/resources/${updatedResource.id}`);
+      if (!response.ok) throw new Error('Failed to fetch updated resource');
+      const freshResource = await response.json();
+      
+      setResource(freshResource);
+      setShowEdit(false);
+      // Still call onDelete to refresh the parent list if needed
+      onDelete();
+    } catch (error) {
+      console.error('Error refreshing resource:', error);
+      // Fall back to using the passed resource if fetch fails
+      setResource(updatedResource);
+      setShowEdit(false);
+      onDelete();
     }
   }
 
@@ -285,7 +309,7 @@ export default function ResourceCard({
         resource={resource}
         show={showEdit}
         onHide={() => setShowEdit(false)}
-        onEdit={onDelete}
+        onEdit={handleResourceUpdate}
         isFavorite={isFavorite}
         isCompleted={isCompleted}
         onToggleFavorite={onToggleFavorite}

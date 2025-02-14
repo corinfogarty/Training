@@ -93,11 +93,29 @@ export async function PUT(request: NextRequest) {
         contentType: data.contentType
       },
       include: {
-        category: true
+        category: true,
+        submittedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true
+          }
+        },
+        favoritedBy: {
+          select: { id: true }
+        },
+        completedBy: {
+          select: { id: true }
+        }
       }
     })
 
-    return NextResponse.json(resource)
+    return NextResponse.json({
+      ...resource,
+      isFavorite: resource.favoritedBy.some(u => u.id === session.user.id),
+      isCompleted: resource.completedBy.some(u => u.id === session.user.id)
+    })
   } catch (error) {
     console.error('Error updating resource:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

@@ -22,7 +22,7 @@ interface Props {
   resource: ResourceWithRelations
   show: boolean
   onHide: () => void
-  onEdit?: () => void
+  onEdit?: (updatedResource: ResourceWithRelations) => void
   onDelete?: () => void
   isFavorite?: boolean
   isCompleted?: boolean
@@ -201,7 +201,7 @@ export default function ResourceLightbox({
 
       const updatedResource = await response.json()
       setCurrentResource(updatedResource)
-      if (onEdit) onEdit()
+      if (onEdit) onEdit(updatedResource)
       setIsEditing(false)
     } catch (error) {
       console.error('Error updating resource:', error)
@@ -427,7 +427,16 @@ export default function ResourceLightbox({
             </div>
             <div className="mb-4">
               {currentResource?.description && (
-                <div dangerouslySetInnerHTML={{ __html: currentResource.description }} />
+                <div dangerouslySetInnerHTML={{ 
+                  __html: (() => {
+                    try {
+                      const content = JSON.parse(currentResource.description);
+                      return content.description || '';
+                    } catch {
+                      return currentResource.description;
+                    }
+                  })()
+                }} />
               )}
             </div>
           </>
