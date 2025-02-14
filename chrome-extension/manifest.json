@@ -5,11 +5,19 @@
   "description": "Add resources to Training Hub directly from any webpage",
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "scripting",
+    "tabs"
   ],
   "host_permissions": [
-    "https://training.ols.to/*"
+    "https://training.ols.to/*",
+    "https://cdn.tiny.cloud/*",
+    "<all_urls>"
   ],
+  "web_accessible_resources": [{
+    "resources": ["popup.html", "src/*", "public/*"],
+    "matches": ["<all_urls>"]
+  }],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
