@@ -9,4 +9,9 @@ const config = {
 
 // Use production config by default
 const isDevelopment = false;
-export const apiUrl = isDevelopment ? config.development.apiUrl : config.production.apiUrl; 
+const apiUrl = isDevelopment ? config.development.apiUrl : config.production.apiUrl;
+
+// Log the API URL for debugging
+console.log('API URL:', apiUrl);
+
+export { apiUrl }; 

@@ -29,8 +29,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function updatePreviewImage(imageUrl) {
     if (!imageUrl) {
-      previewImage = null;
-      previewImageEl.style.display = 'none';
+      previewImage = chrome.runtime.getURL('public/default.png');
+      previewImageEl.src = previewImage;
+      previewImageEl.style.display = 'block';
       return;
     }
 
@@ -43,8 +44,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     img.onerror = () => {
       console.error('Failed to load image:', imageUrl);
-      previewImage = null;
-      previewImageEl.style.display = 'none';
+      previewImage = chrome.runtime.getURL('public/default.png');
+      previewImageEl.src = previewImage;
+      previewImageEl.style.display = 'block';
     };
     img.src = imageUrl;
   }
@@ -65,32 +67,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
       }
 
-      // Request permissions if needed
-      try {
-        await chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          func: () => true // Test if we can execute scripts
-        });
-      } catch (permError) {
-        console.error('Permission error:', permError);
-        // Return basic tab data if we can't execute scripts
-        return {
-          url: tab.url || '',
-          title: tab.title || '',
-          description: '',
-          image: ''
-        };
-      }
-
       const results = await chrome.scripting.executeScript({
         target: { tabId: tab.id },
         func: () => {
           const getMetaContent = (selectors) => {
             try {
               for (const selector of selectors) {
-                const element = document.querySelector(selector);
-                if (element?.content) {
-                  return element.content.trim();
+                const elements = document.querySelectorAll(selector);
+                for (const element of elements) {
+                  if (element?.content) {
+                    return element.content.trim();
+                  }
                 }
               }
             } catch (e) {
@@ -99,17 +86,96 @@ document.addEventListener('DOMContentLoaded', async () => {
             return null;
           };
 
-          // Get favicon with absolute URL
-          const getFavicon = () => {
+          // Get all possible images from the page
+          const getAllImages = () => {
             try {
-              const iconLink = document.querySelector('link[rel*="icon"]');
-              if (iconLink?.href) {
-                return new URL(iconLink.href, window.location.href).href;
-              }
-              return new URL('/favicon.ico', window.location.href).href;
+              // Get meta images first
+              const ogImage = document.querySelector('meta[property="og:image"]')?.content;
+              const twitterImage = document.querySelector('meta[name="twitter:image"]')?.content;
+              const twitterImageAlt = document.querySelector('meta[property="twitter:image"]')?.content;
+              
+              // Get all og:image tags (some pages have multiple)
+              const allOgImages = Array.from(document.querySelectorAll('meta[property="og:image"]'))
+                .map(el => el.content)
+                .filter(Boolean);
+
+              // Get all article:image tags
+              const articleImages = Array.from(document.querySelectorAll('meta[property="article:image"]'))
+                .map(el => el.content)
+                .filter(Boolean);
+
+              // Get schema.org image
+              const schemaImage = document.querySelector('meta[itemprop="image"]')?.content;
+
+              // Get the largest visible image from the page
+              let largestImage = null;
+              let maxArea = 0;
+              document.querySelectorAll('img').forEach(img => {
+                // Check if image is visible and reasonably sized
+                const rect = img.getBoundingClientRect();
+                const style = window.getComputedStyle(img);
+                const isVisible = style.display !== 'none' && 
+                                style.visibility !== 'hidden' && 
+                                rect.width > 50 && 
+                                rect.height > 50;
+
+                if (isVisible && img.src && !img.src.includes('data:')) {
+                  const area = rect.width * rect.height;
+                  if (area > maxArea) {
+                    maxArea = area;
+                    largestImage = img.src;
+                  }
+                }
+              });
+
+              // Get high-res favicon or apple touch icon
+              const getHighResIcon = () => {
+                const selectors = [
+                  'link[rel="apple-touch-icon"]',
+                  'link[rel="apple-touch-icon-precomposed"]',
+                  'link[sizes="192x192"]',
+                  'link[sizes="180x180"]',
+                  'link[rel="icon"][sizes="32x32"]',
+                  'link[rel="shortcut icon"]',
+                  'link[rel="icon"]'
+                ];
+
+                for (const selector of selectors) {
+                  const icon = document.querySelector(selector);
+                  if (icon?.href) {
+                    return new URL(icon.href, window.location.href).href;
+                  }
+                }
+                return new URL('/favicon.ico', window.location.href).href;
+              };
+
+              // Combine all images and remove duplicates
+              const allImages = [
+                ...allOgImages,
+                twitterImage,
+                twitterImageAlt,
+                schemaImage,
+                ...articleImages,
+                largestImage,
+                getHighResIcon()
+              ]
+                .filter(Boolean)
+                .filter((value, index, self) => self.indexOf(value) === index)
+                .map(url => {
+                  try {
+                    return new URL(url, window.location.href).href;
+                  } catch (e) {
+                    console.error('Invalid URL:', url);
+                    return null;
+                  }
+                })
+                .filter(Boolean);
+
+              console.log('Found images:', allImages);
+              return allImages;
             } catch (e) {
-              console.error('Error getting favicon:', e);
-              return null;
+              console.error('Error getting images:', e);
+              return [];
             }
           };
 
@@ -139,39 +205,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
           };
 
-          // Get image URL
-          const getImageUrl = (url) => {
-            if (!url) return null;
-            try {
-              return new URL(url, window.location.href).href;
-            } catch (e) {
-              console.error('Error getting image URL:', e);
-              return null;
-            }
+          return {
+            url: getCleanUrl(),
+            title: document.title?.split('|')[0].trim() || '',
+            description: getDescription(),
+            images: getAllImages()
           };
-
-          try {
-            const imageUrl = getMetaContent([
-              'meta[property="og:image"]',
-              'meta[name="twitter:image"]',
-              'meta[property="twitter:image"]'
-            ]);
-
-            return {
-              url: getCleanUrl(),
-              title: document.title?.split('|')[0].trim() || '',
-              description: getDescription(),
-              image: getImageUrl(imageUrl) || getFavicon()
-            };
-          } catch (e) {
-            console.error('Error getting page data:', e);
-            return {
-              url: window.location.href,
-              title: document.title || '',
-              description: '',
-              image: null
-            };
-          }
         }
       });
 
@@ -181,12 +220,104 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const metadata = results[0].result;
       console.log('Extracted metadata:', metadata);
-      return metadata;
+
+      // Helper to check if URL is an SVG
+      const isSvg = (url) => {
+        return url.toLowerCase().endsWith('.svg') || url.includes('svg+xml');
+      };
+
+      // Helper to check if URL is a small icon
+      const isSmallIcon = (url) => {
+        const iconPatterns = [
+          'favicon',
+          'icon',
+          'logo',
+          'windows-phone',
+          'apple-touch',
+          '/icons/',
+          'blocks_84x24'
+        ];
+        return iconPatterns.some(pattern => url.toLowerCase().includes(pattern));
+      };
+
+      // Group images by type
+      const groupedImages = {
+        og: metadata.images.filter(url => url.includes('og:image')),
+        twitter: metadata.images.filter(url => url.includes('twitter:image')),
+        article: metadata.images.filter(url => url.includes('article:image')),
+        schema: metadata.images.filter(url => url.includes('schema.org')),
+        other: metadata.images.filter(url => {
+          return !url.includes('og:image') && 
+                 !url.includes('twitter:image') && 
+                 !url.includes('article:image') &&
+                 !url.includes('schema.org');
+        })
+      };
+
+      // Test image and get its dimensions
+      const testImage = async (url) => {
+        try {
+          const img = new Image();
+          const dimensions = await new Promise((resolve, reject) => {
+            img.onload = () => resolve({ width: img.width, height: img.height });
+            img.onerror = reject;
+            img.src = url;
+          });
+          return { url, ...dimensions, valid: true };
+        } catch (e) {
+          console.error('Error loading image:', url, e);
+          return { url, valid: false };
+        }
+      };
+
+      // Find best image from a group
+      const findBestImage = async (images) => {
+        const results = await Promise.all(images.map(testImage));
+        const validImages = results.filter(img => img.valid);
+        
+        // Sort by area, preferring non-SVG and non-icon images
+        return validImages.sort((a, b) => {
+          const aScore = (a.width * a.height) * (isSvg(a.url) || isSmallIcon(a.url) ? 0.1 : 1);
+          const bScore = (b.width * b.height) * (isSvg(b.url) || isSmallIcon(b.url) ? 0.1 : 1);
+          return bScore - aScore;
+        })[0]?.url;
+      };
+
+      // Try to find the best image in order of preference
+      let validImage = null;
+      for (const group of ['og', 'twitter', 'article', 'schema', 'other']) {
+        if (groupedImages[group].length) {
+          validImage = await findBestImage(groupedImages[group]);
+          if (validImage && !isSmallIcon(validImage)) {
+            console.log(`Found valid image from ${group} group:`, validImage);
+            break;
+          }
+        }
+      }
+
+      // If we only found an icon, try again without excluding icons
+      if (!validImage) {
+        for (const group of ['og', 'twitter', 'article', 'schema', 'other']) {
+          if (groupedImages[group].length) {
+            validImage = await findBestImage(groupedImages[group]);
+            if (validImage) {
+              console.log(`Found fallback image from ${group} group:`, validImage);
+              break;
+            }
+          }
+        }
+      }
+
+      return {
+        url: metadata.url,
+        title: metadata.title,
+        description: metadata.description,
+        image: validImage
+      };
     } catch (error) {
       console.error('Error getting page metadata:', error);
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       
-      // Return basic tab data as fallback
       return {
         url: tab?.url || '',
         title: tab?.title?.split('|')[0].trim() || '',
@@ -211,7 +342,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         credentials: 'include'
       });
       
-      if (!response.ok) throw new Error('Failed to fetch preview');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to fetch preview');
+      }
       
       const data = await response.json();
       
@@ -237,6 +371,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.error('Preview error:', error);
       messageDiv.textContent = error.message || 'Error fetching preview';
       messageDiv.className = 'error';
+      updatePreviewImage(null); // Clear preview image on error
     } finally {
       setLoading(false);
       previewLoading = false;
@@ -365,15 +500,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         courseContent: []
       };
 
+      // Validate content type (ensure it's one of the expected values)
+      const validContentTypes = ['Resource', 'Training', 'Shortcut', 'Plugin'];
+      const contentType = contentTypeSelect.value;
+      
+      if (!validContentTypes.includes(contentType)) {
+        throw new Error(`Invalid content type: ${contentType}`);
+      }
+
       const data = {
         title: titleInput.value,
         url: urlInput.value,
         description: JSON.stringify(content),
         categoryId: categorySelect.value,
-        contentType: contentTypeSelect.value,
-        previewImage: previewImage,
+        contentType: contentType,
+        previewImage: previewImage || chrome.runtime.getURL('public/default.png'),
         additionalUrls: []
       };
+
+      console.log('Sending data:', data);
 
       const response = await fetch(`${apiUrl}/api/resources`, {
         method: 'POST',
@@ -383,6 +528,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
         body: JSON.stringify(data)
       });
+
+      console.log('Response:', response.status, await response.clone().json());
 
       const responseData = await response.json();
 
