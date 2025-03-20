@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Analytics Test Page</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RPHM2B4SNB"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-RPHM2B4SNB');
+  </script>
+</head>
+<body>
+  <h1>Google Analytics Test Page</h1>
+  <p>This page contains the Google Analytics tracking code.</p>
+  <p>Time loaded: <span id="time"></span></p>
+  
+  <script>
+    document.getElementById('time').textContent = new Date().toLocaleTimeString();
+  </script>
+</body>
+</html> 

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Direct Google Analytics Test</title>
+</head>
+<body>
+  <h1>Direct Google Analytics Test</h1>
+  <p>This page has the Google Analytics code directly before the closing body tag.</p>
+  <p>Time loaded: <span id="time"></span></p>
+  
+  <script>
+    document.getElementById('time').textContent = new Date().toLocaleTimeString();
+  </script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RPHM2B4SNB"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-RPHM2B4SNB');
+  </script>
+</body>
+</html> 
