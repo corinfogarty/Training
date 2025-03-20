@@ -9,7 +9,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { LoginUpdater } from "@/components/auth/LoginUpdater"
 import { Toaster } from "@/components/ui/toaster"
 import { PathwayProvider } from '@/components/PathwayContext'
-// import GoogleAnalytics from '@/components/GoogleAnalytics'
+import GoogleAnalytics from '@/components/GoogleAnalytics'
 // import Script from 'next/script'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -36,12 +36,10 @@ export default async function RootLayout({
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
         
-        {/* Google Analytics - Old school approach */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-RPHM2B4SNB"></script>
-        <script async src="/gtag.js"></script>
+        {/* Google Analytics code is now in the GoogleAnalytics component */}
       </head>
       <body className={inter.className}>
-        {/* <GoogleAnalytics /> */}
+        <GoogleAnalytics />
         <Providers session={session}>
           <PathwayProvider>
             <LoginUpdater />
