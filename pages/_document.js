@@ -4,8 +4,8 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
-        {/* Google Analytics */}
-        <script async src={`https://www.googletagmanager.com/gtag/js?id=G-RPHM2B4SNB`} />
+        {/* Google tag (gtag.js) */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-RPHM2B4SNB"></script>
         <script
           dangerouslySetInnerHTML={{
             __html: `
