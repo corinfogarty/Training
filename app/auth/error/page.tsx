@@ -6,7 +6,7 @@ import Script from 'next/script'
 
 export default function Error() {
   const searchParams = useSearchParams()
-  const error = searchParams.get('error')
+  const error = searchParams?.get('error')
 
   return (
     <>
