@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { Search, Plus, Check, ArrowLeft, X } from 'lucide-react'
+import { Search, Plus, Check, ArrowLeft, X, Trash } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -67,14 +67,15 @@ export default function AdminPathways({ pathways, resources }: { pathways: Pathw
 
     try {
       const endpoint = editingPathway.id 
-        ? `/api/pathways/${editingPathway.id}`
-        : '/api/pathways'
+        ? `/api/admin/pathways/${editingPathway.id}`
+        : '/api/admin/pathways'
       
       const method = editingPathway.id ? 'PUT' : 'POST'
 
       const validResources = selectedResources.map((resource, index) => ({
-        resourceId: resource.id,
-        order: index
+        id: resource.id,
+        order: index,
+        notes: ''
       }))
 
       const response = await fetch(endpoint, {
@@ -85,7 +86,8 @@ export default function AdminPathways({ pathways, resources }: { pathways: Pathw
         body: JSON.stringify({
           title: editForm.title,
           description: editForm.description,
-          resources: validResources
+          resources: validResources,
+          isPublished: editingPathway.isPublished
         }),
       })
 
@@ -111,71 +113,41 @@ export default function AdminPathways({ pathways, resources }: { pathways: Pathw
     }
   }
 
-  const handleAddResource = async (resource: Resource) => {
+  const handleAddResource = (resource: Resource) => {
     if (selectedResources.find(r => r.id === resource.id)) return
-    
-    if (!editingPathway) return
+    setSelectedResources([...selectedResources, resource])
+  }
 
+  const handleRemoveResource = (resourceId: string) => {
+    setSelectedResources(selectedResources.filter(r => r.id !== resourceId))
+  }
+
+  const handleDeletePathway = async (pathwayId: string, pathwayTitle: string) => {
     try {
-      const maxOrder = selectedResources.length > 0 
-        ? Math.max(...selectedResources.map((_, index) => index))
-        : -1
+      const response = await fetch(`/api/admin/pathways/${pathwayId}`, {
+        method: 'DELETE',
+      });
 
-      const response = await fetch(`/api/pathways/${editingPathway.id}/resources`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          resourceId: resource.id,
-          order: maxOrder + 1
-        }),
-      })
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete pathway');
+      }
 
-      if (!response.ok) throw new Error('Failed to add resource')
-
-      setSelectedResources([...selectedResources, resource])
+      toast({
+        title: 'Success',
+        description: `Pathway "${pathwayTitle}" deleted successfully`,
+      });
       
-      toast({
-        title: 'Success',
-        description: 'Resource added to pathway',
-      })
+      router.refresh();
     } catch (error) {
-      console.error('Error adding resource:', error)
+      console.error('Error deleting pathway:', error);
       toast({
         title: 'Error',
-        description: 'Failed to add resource',
+        description: error instanceof Error ? error.message : 'Failed to delete pathway',
         variant: 'destructive'
-      })
+      });
     }
-  }
-
-  const handleRemoveResource = async (resourceId: string) => {
-    if (!editingPathway) return
-
-    try {
-      const response = await fetch(
-        `/api/pathways/${editingPathway.id}/resources/${resourceId}`,
-        { method: 'DELETE' }
-      )
-
-      if (!response.ok) throw new Error('Failed to remove resource')
-
-      setSelectedResources(selectedResources.filter(r => r.id !== resourceId))
-
-      toast({
-        title: 'Success',
-        description: 'Resource removed from pathway',
-      })
-    } catch (error) {
-      console.error('Error removing resource:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to remove resource',
-        variant: 'destructive'
-      })
-    }
-  }
+  };
 
   const filteredResources = resources.filter(resource => {
     const matchesSearch = searchTerm === '' || 
@@ -240,6 +212,20 @@ export default function AdminPathways({ pathways, resources }: { pathways: Pathw
                   placeholder="Enter pathway description"
                   className="mt-1.5"
                 />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="published"
+                  checked={editingPathway.isPublished}
+                  onCheckedChange={(checked) => {
+                    setEditingPathway({
+                      ...editingPathway,
+                      isPublished: checked
+                    });
+                  }}
+                />
+                <Label htmlFor="published">Published</Label>
               </div>
             </div>
 
@@ -344,6 +330,19 @@ export default function AdminPathways({ pathways, resources }: { pathways: Pathw
           </div>
 
           <div className="modal-footer">
+            <Button 
+              variant="ghost"
+              className="text-red-500 hover:text-red-700 hover:bg-red-50 mr-auto"
+              onClick={() => {
+                if (confirm(`Are you sure you want to delete the pathway "${editingPathway.title}"? This action cannot be undone.`)) {
+                  handleDeletePathway(editingPathway.id, editingPathway.title);
+                  setEditingPathway(null);
+                }
+              }}
+            >
+              <Trash className="h-4 w-4 mr-2" />
+              Delete Pathway
+            </Button>
             <Button variant="outline" onClick={() => setEditingPathway(null)}>Cancel</Button>
             <Button 
               onClick={handleSaveEdit}
@@ -386,7 +385,18 @@ export default function AdminPathways({ pathways, resources }: { pathways: Pathw
           >
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-semibold">{pathway.title}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold">{pathway.title}</h3>
+                  {pathway.isPublished ? (
+                    <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
+                      Published
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded-full">
+                      Draft
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm text-muted-foreground">
                   {pathway.resources.length} resources
                 </p>
@@ -401,6 +411,17 @@ export default function AdminPathways({ pathways, resources }: { pathways: Pathw
                   }}
                 >
                   Edit
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeletePathway(pathway.id, pathway.title);
+                  }}
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash className="h-4 w-4" />
                 </Button>
               </div>
             </div>

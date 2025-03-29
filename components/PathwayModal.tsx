@@ -1,7 +1,7 @@
 'use client'
 
 import { Modal, Button, Form, Badge, ProgressBar } from 'react-bootstrap'
-import { ArrowLeft, Star, CheckCircle, Calendar, Plus, Settings, Search, Check, X, Edit } from 'lucide-react'
+import { ArrowLeft, Star, CheckCircle, Calendar, Plus, Settings, Search, Check, X, Edit, Trash } from 'lucide-react'
 import ResourceCard from './ResourceCard'
 import Image from 'next/image'
 import { usePathway } from './PathwayContext'
@@ -93,6 +93,7 @@ export default function PathwayModal({ show, onHide, pathways }: PathwayModalPro
   const [resourceStates, setResourceStates] = useState<Record<string, { isFavorite: boolean, isCompleted: boolean, completedAt?: Date }>>({})
   const [selectedResource, setSelectedResource] = useState<PathwayResource | null>(null)
   const { progressData } = usePathwayProgress()
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const fetchAvailableResources = async () => {
     try {
@@ -392,6 +393,49 @@ export default function PathwayModal({ show, onHide, pathways }: PathwayModalPro
   const uniqueCategories = Array.from(
     new Set(resources.map(r => r.category?.name).filter((name): name is string => !!name))
   )
+
+  const handleDeletePathway = async (pathwayToDelete?: Pathway) => {
+    const pathway = pathwayToDelete || selectedPathway;
+    if (!pathway) return;
+    
+    const confirmDelete = confirm(`Are you sure you want to delete "${pathway.title}" pathway? This action cannot be undone.`);
+    if (!confirmDelete) return;
+    
+    try {
+      setIsDeleting(true);
+      const response = await fetch(`/api/admin/pathways/${pathway.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete pathway');
+      }
+
+      // Clear state before showing success message
+      const pathwayTitle = pathway.title; // Store the title before clearing state
+      setSelectedPathway(null);
+      setIsEditing(false);
+      setIsDeleting(false);
+      
+      // Show success message
+      toast({
+        title: 'Pathway Deleted',
+        description: `"${pathwayTitle}" has been successfully deleted`,
+      });
+      
+      // Refresh the page data
+      router.refresh();
+    } catch (error) {
+      console.error('Error deleting pathway:', error);
+      setIsDeleting(false);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to delete pathway',
+        variant: 'destructive'
+      });
+    }
+  };
 
   if (!show) return null
 
@@ -693,10 +737,12 @@ export default function PathwayModal({ show, onHide, pathways }: PathwayModalPro
                     <Button
                       variant="outline-secondary"
                       size="sm"
-                      onClick={() => handleStartEdit(selectedPathway)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleStartEdit(selectedPathway)
+                      }}
                     >
-                      <Settings size={16} className="me-2" />
-                      Edit
+                      <Settings size={16} />
                     </Button>
                   )}
                 </div>
@@ -775,6 +821,15 @@ export default function PathwayModal({ show, onHide, pathways }: PathwayModalPro
       <Modal.Footer className="border-top bg-white" style={{ position: 'sticky', bottom: 0 }}>
         {isEditing ? (
           <>
+            <Button 
+              variant="outline-danger"
+              className="me-auto"
+              onClick={() => handleDeletePathway()}
+              disabled={isDeleting || !selectedPathway?.id}
+            >
+              <Trash size={16} className="me-2" />
+              {isDeleting ? 'Deleting...' : 'Delete Pathway'}
+            </Button>
             <Button variant="secondary" onClick={handleBackToList}>
               Cancel
             </Button>

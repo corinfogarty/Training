@@ -20,7 +20,6 @@ import AdminModal from './AdminModal'
 import Link from 'next/link'
 import { usePathway } from './PathwayContext'
 import PathwayModal from './PathwayModal'
-import ResourceLightbox from './ResourceLightbox'
 import { useRouter } from 'next/navigation'
 
 type ViewType = 'grid' | 'list' | 'columns'
@@ -36,11 +35,15 @@ interface ResourceWithRelations extends Resource {
   orders?: ResourceOrder[]
 }
 
-export default function CategoryList() {
+interface CategoryListProps {
+  resourceId?: string | null
+  onResourceClick?: (id: string) => void
+  onResourceHover?: (id: string | null) => void
+}
+
+export default function CategoryList({ resourceId, onResourceClick, onResourceHover }: CategoryListProps) {
   const [categories, setCategories] = useState<Category[]>([])
   const [resources, setResources] = useState<ResourceWithRelations[]>([])
-  const [selectedResource, setSelectedResource] = useState<ResourceWithRelations | null>(null)
-  const [showResourceModal, setShowResourceModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>(() => {
@@ -102,6 +105,13 @@ export default function CategoryList() {
   useEffect(() => {
     fetchData()
   }, [])
+
+  // Refresh data when resourceId changes (e.g., when a resource is favorited/completed in the modal)
+  useEffect(() => {
+    if (resourceId) {
+      fetchData()
+    }
+  }, [resourceId])
 
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination || !session?.user) return
@@ -331,8 +341,28 @@ export default function CategoryList() {
   }
 
   const handleResourceClick = (resource: ResourceWithRelations) => {
-    setSelectedResource(resource)
-    setShowResourceModal(true)
+    console.log('CategoryList.handleResourceClick called for resource:', resource.id, resource.title)
+    
+    // Always use the callback if available
+    if (onResourceClick) {
+      console.log('Using onResourceClick callback')
+      onResourceClick(resource.id)
+    } else {
+      // If no callback, update hash without causing a reload
+      console.log('No callback provided, updating hash directly')
+      if (typeof window !== 'undefined') {
+        const scrollPosition = window.pageYOffset
+        console.log('Using history.pushState to update URL')
+        history.pushState(null, '', `#resource=${resource.id}`)
+        window.scrollTo(0, scrollPosition)
+      }
+    }
+  }
+
+  const handleResourceHover = (resource: ResourceWithRelations | null) => {
+    if (onResourceHover) {
+      onResourceHover(resource?.id || null)
+    }
   }
 
   if (loading) {
@@ -596,6 +626,8 @@ export default function CategoryList() {
                                     onToggleFavorite={() => handleToggleFavorite(resource.id)}
                                     onToggleComplete={() => handleToggleComplete(resource.id)}
                                     onClick={() => handleResourceClick(resource)}
+                                    onMouseEnter={() => handleResourceHover(resource)}
+                                    onMouseLeave={() => handleResourceHover(null)}
                                     standalone={true}
                                   />
                                 ))}
@@ -652,6 +684,8 @@ export default function CategoryList() {
                                 onToggleFavorite={() => handleToggleFavorite(resource.id)}
                                 onToggleComplete={() => handleToggleComplete(resource.id)}
                                 onClick={() => handleResourceClick(resource)}
+                                onMouseEnter={() => handleResourceHover(resource)}
+                                onMouseLeave={() => handleResourceHover(null)}
                                 standalone={true}
                               />
                             ))}
@@ -678,24 +712,6 @@ export default function CategoryList() {
           setSelectedPathway(null)
         }}
         pathways={pathways}
-      />
-
-      <ResourceLightbox
-        resource={selectedResource!}
-        show={showResourceModal}
-        onHide={() => setShowResourceModal(false)}
-        isFavorite={selectedResource?.favoritedBy?.some(u => u.id === session?.user?.id)}
-        isCompleted={selectedResource?.completedBy?.some(u => u.id === session?.user?.id)}
-        onToggleFavorite={async (e) => {
-          if (selectedResource) await handleToggleFavorite(selectedResource.id)
-        }}
-        onToggleComplete={async (e) => {
-          if (selectedResource) await handleToggleComplete(selectedResource.id)
-        }}
-        onEdit={() => {
-          setShowResourceModal(false)
-          router.refresh()
-        }}
       />
     </div>
   )

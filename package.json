@@ -26,6 +26,7 @@
     "@auth/prisma-adapter": "^2.7.4",
     "@hello-pangea/dnd": "^16.3.0",
     "@prisma/client": "^5.22.0",
+    "@radix-ui/react-alert-dialog": "^1.1.6",
     "@radix-ui/react-toast": "^1.2.6",
     "@swc/helpers": "^0.5.15",
     "@tanstack/react-table": "^8.20.6",
@@ -51,6 +52,7 @@
     "react-bootstrap": "^2.10.1",
     "react-bootstrap-icons": "^1.11.5",
     "react-dom": "^18.2.0",
+    "react-icons": "^5.5.0",
     "sharp": "^0.33.5",
     "styled-jsx": "^5.1.6",
     "tailwind-merge": "^3.0.1"

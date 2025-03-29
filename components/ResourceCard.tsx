@@ -27,6 +27,8 @@ interface ResourceCardProps {
   onToggleFavorite?: () => void
   onToggleComplete?: () => void
   onClick?: () => void
+  onMouseEnter?: () => void
+  onMouseLeave?: () => void
   standalone?: boolean
   viewType?: 'grid' | 'list' | 'columns'
 }
@@ -41,6 +43,8 @@ export default function ResourceCard({
   onToggleFavorite = () => {},
   onToggleComplete = () => {},
   onClick,
+  onMouseEnter,
+  onMouseLeave,
   standalone = false,
   viewType = 'grid'
 }: ResourceCardProps) {
@@ -60,12 +64,16 @@ export default function ResourceCard({
 
   const handleCardClick = (e: React.MouseEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     
     if (onClick) {
       onClick()
+      return false;
     } else if (standalone) {
       window.open(resource.url, '_blank')
+      return false;
     }
+    return false;
   }
 
   const handleDelete = async () => {
@@ -112,6 +120,8 @@ export default function ResourceCard({
     <div 
       className="resource-list-item"
       onClick={handleCardClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       style={{ cursor: 'pointer' }}
     >
       <div className="d-flex justify-content-between align-items-center">
@@ -200,6 +210,8 @@ export default function ResourceCard({
     <Card 
       className="h-100 shadow-sm" 
       onClick={handleCardClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       style={{ 
         cursor: 'pointer',
         position: 'relative',
