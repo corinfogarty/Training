@@ -161,27 +161,34 @@ export default function Home() {
   
   // Show resource - safe for server
   const showResource = useCallback(async (id: string) => {
-    console.log('🔍 showResource called with id:', id);
     if (!id) return
     
     try {
+      // Add a custom event for debugging in production
+      if (isClient) {
+        const debugEvent = new CustomEvent('resource-click', { 
+          detail: { id, timestamp: new Date().toISOString() } 
+        });
+        document.dispatchEvent(debugEvent);
+      }
+      
       // First update URL silently
-      console.log('🔍 Updating URL for resource:', id);
       updateUrl(id)
       
       // Set resource ID 
       setResourceId(id)
-      console.log('🔍 resourceId state set to:', id);
       
       // Use cached resource or placeholder while loading
       if (resourceCache.current[id]) {
         // Set the resource BEFORE showing the lightbox
         setSelectedResource(resourceCache.current[id])
+        console.log('🔍 Using cached resource:', id)
         
         // Show modal with a delay on client
         if (isClient) {
           // Use safe timeout instead of requestAnimationFrame
           setTimeout(() => {
+            console.log('🔍 Setting showLightbox to true (cached)')
             setShowLightbox(true)
           }, 0)
         } else {
@@ -191,10 +198,12 @@ export default function Home() {
       } else {
         // If not cached, use empty placeholder and show modal immediately
         setSelectedResource(emptyResource)
+        console.log('🔍 Using empty placeholder while loading:', id)
         
         // Show with a tiny delay to ensure CSS transitions
         if (isClient) {
           setTimeout(() => {
+            console.log('🔍 Setting showLightbox to true (placeholder)')
             setShowLightbox(true)
           }, 0)
         } else {
@@ -203,6 +212,7 @@ export default function Home() {
         
         // Then load the real data in background
         const resource = await loadResource(id)
+        console.log('🔍 Loaded resource from API:', resource?.id || 'null')
         if (resource) {
           // Update data without closing/reopening modal
           setSelectedResource(resource)
@@ -373,6 +383,19 @@ export default function Home() {
       console.error('Error toggling complete:', error)
     }
   }
+  
+  // Listen for debug events (for production troubleshooting)
+  useEffect(() => {
+    if (!isClient) return
+    
+    const handleDebugEvent = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      console.log('🐛 Resource click debug event:', customEvent.detail);
+    };
+    
+    document.addEventListener('resource-click', handleDebugEvent);
+    return () => document.removeEventListener('resource-click', handleDebugEvent);
+  }, []);
   
   if (status === 'loading') {
     return null
