@@ -68,18 +68,22 @@ export default function ResourceCard({
     
     console.log('🔍 ResourceCard.handleCardClick called for resource:', resource.id, resource.title)
     
-    if (true) {
-      console.log('🔍 Calling onClick callback if available')
-      if (onClick) {
-        onClick()
-        return false;
-      } else if (standalone) {
-        console.log('🔍 Opening resource URL in new tab:', resource.url)
-        window.open(resource.url, '_blank')
-        return false;
+    // Always call onClick if provided
+    if (onClick) {
+      console.log('🔍 Calling onClick callback')
+      onClick()
+    } else if (standalone) {
+      console.log('🔍 Opening resource URL in new tab:', resource.url)
+      window.open(resource.url, '_blank')
+    } else {
+      // If no callback and not standalone, navigate directly
+      console.log('🔍 Directly navigating to resource page:', resource.id)
+      if (typeof window !== 'undefined') {
+        window.location.href = `/resources/${resource.id}`
       }
     }
-    return false;
+    
+    return false
   }
 
   const handleDelete = async () => {
