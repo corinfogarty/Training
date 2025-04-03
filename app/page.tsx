@@ -53,25 +53,33 @@ export default function Home() {
   const updateUrl = useCallback((id: string | null) => {
     if (!isClient) return
     
+    console.log('🔍 updateUrl called with id:', id);
     urlUpdateInProgress.current = true
     
     try {
       if (id) {
         // Set URL hash directly
+        console.log('🔍 Setting hash to:', `resource=${id}`);
         window.location.hash = `resource=${id}`
+        // Verify the hash was set
+        console.log('🔍 Hash is now:', window.location.hash);
       } else {
         // Clear hash without navigating
+        console.log('🔍 Clearing hash');
         const scrollPosition = window.pageYOffset
         history.replaceState(null, '', window.location.pathname)
         window.scrollTo(0, scrollPosition)
+        // Verify the hash was cleared
+        console.log('🔍 Hash is now:', window.location.hash);
       }
     } catch (error) {
-      console.error('Error updating URL:', error)
+      console.error('❌ Error updating URL:', error)
     }
     
     // Small delay to prevent race conditions
     setTimeout(() => {
       urlUpdateInProgress.current = false
+      console.log('🔍 urlUpdateInProgress set to false');
     }, 50)
   }, [])
   
@@ -153,14 +161,17 @@ export default function Home() {
   
   // Show resource - safe for server
   const showResource = useCallback(async (id: string) => {
+    console.log('🔍 showResource called with id:', id);
     if (!id) return
     
     try {
       // First update URL silently
+      console.log('🔍 Updating URL for resource:', id);
       updateUrl(id)
       
       // Set resource ID 
       setResourceId(id)
+      console.log('🔍 resourceId state set to:', id);
       
       // Use cached resource or placeholder while loading
       if (resourceCache.current[id]) {
@@ -380,7 +391,6 @@ export default function Home() {
         resource={selectedResource || emptyResource}
         show={showLightbox}
         onHide={closeResource}
-        onEdit={() => resourceId && showResource(resourceId)}
         isFavorite={selectedResource?.favoritedBy?.some(u => u.id === session?.user?.id) || false}
         isCompleted={selectedResource?.completedBy?.some(u => u.id === session?.user?.id) || false}
         onToggleFavorite={handleToggleFavorite}
