@@ -66,18 +66,13 @@ export default function ResourceCard({
     e.preventDefault()
     e.stopPropagation()
     
-    console.log('🔍 ResourceCard.handleCardClick called for resource:', resource.id, resource.title)
-    
     // Always call onClick if provided
     if (onClick) {
-      console.log('🔍 Calling onClick callback')
       onClick()
     } else if (standalone) {
-      console.log('🔍 Opening resource URL in new tab:', resource.url)
       window.open(resource.url, '_blank')
     } else {
       // If no callback and not standalone, navigate directly
-      console.log('🔍 Directly navigating to resource page:', resource.id)
       if (typeof window !== 'undefined') {
         window.location.href = `/resources/${resource.id}`
       }
@@ -183,7 +178,6 @@ export default function ResourceCard({
                 className="text-muted p-0"
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log('🔍 Edit button clicked in ResourceCard');
                   setShowEdit(true);
                 }}
               >
@@ -284,7 +278,6 @@ export default function ResourceCard({
                   className="text-muted p-0"
                   onClick={(e) => {
                     e.stopPropagation();
-                    console.log('🔍 Edit button clicked in ResourceCard');
                     setShowEdit(true);
                   }}
                 >

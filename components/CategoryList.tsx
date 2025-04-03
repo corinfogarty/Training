@@ -341,18 +341,13 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
   }
 
   const handleResourceClick = (resource: ResourceWithRelations) => {
-    console.log('CategoryList.handleResourceClick called for resource:', resource.id, resource.title)
-    
     // Always use the callback if available
     if (onResourceClick) {
-      console.log('Using onResourceClick callback')
       onResourceClick(resource.id)
     } else {
       // If no callback, update hash without causing a reload
-      console.log('No callback provided, updating hash directly')
       if (typeof window !== 'undefined') {
         const scrollPosition = window.pageYOffset
-        console.log('Using history.pushState to update URL')
         history.pushState(null, '', `#resource=${resource.id}`)
         window.scrollTo(0, scrollPosition)
       }

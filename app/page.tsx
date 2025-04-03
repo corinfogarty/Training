@@ -53,33 +53,25 @@ export default function Home() {
   const updateUrl = useCallback((id: string | null) => {
     if (!isClient) return
     
-    console.log('🔍 updateUrl called with id:', id);
     urlUpdateInProgress.current = true
     
     try {
       if (id) {
         // Set URL hash directly
-        console.log('🔍 Setting hash to:', `resource=${id}`);
         window.history.pushState({resourceId: id}, "", `#resource=${id}`)
-        // Verify the hash was set
-        console.log('🔍 Hash is now:', window.location.hash);
       } else {
         // Clear hash without navigating
-        console.log('🔍 Clearing hash');
         const scrollPosition = window.pageYOffset
         history.replaceState(null, '', window.location.pathname)
         window.scrollTo(0, scrollPosition)
-        // Verify the hash was cleared
-        console.log('🔍 Hash is now:', window.location.hash);
       }
     } catch (error) {
-      console.error('❌ Error updating URL:', error)
+      console.error('Error updating URL:', error)
     }
     
     // Small delay to prevent race conditions
     setTimeout(() => {
       urlUpdateInProgress.current = false
-      console.log('🔍 urlUpdateInProgress set to false');
     }, 50)
   }, [])
   
@@ -164,14 +156,6 @@ export default function Home() {
     if (!id) return
     
     try {
-      // Add a custom event for debugging in production
-      if (isClient) {
-        const debugEvent = new CustomEvent('resource-click', { 
-          detail: { id, timestamp: new Date().toISOString() } 
-        });
-        document.dispatchEvent(debugEvent);
-      }
-      
       // First update URL silently
       updateUrl(id)
       
@@ -182,13 +166,11 @@ export default function Home() {
       if (resourceCache.current[id]) {
         // Set the resource BEFORE showing the lightbox
         setSelectedResource(resourceCache.current[id])
-        console.log('🔍 Using cached resource:', id)
         
         // Show modal with a delay on client
         if (isClient) {
           // Use safe timeout instead of requestAnimationFrame
           setTimeout(() => {
-            console.log('🔍 Setting showLightbox to true (cached)')
             setShowLightbox(true)
           }, 0)
         } else {
@@ -198,12 +180,10 @@ export default function Home() {
       } else {
         // If not cached, use empty placeholder and show modal immediately
         setSelectedResource(emptyResource)
-        console.log('🔍 Using empty placeholder while loading:', id)
         
         // Show with a tiny delay to ensure CSS transitions
         if (isClient) {
           setTimeout(() => {
-            console.log('🔍 Setting showLightbox to true (placeholder)')
             setShowLightbox(true)
           }, 0)
         } else {
@@ -212,7 +192,6 @@ export default function Home() {
         
         // Then load the real data in background
         const resource = await loadResource(id)
-        console.log('🔍 Loaded resource from API:', resource?.id || 'null')
         if (resource) {
           // Update data without closing/reopening modal
           setSelectedResource(resource)
@@ -389,8 +368,7 @@ export default function Home() {
     if (!isClient) return
     
     const handleDebugEvent = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      console.log('🐛 Resource click debug event:', customEvent.detail);
+      // Debug events are silenced in production
     };
     
     document.addEventListener('resource-click', handleDebugEvent);
