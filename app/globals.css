@@ -873,4 +873,9 @@ body {
 
 .resource-section:last-child {
   margin-bottom: 0;
+}
+
+/* Add overflow hidden to prevent resources from overflowing in columns */
+.bg-white.rounded-3.shadow-sm.text-dark {
+  overflow: hidden;
 } 
