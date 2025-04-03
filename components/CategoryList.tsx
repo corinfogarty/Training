@@ -20,7 +20,7 @@ import AdminModal from './AdminModal'
 import Link from 'next/link'
 import { usePathway } from './PathwayContext'
 import PathwayModal from './PathwayModal'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 type ViewType = 'grid' | 'list' | 'columns'
 type FilterType = 'all' | 'favorites' | 'completed' | 'incomplete'
@@ -81,6 +81,7 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
   const { setShowPathwayModal, setSelectedPathway, showPathwayModal } = usePathway()
   const [pathways, setPathways] = useState([])
   const router = useRouter()
+  const pathname = usePathname()
   const [sortType, setSortType] = useState<SortType>('custom')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
@@ -105,6 +106,52 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
   useEffect(() => {
     fetchData()
   }, [])
+
+  // Apply URL-based filtering when categories are loaded
+  useEffect(() => {
+    if (categories.length > 0) {
+      applyUrlFiltering();
+    }
+  }, [categories, pathname]);
+
+  // Parse URL path to extract category for filtering
+  const applyUrlFiltering = () => {
+    if (!pathname || !categories.length) return;
+    
+    // Handle paths like /ai/resources or /category-slug/resources
+    const parts = pathname.split('/').filter(Boolean);
+    
+    if (parts.length >= 1 && parts[parts.length-1] !== 'resources') {
+      const categorySlug = parts[0].toLowerCase();
+      
+      // Find category by name (convert to slug for comparison)
+      const category = categories.find(cat => 
+        cat.name.toLowerCase().replace(/\s+/g, '-') === categorySlug
+      );
+      
+      if (category) {
+        // Set the category filter to show only this category
+        setCategoryFilter(new Set([category.id]));
+      }
+    }
+  };
+
+  // Function to get a category's slug
+  const getCategorySlug = (categoryName: string) => {
+    return categoryName.toLowerCase().replace(/\s+/g, '-');
+  };
+
+  // Handle category link clicks
+  const handleCategoryLinkClick = (categoryId: string) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    if (category) {
+      const slug = getCategorySlug(category.name);
+      // Navigate to the URL without page reload
+      router.push(`/${slug}/resources`);
+      // Also set the filter
+      setCategoryFilter(new Set([categoryId]));
+    }
+  };
 
   // Refresh data when resourceId changes (e.g., when a resource is favorited/completed in the modal)
   useEffect(() => {
@@ -383,32 +430,54 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
     <div style={{ backgroundColor: '#f8f9fa' }} className="min-vh-100">
       <div className="bg-white shadow-sm">
         <Container className="py-3">
-          <div className="d-flex align-items-center justify-content-center gap-4">
-            <Image 
-              src="/logo-ols-2023.png" 
-              alt="Logo" 
-              width={48}
-              height={48}
-              style={{ objectFit: 'contain' }}
-            />
-
-            <div style={{ maxWidth: '320px', width: '100%' }}>
-              <SearchBar 
-                searchTerm={searchTerm} 
-                onSearchChange={setSearchTerm}
-                className="w-100"
+          <div className="d-flex align-items-center justify-content-between gap-4 flex-wrap">
+            <div className="d-flex align-items-center gap-3">
+              <Image 
+                src="/logo-ols-2023.png" 
+                alt="Logo" 
+                width={48}
+                height={48}
+                style={{ objectFit: 'contain' }}
               />
+
+              <div style={{ maxWidth: '320px', width: '100%' }}>
+                <SearchBar 
+                  searchTerm={searchTerm} 
+                  onSearchChange={setSearchTerm}
+                  className="w-100"
+                />
+              </div>
             </div>
 
-            <div className="d-flex align-items-center gap-3">
-              <Button 
-                variant="outline-primary" 
-                className="d-flex align-items-center gap-2"
-                onClick={handlePathwaysClick}
+            {/* Category Filter Buttons */}
+            <div className="d-flex gap-2 flex-wrap">
+              <Button
+                key="all-categories"
+                variant={categoryFilter.size === 0 ? "primary" : "outline-primary"}
+                size="sm"
+                className="d-flex align-items-center"
+                onClick={() => {
+                  setCategoryFilter(new Set());
+                  router.push('/');
+                }}
               >
-                <GraduationCap size={16} />
-                Pathways
+                All Categories
               </Button>
+              {categories.map(category => (
+                <Button
+                  key={category.id}
+                  variant={categoryFilter.has(category.id) ? "primary" : "outline-primary"}
+                  size="sm"
+                  className="d-flex align-items-center"
+                  onClick={() => handleCategoryLinkClick(category.id)}
+                >
+                  {getCategoryIcon(category.name)}
+                  {category.name}
+                </Button>
+              ))}
+            </div>
+
+            <div className="d-flex gap-2">
               <ButtonGroup>
                 <Button
                   variant={viewType === 'grid' ? 'primary' : 'outline-primary'}
