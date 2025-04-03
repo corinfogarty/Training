@@ -69,13 +69,15 @@ export default function ResourceCard({
     console.log('🔍 ResourceCard.handleCardClick called for resource:', resource.id, resource.title)
     
     if (true) {
-      console.log('🔍 Calling onClick callback')
-      onClick()
-      return false;
-    } else if (standalone) {
-      console.log('🔍 Opening resource URL in new tab:', resource.url)
-      window.open(resource.url, '_blank')
-      return false;
+      console.log('🔍 Calling onClick callback if available')
+      if (onClick) {
+        onClick()
+        return false;
+      } else if (standalone) {
+        console.log('🔍 Opening resource URL in new tab:', resource.url)
+        window.open(resource.url, '_blank')
+        return false;
+      }
     }
     return false;
   }
