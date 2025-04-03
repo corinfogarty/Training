@@ -4,11 +4,9 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Resource, Category, ContentType } from '@prisma/client'
 import { Modal, Button, Badge, Form } from 'react-bootstrap'
 import { ExternalLink, Calendar, Link as LinkIcon, Edit, Star, CheckCircle, List, Link2, FileIcon } from 'lucide-react'
-import { StarFill, CheckCircleFill, Pencil, Trash } from 'react-bootstrap-icons'
 import { useSession } from 'next-auth/react'
 import { Editor } from '@tinymce/tinymce-react'
 import ResourceEditor from './ResourceEditor'
-import { FaHeart, FaRegHeart, FaCheck, FaRegCheckSquare, FaArrowLeft } from 'react-icons/fa'
 
 // Define local resource type that matches the existing implementation
 interface ResourceWithRelations extends Resource {
@@ -27,11 +25,11 @@ interface ResourceLightboxProps {
   resource: ResourceWithRelations
   show: boolean
   onHide: () => void
-  onEdit: () => void
   isFavorite: boolean
   isCompleted: boolean
   onToggleFavorite: () => void
   onToggleComplete: () => void
+  startInEditMode?: boolean
 }
 
 interface FormattedContent {
@@ -45,11 +43,11 @@ export default function ResourceLightbox({
   resource,
   show,
   onHide,
-  onEdit,
   isFavorite,
   isCompleted,
   onToggleFavorite,
   onToggleComplete,
+  startInEditMode = false,
 }: ResourceLightboxProps) {
   const { data: session } = useSession()
   const [favoriteLoading, setFavoriteLoading] = useState(false)
@@ -64,11 +62,40 @@ export default function ResourceLightbox({
   const [imageLoaded, setImageLoaded] = useState(false)
   const overlayRef = useRef<HTMLDivElement>(null)
 
+  // Add ref to track previous image URL
+  const previousImage = useRef<string | null | undefined>(null);
+
+  // Set initial editing state based on the startInEditMode prop
+  useEffect(() => {
+    if (startInEditMode && show) {
+      console.log('🔍 Starting in edit mode due to startInEditMode prop');
+      // Need to fetch categories before editing
+      fetchCategories()
+        .then(() => {
+          console.log('✅ Categories fetched for startInEditMode');
+          setIsEditing(true);
+        })
+        .catch(err => {
+          console.error('❌ Error fetching categories for startInEditMode:', err);
+          // Still set editing mode even if categories fail
+          setIsEditing(true);
+        });
+    }
+  }, [startInEditMode, show]);
+
   useEffect(() => {
     setCurrentResource(resource)
-    // Reset image loaded state when resource changes
-    setImageLoaded(false)
-  }, [resource])
+    // Only reset imageLoaded if the previewImage URL has actually changed
+    if (resource?.previewImage !== previousImage.current) {
+      setImageLoaded(false);
+    }
+    previousImage.current = resource?.previewImage; // Update previous value
+
+    // Reset editing state when resource changes IF the modal is already open
+    if (show) {
+        setIsEditing(false);
+    }
+  }, [resource, show])
 
   useEffect(() => {
     if (isEditing) {
@@ -103,6 +130,17 @@ export default function ResourceLightbox({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [show, onHide, isEditing])
 
+  useEffect(() => {
+    // Notify parent on editing mode changes
+    console.log('🔍 isEditing state changed to:', isEditing);
+    
+    if (isEditing === false && show) {
+      // If we just finished editing, refresh the parent
+      console.log('✅ Exited editing mode, refreshing parent');
+      // This is a good place to trigger a refresh if needed
+    }
+  }, [isEditing, show]);
+
   const fetchCategories = async () => {
     try {
       const response = await fetch('/api/categories')
@@ -114,8 +152,39 @@ export default function ResourceLightbox({
     }
   }
 
-  const handleEdit = () => {
-    setIsEditing(true)
+  const handleEdit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // Prevent default behavior and stop event propagation
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    console.log('🔍 Edit button clicked, current isEditing state:', isEditing);
+    
+    try {
+      // First fetch categories to ensure we have the data before switching modes
+      console.log('🔍 Fetching categories...');
+      fetchCategories()
+        .then(() => {
+          console.log('✅ Categories fetched successfully, setting isEditing to true');
+          // Only set editing state after categories are loaded
+          setIsEditing(true);
+          
+          // Log state change
+          setTimeout(() => {
+            console.log('✅ New isEditing state:', isEditing, 'Should be switching to editor view');
+          }, 100);
+        })
+        .catch(error => {
+          console.error('❌ Error fetching categories:', error);
+          // Still set editing even if categories fail - better UX
+          setIsEditing(true);
+        });
+    } catch (error) {
+      console.error('❌ Unexpected error in handleEdit:', error);
+      // Fallback - set editing mode anyway
+      setIsEditing(true);
+    }
   }
 
   const handleEditCancel = () => {
@@ -126,25 +195,38 @@ export default function ResourceLightbox({
   const handleModalHide = () => {
     if (!isEditing) {
       onHide()
-      // URL will be handled by the parent component via onHide
     }
   }
 
   const handleFavoriteClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation(); // Stop event from reaching overlay backdrop
+    console.log('Favorite button clicked');
+    
     if (!onToggleFavorite) return
     setFavoriteLoading(true)
     try {
       await onToggleFavorite()
+      console.log('Toggled favorite successfully');
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
     } finally {
       setFavoriteLoading(false)
     }
   }
 
   const handleCompleteClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation(); // Stop event from reaching overlay backdrop
+    console.log('Complete button clicked');
+    
     if (!onToggleComplete) return
     setCompleteLoading(true)
     try {
       await onToggleComplete()
+      console.log('Toggled complete successfully');
+    } catch (error) {
+      console.error('Error toggling complete:', error);
     } finally {
       setCompleteLoading(false)
     }
@@ -234,7 +316,6 @@ export default function ResourceLightbox({
 
       const updatedResource = await response.json()
       setCurrentResource(updatedResource)
-      if (onEdit) onEdit()
       setIsEditing(false)
     } catch (error) {
       console.error('Error updating resource:', error)
@@ -250,443 +331,197 @@ export default function ResourceLightbox({
     }
   }
 
-  const content = (
-    <div className="modal-content">
-      <div className="modal-body" style={{ height: 'calc(100vh - 180px)', overflowY: 'auto', padding: '1.5rem' }}>
-        {error && (
-          <div className="alert alert-danger mb-3">
-            {error}
-          </div>
-        )}
-        
-        {!isEditing && currentResource?.previewImage && (
-          <div className="text-center mb-4">
-            {!imageLoaded && (
-              <div 
-                className="d-flex justify-content-center align-items-center bg-light rounded" 
-                style={{ height: '250px', width: '100%' }}
-              >
-                <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">Loading image...</span>
-                </div>
-              </div>
-            )}
-            <img
-              src={currentResource.previewImage}
-              alt={currentResource.title}
-              className={`img-fluid rounded shadow-sm ${imageLoaded ? '' : 'd-none'}`}
-              style={{
-                maxHeight: '400px',
-                width: 'auto',
-                objectFit: 'contain'
-              }}
-              onLoad={() => setImageLoaded(true)}
-              onError={(e) => {
-                console.error('Failed to load image:', currentResource.previewImage);
-                setImageLoaded(true); // Still mark as loaded even if error
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-          </div>
-        )}
-
-        {isEditing ? (
-          <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-4">
-              <Form.Control
-                type="url"
-                value={currentResource?.url || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentResource(prev => ({ ...prev, url: e.target.value }))}
-                required
-                placeholder="Enter URL"
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-4">
-              <div className="position-relative">
-                <div 
-                  className="img-placeholder bg-light rounded d-flex justify-content-center align-items-center"
-                  style={{ 
-                    height: '200px',
-                    backgroundColor: '#f8f9fa'
-                  }}
-                >
-                  {previewLoading && (
-                    <div className="spinner-border text-primary" role="status">
-                      <span className="visually-hidden">Loading preview...</span>
-                    </div>
-                  )}
-                  {!previewLoading && !currentResource?.previewImage && (
-                    <span className="text-muted">No preview image</span>
-                  )}
-                </div>
-                {currentResource?.previewImage && (
-                  <img 
-                    src={currentResource.previewImage}
-                    alt="Preview"
-                    className="img-fluid rounded shadow-sm w-100"
-                    style={{ 
-                      height: '200px',
-                      objectFit: 'cover'
-                    }}
-                    onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-                      const img = e.currentTarget
-                      img.style.display = 'none'
-                    }}
-                  />
-                )}
-                <div className="position-absolute top-0 end-0 p-2 d-flex gap-2">
-                  <Button
-                    variant="light"
-                    size="sm"
-                    onClick={handleFetchPreview}
-                    disabled={!currentResource?.url || previewLoading}
-                    title="Fetch image from URL"
-                    className="d-flex align-items-center justify-content-center"
-                    style={{ width: '32px', height: '32px', padding: 0 }}
-                  >
-                    <LinkIcon size={16} />
-                  </Button>
-                  <Form.Control
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="d-none"
-                    id="preview-image-upload"
-                    aria-label="Choose preview image file"
-                  />
-                  <Button
-                    variant="light"
-                    size="sm"
-                    onClick={() => document.getElementById('preview-image-upload')?.click()}
-                    title="Upload image file"
-                    className="d-flex align-items-center justify-content-center"
-                    style={{ width: '32px', height: '32px', padding: 0 }}
-                  >
-                    <FileIcon size={16} />
-                  </Button>
-                </div>
-              </div>
-            </Form.Group>
-
-            <Form.Group className="mb-4">
-              <Form.Control
-                type="text"
-                value={currentResource?.title || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCurrentResource(prev => ({ ...prev, title: e.target.value }))}
-                required
-                placeholder="Enter title"
-                className="h4 border-0 p-0"
-                style={{ fontSize: '1.5rem', fontWeight: 600 }}
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-4">
-              <Editor
-                apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY || "no-api-key"}
-                value={currentResource?.description || ''}
-                onEditorChange={(content: string) => {
-                  setCurrentResource(prev => ({ ...prev, description: content }))
-                }}
-                init={{
-                  height: 300,
-                  menubar: false,
-                  disabled: false,
-                  plugins: [
-                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                    'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                  ],
-                  toolbar: 'undo redo | blocks | ' +
-                    'bold italic forecolor | alignleft aligncenter ' +
-                    'alignright alignjustify | bullist numlist outdent indent | ' +
-                    'removeformat | help',
-                  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-                }}
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-4">
-              <Form.Select
-                value={currentResource?.categoryId || ''}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCurrentResource(prev => ({ ...prev, categoryId: e.target.value }))}
-                required
-              >
-                <option value="">Select Category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-
-            <Form.Group className="mb-4">
-              <Form.Select
-                value={currentResource?.contentType || 'Resource'}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCurrentResource(prev => ({ ...prev, contentType: e.target.value as ContentType }))}
-                required
-              >
-                <option value="Resource">Resource</option>
-                <option value="Training">Training</option>
-                <option value="Shortcut">Shortcut</option>
-                <option value="Plugin">Plugin</option>
-              </Form.Select>
-            </Form.Group>
-
-            <div className="d-flex justify-content-end">
-              <div className="d-flex gap-2">
-                <Button
-                  variant="link"
-                  className={`p-0 me-2 ${favoriteLoading ? 'disabled' : ''}`}
-                  onClick={handleFavoriteClick}
-                  disabled={favoriteLoading}
-                >
-                  {isFavorite ? <StarFill className="text-warning" size={20} /> : <Star size={20} />}
-                </Button>
-                <Button
-                  variant="link"
-                  className={`p-0 ${completeLoading ? 'disabled' : ''}`}
-                  onClick={handleCompleteClick}
-                  disabled={completeLoading}
-                >
-                  {isCompleted ? <CheckCircleFill className="text-success" size={20} /> : <CheckCircle size={20} />}
-                </Button>
-              </div>
-            </div>
-          </Form>
-        ) : (
-          <>
-            <h4 className="mb-3">{currentResource?.title || ''}</h4>
-            <div className="d-flex align-items-center gap-3 mb-4">
-              <div className="d-flex align-items-center gap-2 text-muted">
-                {currentResource?.submittedBy?.image ? (
-                  <img
-                    src={currentResource.submittedBy.image}
-                    alt={currentResource.submittedBy.name || 'User'}
-                    className="rounded-circle"
-                    width={24}
-                    height={24}
-                    style={{ objectFit: 'cover' }}
-                  />
-                ) : currentResource?.submittedBy ? (
-                  <div 
-                    className="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white"
-                    style={{ width: '24px', height: '24px', fontSize: '12px' }}
-                  >
-                    {currentResource.submittedBy.name?.[0] || currentResource.submittedBy.email[0]}
-                  </div>
-                ) : null}
-                Added {currentResource?.createdAt ? new Date(currentResource.createdAt).toLocaleDateString() : ''}
-              </div>
-              <div className="ms-auto">
-                <Button
-                  variant="link"
-                  className={`p-0 me-2 ${favoriteLoading ? 'disabled' : ''}`}
-                  onClick={handleFavoriteClick}
-                  disabled={favoriteLoading}
-                >
-                  {isFavorite ? <StarFill className="text-warning" size={20} /> : <Star size={20} />}
-                </Button>
-                <Button
-                  variant="link"
-                  className={`p-0 ${completeLoading ? 'disabled' : ''}`}
-                  onClick={handleCompleteClick}
-                  disabled={completeLoading}
-                >
-                  {isCompleted ? <CheckCircleFill className="text-success" size={20} /> : <CheckCircle size={20} />}
-                </Button>
-              </div>
-            </div>
-            <div className="mb-4">
-              {currentResource?.description && (
-                <div dangerouslySetInnerHTML={{ 
-                  __html: (() => {
-                    try {
-                      const content = JSON.parse(currentResource.description);
-                      return content.description || '';
-                    } catch {
-                      return currentResource.description;
-                    }
-                  })()
-                }} />
-              )}
-            </div>
-          </>
-        )}
-      </div>
-      <div className="modal-footer border-top">
-        <div className="d-flex gap-2 w-100">
-          {isEditing ? (
-            <>
-              <Button 
-                variant="secondary" 
-                onClick={handleEditCancel}
-                disabled={loading}
-                size="lg"
-                className="flex-grow-1"
-              >
-                Cancel
-              </Button>
-              <Button 
-                variant="primary" 
-                onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>)}
-                disabled={loading}
-                size="lg"
-                className="flex-grow-1"
-                type="submit"
-              >
-                {loading ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </>
-          ) : (
-            <>
-              {currentResource?.url && (
-                <Button 
-                  variant="primary" 
-                  size="lg"
-                  className="flex-grow-1"
-                  href={currentResource.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Open Resource
-                </Button>
-              )}
-              {(session?.user?.isAdmin || session?.user?.id === currentResource?.submittedBy?.id) && (
-                <Button 
-                  variant="outline-secondary" 
-                  size="lg"
-                  onClick={handleEdit}
-                  className="d-flex align-items-center gap-2"
-                >
-                  <Pencil size={16} />
-                  Edit
-                </Button>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-
-  if (isEditing) {
-    return (
-      <div 
-        className={`resource-overlay ${show ? 'resource-overlay-visible' : ''}`}
-        ref={overlayRef}
-        onClick={handleBackdropClick}
-      >
-        <div className="resource-content editing-mode">
-          <Button 
-            variant="link" 
-            className="back-button" 
-            onClick={() => setIsEditing(false)}
-          >
-            <FaArrowLeft /> Back to resource
-          </Button>
-          
-          <ResourceEditor 
-            resource={currentResource} 
-            onSave={() => {
-              setIsEditing(false)
-              if (onEdit) onEdit()
-            }} 
-            onCancel={handleEditCancel} 
-          />
-        </div>
-      </div>
-    )
+  // Don't render at all if not showing (prevents flash)
+  if (!show) {
+    return null;
   }
 
+  // Track if we're in editing mode
+  const shouldShowEditor = isEditing === true;
+  console.log('ResourceLightbox rendering, isEditing:', isEditing, 'shouldShowEditor:', shouldShowEditor);
+
+  // Always return the same overlay structure, but conditionally render either the editor or viewer inside
   return (
     <div 
       className={`resource-overlay ${show ? 'resource-overlay-visible' : ''}`}
       ref={overlayRef}
       onClick={handleBackdropClick}
     >
-      <div className="resource-content">
+      <div className={`resource-content ${shouldShowEditor ? 'editing-mode' : ''} d-flex flex-column`} style={{ maxHeight: '90vh' }}>
         <button 
           className="close-button" 
-          onClick={handleModalHide}
+          onClick={shouldShowEditor ? () => setIsEditing(false) : handleModalHide}
           aria-label="Close"
         >
           ×
         </button>
         
-        <div className="resource-header">
-          <h2>{currentResource?.title || ''}</h2>
-          
-          <div className="resource-actions">
+        {shouldShowEditor ? (
+          // EDITOR VIEW - show when isEditing is true
+          <>
             <Button 
-              variant={isFavorite ? "danger" : "outline-danger"} 
-              className="action-button" 
-              onClick={handleFavoriteClick}
-            >
-              {isFavorite ? <FaHeart /> : <FaRegHeart />}
-              {isFavorite ? ' Favorited' : ' Favorite'}
-            </Button>
-            
-            <Button 
-              variant={isCompleted ? "success" : "outline-success"} 
-              className="action-button" 
-              onClick={handleCompleteClick}
-            >
-              {isCompleted ? <FaCheck /> : <FaRegCheckSquare />}
-              {isCompleted ? ' Completed' : ' Mark Complete'}
-            </Button>
-            
-            <Button 
-              variant="outline-primary" 
-              className="action-button"
-              onClick={handleEdit}
-            >
-              Edit
-            </Button>
-          </div>
-        </div>
-        
-        {currentResource?.previewImage && (
-          <div className="resource-image-container">
-            <img
-              src={currentResource.previewImage}
-              alt={currentResource.title}
-              className={imageLoaded ? 'loaded' : ''}
-              onLoad={() => setImageLoaded(true)}
-              onError={(e) => {
-                console.warn(`Image not found: ${currentResource.previewImage}`);
-                const fallbackImage = "/defaults/resource-placeholder.png";
-                (e.target as HTMLImageElement).src = fallbackImage;
-                (e.target as HTMLImageElement).onerror = () => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                };
-                setImageLoaded(true);
+              variant="link" 
+              className="back-button" 
+              onClick={() => {
+                console.log('🔍 Back button clicked, returning to resource view');
+                setIsEditing(false);
               }}
+            >
+              Back to resource
+            </Button>
+            
+            <ResourceEditor 
+              resource={currentResource} 
+              onSave={() => {
+                console.log('🔍 ResourceEditor save callback, setting isEditing to false');
+                setIsEditing(false);
+              }} 
+              onCancel={() => {
+                console.log('🔍 ResourceEditor cancel callback');
+                handleEditCancel();
+              }} 
             />
-            {!imageLoaded && (
-              <div className="image-placeholder">
-                Loading image...
+          </>
+        ) : (
+          // VIEWER VIEW - show when isEditing is false
+          <>
+            <div className="d-flex flex-column flex-md-row flex-wrap align-items-start align-items-md-center border-bottom pb-3 mb-3 gap-2 pe-5">
+              <div className="d-flex flex-wrap gap-1 order-1" style={{ minWidth: '100px' }}>
+                 {currentResource?.category?.name && (
+                   <Badge pill bg="primary" text="white" className="px-2 py-1 small">
+                      {currentResource.category.name}
+                   </Badge>
+                 )}
+                 {currentResource?.contentType && (
+                   <Badge pill bg="secondary" text="white" className="px-2 py-1 small">
+                     {currentResource.contentType}
+                   </Badge>
+                 )}
+               </div>
+               <div className="flex-grow-1 d-none d-md-block order-2"></div>
+               {currentResource?.submittedBy && (
+                  <div className="d-flex align-items-center gap-1 text-muted small order-3 order-md-2">
+                    {currentResource.submittedBy.image ? (
+                      <img
+                        src={currentResource.submittedBy.image}
+                        alt={currentResource.submittedBy.name || 'User'}
+                        className="rounded-circle"
+                        width={20}
+                        height={20}
+                        style={{ objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div
+                        className="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white"
+                        style={{ width: '20px', height: '20px', fontSize: '10px' }}
+                      >
+                        {currentResource.submittedBy.name?.[0] || currentResource.submittedBy.email[0]}
+                      </div>
+                    )}
+                    <span>
+                      Added by {currentResource.submittedBy.name || currentResource.submittedBy.email.split('@')[0]}
+                      {currentResource.createdAt && ` on ${new Date(currentResource.createdAt).toLocaleDateString()}`}
+                    </span>
+                  </div>
+               )}
+               {/* Icon Buttons */}
+               <div className="d-flex gap-1 order-2 order-md-3 ms-md-2">
+                  <Button
+                    variant="link"
+                    className={`p-1 lh-1 ${favoriteLoading ? 'disabled' : ''}`}
+                    onClick={(e) => handleFavoriteClick(e)}
+                    disabled={favoriteLoading}
+                    title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                  >
+                    <Star size={18} fill={isFavorite ? 'currentColor' : 'none'} className={isFavorite ? 'text-warning' : 'text-muted'} />
+                  </Button>
+                  <Button
+                    variant="link"
+                    className={`p-1 lh-1 ${completeLoading ? 'disabled' : ''}`}
+                    onClick={(e) => handleCompleteClick(e)}
+                    disabled={completeLoading}
+                    title={isCompleted ? "Mark as incomplete" : "Mark as complete"}
+                  >
+                    <CheckCircle size={18} fill={isCompleted ? 'currentColor' : 'none'} className={isCompleted ? 'text-success' : 'text-muted'} />
+                  </Button>
+                  {(session?.user?.isAdmin || session?.user?.id === currentResource?.submittedBy?.id) && (
+                    <Button
+                      variant="link"
+                      className="p-1 lh-1 text-muted"
+                      onClick={(e) => handleEdit(e)}
+                      title="Edit resource"
+                    >
+                      <Edit size={18} />
+                    </Button>
+                  )}
+                </div>
+             </div>
+    
+            <div style={{ overflowY: 'auto', flexGrow: 1, paddingRight: '10px' }}>
+                <h2 className="mb-3 h4">{currentResource?.title || ''}</h2>
+    
+                {currentResource?.previewImage && (
+                  <div className="mb-4 text-center">
+                    {!imageLoaded && (
+                      <div className="image-placeholder d-flex justify-content-center align-items-center bg-light rounded mx-auto" style={{ height: '250px', width: '100%', maxWidth: '500px' }}>
+                        <div className="spinner-border text-primary" role="status">
+                          <span className="visually-hidden">Loading image...</span>
+                        </div>
+                      </div>
+                    )}
+                    <img
+                      src={currentResource.previewImage}
+                      alt={currentResource.title || 'Resource preview'}
+                      className={`img-fluid rounded shadow-sm mx-auto ${imageLoaded ? '' : 'd-none'}`}
+                      style={{ maxHeight: '400px', width: 'auto', objectFit: 'contain' }}
+                      onLoad={() => setImageLoaded(true)}
+                      onError={(e) => {
+                        console.warn(`Image failed to load: ${currentResource.previewImage}`);
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          const placeholder = document.createElement('div');
+                          placeholder.style.width = '300px';
+                          placeholder.style.height = '200px';
+                          placeholder.style.backgroundColor = '#e9ecef';
+                          placeholder.style.display = 'flex';
+                          placeholder.style.alignItems = 'center';
+                          placeholder.style.justifyContent = 'center';
+                          placeholder.style.margin = '0 auto';
+                          placeholder.style.borderRadius = '8px';
+                          placeholder.innerHTML = '<div style="color:#6c757d;font-family:system-ui,-apple-system,sans-serif;">Resource preview</div>';
+                          parent.appendChild(placeholder);
+                          target.onerror = null;
+                        }
+                        setImageLoaded(true);
+                      }}
+                    />
+                  </div>
+                )}
+    
+                <div className="resource-description mb-4">
+                  {currentResource?.description ? (
+                     <div dangerouslySetInnerHTML={{ __html: currentResource.description }} />
+                  ) : (
+                     <p className="text-muted">No description available.</p>
+                  )}
+                </div>
+            </div>
+    
+            {currentResource?.url && (
+              <div className="resource-footer border-top pt-3 mt-auto">
+                <a
+                  href={currentResource.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary w-100 btn-lg d-flex align-items-center justify-content-center gap-2"
+                >
+                  Visit Resource <ExternalLink size={18} />
+                </a>
               </div>
             )}
-          </div>
-        )}
-        
-        <div className="resource-description">
-          <div dangerouslySetInnerHTML={{ __html: currentResource?.description || '' }} />
-        </div>
-        
-        {currentResource?.url && (
-          <div className="resource-footer">
-            <a 
-              href={currentResource.url} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="btn btn-primary"
-            >
-              Visit Resource
-            </a>
-          </div>
+          </>
         )}
       </div>
       
@@ -716,16 +551,15 @@ export default function ResourceLightbox({
         
         .resource-content {
           background: white;
-          border-radius: 4px;
+          border-radius: 8px;
           max-width: 800px;
           width: 95%;
-          max-height: 90vh;
-          overflow-y: auto;
           position: relative;
           padding: 20px;
           box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
           transform: translateY(20px);
           transition: transform 0.3s ease;
+          overflow: hidden;
         }
         
         .resource-overlay-visible .resource-content {
@@ -744,16 +578,18 @@ export default function ResourceLightbox({
           font-size: 28px;
           font-weight: 700;
           line-height: 1;
-          color: #000;
-          opacity: 0.5;
+          color: #6c757d;
+          opacity: 0.75;
           background: none;
           border: none;
           cursor: pointer;
           padding: 0;
+          z-index: 10;
         }
         
         .close-button:hover {
-          opacity: 0.75;
+           opacity: 1;
+           color: #000;
         }
         
         .back-button {
@@ -762,72 +598,19 @@ export default function ResourceLightbox({
           padding-left: 0;
         }
         
-        .resource-header {
-          margin-bottom: 20px;
-          border-bottom: 1px solid #eee;
-          padding-bottom: 15px;
-        }
-        
-        .resource-header h2 {
-          margin-bottom: 15px;
-          padding-right: 30px;
-        }
-        
-        .resource-actions {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          margin-bottom: 10px;
-        }
-        
-        .action-button {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-        }
-        
-        .resource-image-container {
-          position: relative;
-          margin-bottom: 20px;
-          text-align: center;
-          min-height: 100px;
-        }
-        
-        .resource-image-container img {
-          max-width: 100%;
-          max-height: 400px;
-          margin: 0 auto;
-          display: block;
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
-        
-        .resource-image-container img.loaded {
-          opacity: 1;
-        }
-        
-        .image-placeholder {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #666;
-          background: #f8f9fa;
-        }
-        
         .resource-description {
           margin-bottom: 20px;
         }
         
-        .resource-footer {
-          margin-top: 20px;
-          padding-top: 15px;
-          border-top: 1px solid #eee;
-        }
+        .resource-description :global(a) {
+            color: var(--bs-link-color);
+            text-decoration: underline;
+         }
+         .resource-description :global(a:hover) {
+            color: var(--bs-link-hover-color);
+         }
+         .resource-footer {
+         }
       `}</style>
     </div>
   )

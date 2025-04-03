@@ -173,6 +173,7 @@ export default function ResourceCard({
                 className="text-muted p-0"
                 onClick={(e) => {
                   e.stopPropagation();
+                  console.log('🔍 Edit button clicked in ResourceCard');
                   setShowEdit(true);
                 }}
               >
@@ -273,6 +274,7 @@ export default function ResourceCard({
                   className="text-muted p-0"
                   onClick={(e) => {
                     e.stopPropagation();
+                    console.log('🔍 Edit button clicked in ResourceCard');
                     setShowEdit(true);
                   }}
                 >
@@ -321,9 +323,8 @@ export default function ResourceCard({
         resource={resource}
         show={showEdit}
         onHide={() => setShowEdit(false)}
-        onEdit={handleResourceUpdate}
-        isFavorite={isFavorite}
-        isCompleted={isCompleted}
+        isFavorite={isFavorite === true}
+        isCompleted={isCompleted === true}
         onToggleFavorite={onToggleFavorite}
         onToggleComplete={onToggleComplete}
         startInEditMode={true}
