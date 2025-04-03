@@ -60,7 +60,7 @@ export default function Home() {
       if (id) {
         // Set URL hash directly
         console.log('🔍 Setting hash to:', `resource=${id}`);
-        window.location.hash = `resource=${id}`
+        window.history.pushState({resourceId: id}, "", `#resource=${id}`)
         // Verify the hash was set
         console.log('🔍 Hash is now:', window.location.hash);
       } else {

@@ -68,7 +68,7 @@ export default function ResourceCard({
     
     console.log('🔍 ResourceCard.handleCardClick called for resource:', resource.id, resource.title)
     
-    if (onClick) {
+    if (true) {
       console.log('🔍 Calling onClick callback')
       onClick()
       return false;
