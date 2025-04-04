@@ -436,54 +436,33 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
     <div style={{ backgroundColor: '#f8f9fa' }} className="min-vh-100">
       <div className="bg-white shadow-sm">
         <Container className="py-3">
-          <div className="d-flex align-items-center justify-content-between gap-4 flex-wrap">
-            <div className="d-flex align-items-center gap-3">
-              <Image 
-                src="/logo-ols-2023.png" 
-                alt="Logo" 
-                width={48}
-                height={48}
-                style={{ objectFit: 'contain' }}
+          <div className="d-flex align-items-center justify-content-center gap-4">
+            <Image 
+              src="/logo-ols-2023.png" 
+              alt="Logo" 
+              width={48}
+              height={48}
+              style={{ objectFit: 'contain' }}
+            />
+
+            <div style={{ maxWidth: '320px', width: '100%' }}>
+              <SearchBar 
+                searchTerm={searchTerm} 
+                onSearchChange={setSearchTerm}
+                className="w-100"
               />
-
-              <div style={{ maxWidth: '320px', width: '100%' }}>
-                <SearchBar 
-                  searchTerm={searchTerm} 
-                  onSearchChange={setSearchTerm}
-                  className="w-100"
-                />
-              </div>
             </div>
 
-            {/* Category Filter Buttons */}
-            <div className="d-flex gap-2 flex-wrap">
+            <div className="d-flex align-items-center gap-3">
               <Button
-                key="all-categories"
-                variant={categoryFilter.size === 0 ? "primary" : "outline-primary"}
-                size="sm"
-                className="d-flex align-items-center"
-                onClick={() => {
-                  setCategoryFilter(new Set());
-                  router.push('/');
-                }}
+                variant="outline-primary" 
+                className="d-flex align-items-center gap-2"
+                onClick={handlePathwaysClick}
               >
-                All Categories
+                <GraduationCap size={16} />
+                Pathways
               </Button>
-              {categories.map(category => (
-                <Button
-                  key={category.id}
-                  variant={categoryFilter.has(category.id) ? "primary" : "outline-primary"}
-                  size="sm"
-                  className="d-flex align-items-center"
-                  onClick={() => handleCategoryLinkClick(category.id)}
-                >
-                  {getCategoryIcon(category.name)}
-                  {category.name}
-                </Button>
-              ))}
-            </div>
 
-            <div className="d-flex gap-2">
               <ButtonGroup>
                 <Button
                   variant={viewType === 'grid' ? 'primary' : 'outline-primary'}
@@ -511,77 +490,107 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
                 </Button>
               </ButtonGroup>
 
-              <div className="d-flex align-items-center gap-2">
-                <Dropdown>
-                  <Dropdown.Toggle variant="outline-secondary" style={{ height: '38px' }}>
-                    Sort: {sortType} {sortDirection === 'asc' ? '↑' : '↓'}
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu>
-                    <Dropdown.Item 
-                      active={sortType === 'custom'} 
-                      onClick={() => setSortType('custom')}
-                    >
-                      Custom Order
-                    </Dropdown.Item>
-                    <Dropdown.Item 
-                      active={sortType === 'title'} 
-                      onClick={() => {
-                        setSortType('title')
-                        setSortDirection(prev => sortType === 'title' ? (prev === 'asc' ? 'desc' : 'asc') : 'asc')
-                      }}
-                    >
-                      Title {sortType === 'title' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </Dropdown.Item>
-                    <Dropdown.Item 
-                      active={sortType === 'date'} 
-                      onClick={() => {
-                        setSortType('date')
-                        setSortDirection(prev => sortType === 'date' ? (prev === 'asc' ? 'desc' : 'asc') : 'desc')
-                      }}
-                    >
-                      Date Added {sortType === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </Dropdown.Item>
-                    <Dropdown.Item 
-                      active={sortType === 'progress'} 
-                      onClick={() => {
-                        setSortType('progress')
-                        setSortDirection(prev => sortType === 'progress' ? (prev === 'asc' ? 'desc' : 'asc') : 'desc')
-                      }}
-                    >
-                      Progress {sortType === 'progress' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
+              <Dropdown>
+                <Dropdown.Toggle variant="outline-secondary" style={{ height: '38px' }}>
+                  Sort: {sortType} {sortDirection === 'asc' ? '↑' : '↓'}
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item 
+                    active={sortType === 'custom'} 
+                    onClick={() => setSortType('custom')}
+                  >
+                    Custom Order
+                  </Dropdown.Item>
+                  <Dropdown.Item 
+                    active={sortType === 'title'} 
+                    onClick={() => {
+                      setSortType('title')
+                      setSortDirection(prev => sortType === 'title' ? (prev === 'asc' ? 'desc' : 'asc') : 'asc')
+                    }}
+                  >
+                    Title {sortType === 'title' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </Dropdown.Item>
+                  <Dropdown.Item 
+                    active={sortType === 'date'} 
+                    onClick={() => {
+                      setSortType('date')
+                      setSortDirection(prev => sortType === 'date' ? (prev === 'asc' ? 'desc' : 'asc') : 'desc')
+                    }}
+                  >
+                    Date Added {sortType === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </Dropdown.Item>
+                  <Dropdown.Item 
+                    active={sortType === 'progress'} 
+                    onClick={() => {
+                      setSortType('progress')
+                      setSortDirection(prev => sortType === 'progress' ? (prev === 'asc' ? 'desc' : 'asc') : 'desc')
+                    }}
+                  >
+                    Progress {sortType === 'progress' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
 
-                <FilterFlyout
-                  contentTypeFilter={contentTypeFilter}
-                  setContentTypeFilter={setContentTypeFilter}
-                  categoryFilter={categoryFilter}
-                  setCategoryFilter={setCategoryFilter}
-                  categories={categories}
-                  activeFilters={activeFilters}
-                  onFilterChange={(filter: Exclude<FilterType, 'all'>) => {
-                    setActiveFilters(prev => {
-                      const newFilters = new Set(prev)
-                      if (newFilters.has(filter)) {
-                        newFilters.delete(filter)
-                      } else {
-                        newFilters.add(filter)
-                      }
-                      return newFilters
-                    })
-                  }}
-                />
-              </div>
+              <FilterFlyout
+                contentTypeFilter={contentTypeFilter}
+                setContentTypeFilter={setContentTypeFilter}
+                categoryFilter={categoryFilter}
+                setCategoryFilter={setCategoryFilter}
+                categories={categories}
+                activeFilters={activeFilters}
+                onFilterChange={(filter: Exclude<FilterType, 'all'>) => {
+                  setActiveFilters(prev => {
+                    const newFilters = new Set(prev)
+                    if (newFilters.has(filter)) {
+                      newFilters.delete(filter)
+                    } else {
+                      newFilters.add(filter)
+                    }
+                    return newFilters
+                  })
+                }}
+              />
+            </div>
 
-              <div className="d-flex gap-2">
-                <AddResourceButton />
-                <AuthButton />
-              </div>
+            <div className="d-flex gap-2">
+              <AddResourceButton />
+              <AuthButton />
             </div>
           </div>
         </Container>
       </div>
+
+      {/* Category Filter Buttons - Added as a separate section below header */}
+      {categories.length > 0 && (
+        <Container className="py-3">
+          <div className="d-flex gap-2 flex-wrap">
+            <Button
+              key="all-categories"
+              variant={categoryFilter.size === 0 ? "primary" : "outline-primary"}
+              size="sm"
+              className="d-flex align-items-center"
+              onClick={() => {
+                setCategoryFilter(new Set());
+                router.push('/');
+              }}
+            >
+              All Categories
+            </Button>
+            {categories.map(category => (
+              <Button
+                key={category.id}
+                variant={categoryFilter.has(category.id) ? "primary" : "outline-primary"}
+                size="sm"
+                className="d-flex align-items-center"
+                onClick={() => handleCategoryLinkClick(category.id)}
+              >
+                {getCategoryIcon(category.name)}
+                {category.name}
+              </Button>
+            ))}
+          </div>
+        </Container>
+      )}
 
       {/* Active Filter Badges */}
       {(activeFilters.size > 0 || contentTypeFilter.size > 0 || categoryFilter.size > 0) && (
