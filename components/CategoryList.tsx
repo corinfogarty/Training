@@ -20,7 +20,7 @@ import AdminModal from './AdminModal'
 import Link from 'next/link'
 import { usePathway } from './PathwayContext'
 import PathwayModal from './PathwayModal'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 
 type ViewType = 'grid' | 'list' | 'columns'
 type FilterType = 'all' | 'favorites' | 'completed' | 'incomplete'
@@ -82,6 +82,7 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
   const [pathways, setPathways] = useState([])
   const router = useRouter()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [sortType, setSortType] = useState<SortType>('custom')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
@@ -112,27 +113,19 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
     if (categories.length > 0) {
       applyUrlFiltering();
     }
-  }, [categories, pathname]);
+  }, [categories, searchParams]);
 
-  // Parse URL path to extract category for filtering
+  // Parse URL query params to extract category for filtering
   const applyUrlFiltering = () => {
-    if (!pathname || !categories.length) return;
+    if (!categories.length) return;
     
-    // Extract parts of the URL path
-    const parts = pathname.split('/').filter(Boolean);
+    // Extract category from the URL query params
+    const categoryParam = searchParams?.get('category');
     
-    if (parts.length > 0) {
-      // Handle both /ai and /ai/resources patterns
-      const categorySlug = parts[0].toLowerCase();
-      
-      // Skip if we're on a system route
-      if (['api', 'resources', 'admin', 'auth', 'account', 'pathways', 'progress', 'users'].includes(categorySlug)) {
-        return;
-      }
-
+    if (categoryParam) {
       // Find category by name (convert to slug for comparison)
       const category = categories.find(cat => 
-        cat.name.toLowerCase().replace(/\s+/g, '-') === categorySlug
+        cat.name.toLowerCase().replace(/\s+/g, '-') === categoryParam.toLowerCase()
       );
       
       if (category) {
@@ -152,8 +145,8 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
     const category = categories.find(cat => cat.id === categoryId);
     if (category) {
       const slug = getCategorySlug(category.name);
-      // Navigate to the simpler URL format
-      router.push(`/${slug}`);
+      // Navigate to URL using query parameters
+      router.push(`/?category=${slug}`);
       // Also set the filter
       setCategoryFilter(new Set([categoryId]));
     }
