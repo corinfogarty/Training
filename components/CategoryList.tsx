@@ -20,7 +20,7 @@ import AdminModal from './AdminModal'
 import Link from 'next/link'
 import { usePathway } from './PathwayContext'
 import PathwayModal from './PathwayModal'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 type ViewType = 'grid' | 'list' | 'columns'
 type FilterType = 'all' | 'favorites' | 'completed' | 'incomplete'
@@ -39,9 +39,22 @@ interface CategoryListProps {
   resourceId?: string | null
   onResourceClick?: (id: string) => void
   onResourceHover?: (id: string | null) => void
+  initialCategoryFilter?: string | null
+  initialContentTypeFilter?: string | null
 }
 
-export default function CategoryList({ resourceId, onResourceClick, onResourceHover }: CategoryListProps) {
+// Helper function to generate slugs
+const createSlug = (name: string): string => {
+  return name.toLowerCase().replace(/\s+/g, '-')
+}
+
+export default function CategoryList({ 
+  resourceId, 
+  onResourceClick, 
+  onResourceHover,
+  initialCategoryFilter = null,
+  initialContentTypeFilter = null
+}: CategoryListProps) {
   const [categories, setCategories] = useState<Category[]>([])
   const [resources, setResources] = useState<ResourceWithRelations[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -56,6 +69,11 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
   })
   const [contentTypeFilter, setContentTypeFilter] = useState<ContentTypeFilter>(() => {
     try {
+      // If we have an initial content type filter from URL, use it
+      if (initialContentTypeFilter) {
+        return new Set([initialContentTypeFilter as ContentType])
+      }
+      // Otherwise try to load from cookies
       const savedContentTypes = Cookies.get('contentTypeFilter')
       return savedContentTypes ? new Set(JSON.parse(savedContentTypes)) : new Set()
     } catch {
@@ -64,6 +82,11 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
   })
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>(() => {
     try {
+      // If we have an initial category filter from URL, use it
+      if (initialCategoryFilter) {
+        return new Set([initialCategoryFilter])
+      }
+      // Otherwise try to load from cookies
       const savedCategories = Cookies.get('categoryFilter')
       return savedCategories ? new Set(JSON.parse(savedCategories)) : new Set()
     } catch {
@@ -81,8 +104,6 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
   const { setShowPathwayModal, setSelectedPathway, showPathwayModal } = usePathway()
   const [pathways, setPathways] = useState([])
   const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
   const [sortType, setSortType] = useState<SortType>('custom')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
@@ -107,50 +128,6 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
   useEffect(() => {
     fetchData()
   }, [])
-
-  // Apply URL-based filtering when categories are loaded
-  useEffect(() => {
-    if (categories.length > 0) {
-      applyUrlFiltering();
-    }
-  }, [categories, searchParams]);
-
-  // Parse URL query params to extract category for filtering
-  const applyUrlFiltering = () => {
-    if (!categories.length) return;
-    
-    // Extract category from the URL query params
-    const categoryParam = searchParams?.get('category');
-    
-    if (categoryParam) {
-      // Find category by name (convert to slug for comparison)
-      const category = categories.find(cat => 
-        cat.name.toLowerCase().replace(/\s+/g, '-') === categoryParam.toLowerCase()
-      );
-      
-      if (category) {
-        // Set the category filter to show only this category
-        setCategoryFilter(new Set([category.id]));
-      }
-    }
-  };
-
-  // Function to get a category's slug
-  const getCategorySlug = (categoryName: string) => {
-    return categoryName.toLowerCase().replace(/\s+/g, '-');
-  };
-
-  // Handle category link clicks
-  const handleCategoryLinkClick = (categoryId: string) => {
-    const category = categories.find(cat => cat.id === categoryId);
-    if (category) {
-      const slug = getCategorySlug(category.name);
-      // Navigate to URL using query parameters
-      router.push(`/?category=${slug}`);
-      // Also set the filter
-      setCategoryFilter(new Set([categoryId]));
-    }
-  };
 
   // Refresh data when resourceId changes (e.g., when a resource is favorited/completed in the modal)
   useEffect(() => {
@@ -406,6 +383,17 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
     }
   }
 
+  // Function to get URL for a category and content type
+  const getCategoryUrl = (categoryName: string, contentType?: ContentType): string => {
+    const categorySlug = createSlug(categoryName)
+    
+    if (contentType) {
+      return `/${categorySlug}/${contentType.toLowerCase()}`
+    }
+    
+    return `/${categorySlug}`
+  }
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
@@ -447,7 +435,7 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
             </div>
 
             <div className="d-flex align-items-center gap-3">
-              <Button
+              <Button 
                 variant="outline-primary" 
                 className="d-flex align-items-center gap-2"
                 onClick={handlePathwaysClick}
@@ -455,7 +443,6 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
                 <GraduationCap size={16} />
                 Pathways
               </Button>
-
               <ButtonGroup>
                 <Button
                   variant={viewType === 'grid' ? 'primary' : 'outline-primary'}
@@ -483,107 +470,77 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
                 </Button>
               </ButtonGroup>
 
-              <Dropdown>
-                <Dropdown.Toggle variant="outline-secondary" style={{ height: '38px' }}>
-                  Sort: {sortType} {sortDirection === 'asc' ? '↑' : '↓'}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item 
-                    active={sortType === 'custom'} 
-                    onClick={() => setSortType('custom')}
-                  >
-                    Custom Order
-                  </Dropdown.Item>
-                  <Dropdown.Item 
-                    active={sortType === 'title'} 
-                    onClick={() => {
-                      setSortType('title')
-                      setSortDirection(prev => sortType === 'title' ? (prev === 'asc' ? 'desc' : 'asc') : 'asc')
-                    }}
-                  >
-                    Title {sortType === 'title' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </Dropdown.Item>
-                  <Dropdown.Item 
-                    active={sortType === 'date'} 
-                    onClick={() => {
-                      setSortType('date')
-                      setSortDirection(prev => sortType === 'date' ? (prev === 'asc' ? 'desc' : 'asc') : 'desc')
-                    }}
-                  >
-                    Date Added {sortType === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </Dropdown.Item>
-                  <Dropdown.Item 
-                    active={sortType === 'progress'} 
-                    onClick={() => {
-                      setSortType('progress')
-                      setSortDirection(prev => sortType === 'progress' ? (prev === 'asc' ? 'desc' : 'asc') : 'desc')
-                    }}
-                  >
-                    Progress {sortType === 'progress' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
+              <div className="d-flex align-items-center gap-2">
+                <Dropdown>
+                  <Dropdown.Toggle variant="outline-secondary" style={{ height: '38px' }}>
+                    Sort: {sortType} {sortDirection === 'asc' ? '↑' : '↓'}
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    <Dropdown.Item 
+                      active={sortType === 'custom'} 
+                      onClick={() => setSortType('custom')}
+                    >
+                      Custom Order
+                    </Dropdown.Item>
+                    <Dropdown.Item 
+                      active={sortType === 'title'} 
+                      onClick={() => {
+                        setSortType('title')
+                        setSortDirection(prev => sortType === 'title' ? (prev === 'asc' ? 'desc' : 'asc') : 'asc')
+                      }}
+                    >
+                      Title {sortType === 'title' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </Dropdown.Item>
+                    <Dropdown.Item 
+                      active={sortType === 'date'} 
+                      onClick={() => {
+                        setSortType('date')
+                        setSortDirection(prev => sortType === 'date' ? (prev === 'asc' ? 'desc' : 'asc') : 'desc')
+                      }}
+                    >
+                      Date Added {sortType === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </Dropdown.Item>
+                    <Dropdown.Item 
+                      active={sortType === 'progress'} 
+                      onClick={() => {
+                        setSortType('progress')
+                        setSortDirection(prev => sortType === 'progress' ? (prev === 'asc' ? 'desc' : 'asc') : 'desc')
+                      }}
+                    >
+                      Progress {sortType === 'progress' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
 
-              <FilterFlyout
-                contentTypeFilter={contentTypeFilter}
-                setContentTypeFilter={setContentTypeFilter}
-                categoryFilter={categoryFilter}
-                setCategoryFilter={setCategoryFilter}
-                categories={categories}
-                activeFilters={activeFilters}
-                onFilterChange={(filter: Exclude<FilterType, 'all'>) => {
-                  setActiveFilters(prev => {
-                    const newFilters = new Set(prev)
-                    if (newFilters.has(filter)) {
-                      newFilters.delete(filter)
-                    } else {
-                      newFilters.add(filter)
-                    }
-                    return newFilters
-                  })
-                }}
-              />
-            </div>
+                <FilterFlyout
+                  contentTypeFilter={contentTypeFilter}
+                  setContentTypeFilter={setContentTypeFilter}
+                  categoryFilter={categoryFilter}
+                  setCategoryFilter={setCategoryFilter}
+                  categories={categories}
+                  activeFilters={activeFilters}
+                  onFilterChange={(filter: Exclude<FilterType, 'all'>) => {
+                    setActiveFilters(prev => {
+                      const newFilters = new Set(prev)
+                      if (newFilters.has(filter)) {
+                        newFilters.delete(filter)
+                      } else {
+                        newFilters.add(filter)
+                      }
+                      return newFilters
+                    })
+                  }}
+                />
+              </div>
 
-            <div className="d-flex gap-2">
-              <AddResourceButton />
-              <AuthButton />
+              <div className="d-flex gap-2">
+                <AddResourceButton />
+                <AuthButton />
+              </div>
             </div>
           </div>
         </Container>
       </div>
-
-      {/* Category Filter Buttons - Added as a separate section below header */}
-      {categories.length > 0 && (
-        <Container className="py-3">
-          <div className="d-flex gap-2 flex-wrap">
-            <Button
-              key="all-categories"
-              variant={categoryFilter.size === 0 ? "primary" : "outline-primary"}
-              size="sm"
-              className="d-flex align-items-center"
-              onClick={() => {
-                setCategoryFilter(new Set());
-                router.push('/');
-              }}
-            >
-              All Categories
-            </Button>
-            {categories.map(category => (
-              <Button
-                key={category.id}
-                variant={categoryFilter.has(category.id) ? "primary" : "outline-primary"}
-                size="sm"
-                className="d-flex align-items-center"
-                onClick={() => handleCategoryLinkClick(category.id)}
-              >
-                {getCategoryIcon(category.name)}
-                {category.name}
-              </Button>
-            ))}
-          </div>
-        </Container>
-      )}
 
       {/* Active Filter Badges */}
       {(activeFilters.size > 0 || contentTypeFilter.size > 0 || categoryFilter.size > 0) && (
@@ -593,21 +550,39 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
               {Array.from(categoryFilter).map(categoryId => {
                 const category = categories.find(c => c.id === categoryId)
                 return category ? (
-                  <span key={categoryId} className="badge d-flex align-items-center" style={{ backgroundColor: '#675a95', color: 'white' }}>
-                    {getCategoryIcon(category.name)}
-                    {category.name}
-                  </span>
+                  <Link 
+                    key={categoryId} 
+                    href={getCategoryUrl(category.name)}
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <span className="badge d-flex align-items-center" style={{ backgroundColor: '#675a95', color: 'white' }}>
+                      {getCategoryIcon(category.name)}
+                      {category.name}
+                    </span>
+                  </Link>
                 ) : null
               })}
-              {Array.from(contentTypeFilter).map(type => (
-                <span key={type} className="badge d-flex align-items-center gap-2" style={{ backgroundColor: '#006ba5', color: 'white' }}>
-                  {type === 'Resource' && <Book size={12} />}
-                  {type === 'Training' && <GraduationCap size={12} />}
-                  {type === 'Shortcut' && <Command size={12} />}
-                  {type === 'Plugin' && <Puzzle size={12} />}
-                  {type}
-                </span>
-              ))}
+              {Array.from(contentTypeFilter).map(type => {
+                // Find a selected category to link to, or use just the content type
+                const selectedCategoryId = Array.from(categoryFilter)[0]
+                const category = selectedCategoryId ? categories.find(c => c.id === selectedCategoryId) : null
+                
+                return (
+                  <Link 
+                    key={type} 
+                    href={category ? getCategoryUrl(category.name, type) : `/${type.toLowerCase()}`}
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <span className="badge d-flex align-items-center gap-2" style={{ backgroundColor: '#006ba5', color: 'white' }}>
+                      {type === 'Resource' && <Book size={12} />}
+                      {type === 'Training' && <GraduationCap size={12} />}
+                      {type === 'Shortcut' && <Command size={12} />}
+                      {type === 'Plugin' && <Puzzle size={12} />}
+                      {type}
+                    </span>
+                  </Link>
+                )
+              })}
               {activeFilters.has('favorites') && (
                 <span className="badge d-flex align-items-center gap-2" style={{ backgroundColor: '#f0e0a4', color: '#333' }}>
                   <Star size={12} />

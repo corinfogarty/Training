@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import CategoryList from '@/components/CategoryList'
 import ResourceLightbox from '@/components/ResourceLightbox'
-import type { Resource, Category, User } from '@prisma/client'
+import type { Resource, Category, User, ContentType } from '@prisma/client'
 
 // Check if we're on the client side - do this once at module level
 const isClient = typeof window !== 'undefined'
@@ -48,6 +48,65 @@ export default function Home() {
   
   // Preload resources on hover to make opening them instant
   const [hoveredResourceId, setHoveredResourceId] = useState<string | null>(null)
+  
+  // Extract path information for initial filters (if navigating via direct URL like /ai/resource)
+  const [initialCategoryFilter, setInitialCategoryFilter] = useState<string | null>(null)
+  const [initialContentTypeFilter, setInitialContentTypeFilter] = useState<string | null>(null)
+
+  // Check URL path on initial load client-side only
+  useEffect(() => {
+    if (!isClient) return
+    
+    try {
+      // Get the pathname and remove the leading /
+      const path = window.location.pathname.slice(1)
+      if (!path) return
+      
+      const pathParts = path.split('/')
+      
+      // First check if the first segment could be a content type (for /type routes)
+      if (pathParts.length === 1) {
+        const typeSlug = pathParts[0].toLowerCase()
+        const contentTypes = ['resource', 'training', 'shortcut', 'plugin']
+        
+        if (contentTypes.includes(typeSlug)) {
+          // If it's a content type, set that filter
+          const contentType = typeSlug.charAt(0).toUpperCase() + typeSlug.slice(1)
+          setInitialContentTypeFilter(contentType as ContentType)
+          return // Don't process it as a category
+        }
+      }
+      
+      // If we got here and have a first segment, treat it as a category slug
+      if (pathParts.length > 0 && pathParts[0]) {
+        // Fetch categories to find matching slug and set filter
+        fetch('/api/categories')
+          .then(res => res.json())
+          .then(categories => {
+            const matchingCategory = categories.find(
+              (c: any) => c.name.toLowerCase().replace(/\s+/g, '-') === pathParts[0]
+            )
+            if (matchingCategory) {
+              setInitialCategoryFilter(matchingCategory.id)
+            }
+          })
+          .catch(err => console.error('Error fetching categories for URL match:', err))
+      }
+      
+      // If we have a second path segment, it might be a content type
+      if (pathParts.length > 1 && pathParts[1]) {
+        const typeSlug = pathParts[1].toLowerCase()
+        const contentTypes = ['resource', 'training', 'shortcut', 'plugin']
+        
+        if (contentTypes.includes(typeSlug)) {
+          const contentType = typeSlug.charAt(0).toUpperCase() + typeSlug.slice(1)
+          setInitialContentTypeFilter(contentType as ContentType)
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing URL path:', error)
+    }
+  }, [])
   
   // Update URL without causing page reload - safe for server
   const updateUrl = useCallback((id: string | null) => {
@@ -385,6 +444,8 @@ export default function Home() {
         resourceId={resourceId}
         onResourceClick={showResource}
         onResourceHover={handleResourceHover}
+        initialCategoryFilter={initialCategoryFilter}
+        initialContentTypeFilter={initialContentTypeFilter}
       />
       
       {/* Always render the lightbox with empty data when not showing */}
