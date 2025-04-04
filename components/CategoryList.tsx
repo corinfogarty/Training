@@ -118,12 +118,18 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
   const applyUrlFiltering = () => {
     if (!pathname || !categories.length) return;
     
-    // Handle paths like /ai/resources or /category-slug/resources
+    // Extract parts of the URL path
     const parts = pathname.split('/').filter(Boolean);
     
-    if (parts.length >= 1 && parts[parts.length-1] !== 'resources') {
+    if (parts.length > 0) {
+      // Handle both /ai and /ai/resources patterns
       const categorySlug = parts[0].toLowerCase();
       
+      // Skip if we're on a system route
+      if (['api', 'resources', 'admin', 'auth', 'account', 'pathways', 'progress', 'users'].includes(categorySlug)) {
+        return;
+      }
+
       // Find category by name (convert to slug for comparison)
       const category = categories.find(cat => 
         cat.name.toLowerCase().replace(/\s+/g, '-') === categorySlug
@@ -146,8 +152,8 @@ export default function CategoryList({ resourceId, onResourceClick, onResourceHo
     const category = categories.find(cat => cat.id === categoryId);
     if (category) {
       const slug = getCategorySlug(category.name);
-      // Navigate to the URL without page reload
-      router.push(`/${slug}/resources`);
+      // Navigate to the simpler URL format
+      router.push(`/${slug}`);
       // Also set the filter
       setCategoryFilter(new Set([categoryId]));
     }
